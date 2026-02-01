@@ -118,6 +118,9 @@ public class Cardinal : MonoBehaviour
         if (InGameManager.Instance == null) return;
         GameBalance balance = InGameManager.Instance.Balance;
 
+        Animation_Controller anim = GetComponent<Animation_Controller>();
+        if (anim == null) anim = GetComponentInChildren<Animation_Controller>();
+
         foreach (var item in items)
         {
             item?.OnSpeech(this);
@@ -125,6 +128,8 @@ public class Cardinal : MonoBehaviour
 
         if (Random.value < balance.SpeechSuccessChance)
         {
+            Debug.Log("성공!");
+            if (anim != null) anim.SetSpeechAnimation(2);
             // 연설 성공
             float speechSuccessDeltaInfluence = Random.Range(balance.SpeechSuccessDeltaInfluenceMin, balance.SpeechSuccessDeltaInfluenceMax + 1);
             ChangeInfluence(speechSuccessDeltaInfluence);
@@ -132,6 +137,9 @@ public class Cardinal : MonoBehaviour
         }
         else
         {
+            Debug.Log("실패!");
+            //연설 실패
+            if (anim != null) anim.SetSpeechAnimation(3);
             ChangeInfluence(balance.SpeechFailDeltaInfluence);
             ChangeHp(balance.SpeechFailDeltaHp);
         }

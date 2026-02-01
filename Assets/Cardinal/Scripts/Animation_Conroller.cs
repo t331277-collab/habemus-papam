@@ -9,6 +9,10 @@ public class Animation_Controller : MonoBehaviour
     private Vector2 lastMoveDirection = Vector2.down;
     private bool isPlayer = false; // 플레이어 여부를 저장할 변수
 
+    [Header("이펙트 설정")]
+    [Tooltip("플레이어 머리 위 화살표 오브젝트")]
+    [SerializeField] private GameObject indicatorArrow;
+
     void Start()
     {
         // 컴포넌트 할당
@@ -27,6 +31,8 @@ public class Animation_Controller : MonoBehaviour
         {
             isPlayer = true;
         }
+
+        if (indicatorArrow != null) indicatorArrow.SetActive(false);
     }
 
     void Update()
@@ -92,6 +98,25 @@ public class Animation_Controller : MonoBehaviour
                 animator.SetFloat("InputX", lastMoveDirection.x);
                 animator.SetFloat("InputY", lastMoveDirection.y);
             }
+        }
+    }
+
+    // 호출 시 화살표 킴 ,다시 호출 시 화살표 끔
+    public void SetIndicatorActive(bool isActive)
+    {
+        if (indicatorArrow != null)
+        {
+            indicatorArrow.SetActive(isActive);
+        }
+    }
+
+    // 연설 함수  stateIndex = 1. 연설 2. 성공 3. 실패
+    public void SetSpeechAnimation(int stateIndex)
+    {
+        Debug.Log(stateIndex);
+        if (animator != null)
+        {
+            animator.SetInteger("SpeechState", stateIndex);
         }
     }
 }

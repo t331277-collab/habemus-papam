@@ -171,6 +171,12 @@ public class CardinalManager : MonoBehaviour
         {
             yield return null;
             yield return new WaitUntil(() => playerSC.IsMoving == false);
+
+            var animCtrl = playerSC.GetComponentInChildren<Animation_Controller>();
+            if (animCtrl != null)
+            {
+                animCtrl.SetIndicatorActive(true); 
+            }
         }
 
         Debug.Log("모든 입장 완료. 콘클라베 시작.");
