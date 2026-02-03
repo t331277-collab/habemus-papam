@@ -1082,7 +1082,11 @@ public class StateController : MonoBehaviour
         //연설 시작
         ChangeState(CardinalState.InSpeech);
         //여기에 컷 씬 재생하는 함수 호출하면 될 듯 합니다.
-
+        //연설 중 애니메이션
+        if (animController != null)
+        {
+            animController.SetSpeechAnimation(1);
+        }
 
         Vector2 speechDir = Vector2.down;
 
@@ -1114,6 +1118,14 @@ public class StateController : MonoBehaviour
         }
 
         if (cardinal != null) cardinal.Speech();
+
+        yield return new WaitForSeconds(2.0f);
+
+        if (animController != null)
+        {
+            animController.SetSpeechAnimation(0);
+        }
+
         ChangeState(CardinalState.Idle);
     }
 
