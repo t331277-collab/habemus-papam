@@ -113,7 +113,7 @@ public class Animation_Controller : MonoBehaviour
     // 연설 함수  stateIndex = 1. 연설 2. 성공 3. 실패
     public void SetSpeechAnimation(int stateIndex)
     {
-        Debug.Log(stateIndex);
+        //Debug.Log(stateIndex);
         if (animator != null)
         {
             animator.SetInteger("SpeechState", stateIndex);

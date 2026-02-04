@@ -214,6 +214,8 @@ public class StateController : MonoBehaviour
                 break;
 
             case CardinalState.CutScene:
+                animController.SetSpeechAnimation(0); //애니메이션 초기화
+
                 // 컷씬 진입 시 이동 방해 요소 제거
                 if (agent != null && agent.isOnNavMesh)
                 {
@@ -861,7 +863,10 @@ public class StateController : MonoBehaviour
         finalPrayerPos = Vector3.zero;
 
         IsHeadingToQueue = true; // 이동 시작 플래그
-
+        if (CompareTag("NPC"))
+        {
+            ChangeState(CardinalState.ReadyPraying);
+        }
         if (praySequenceCoroutine != null) StopCoroutine(praySequenceCoroutine);
         praySequenceCoroutine = StartCoroutine(ProcessApproachAndPray(targetPos));
     }
@@ -1014,7 +1019,10 @@ public class StateController : MonoBehaviour
         finalPrayerPos = Vector3.zero;
 
         IsHeadingToSpeech = true;
-
+        if (CompareTag("NPC"))
+        {
+            ChangeState(CardinalState.ReadyInSpeech);
+        }
         if (speechSequenceCoroutine != null) StopCoroutine(speechSequenceCoroutine);
         // 새 코루틴 사용
         speechSequenceCoroutine = StartCoroutine(ProcessApproachAndSpeech(targetPos));
