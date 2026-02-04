@@ -21,11 +21,13 @@ public class Cardinal : MonoBehaviour
     private List<Item> items;
     private NavMeshAgent agent;
 
+
     // 외부(StateController)에서 접근을 위한 프로퍼티
     public float Hp => hp;
     public float Influence => influence;
     public float Piety => piety;
     public float MoveSpeed => moveSpeed; 
+
 
     void Awake()
     {

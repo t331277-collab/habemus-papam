@@ -390,6 +390,7 @@ public class CardinalManager : MonoBehaviour
         }
     }
 
+
     GameObject SpawnCardinalReturn(GameObject prefab, Transform spawnPoint, string objName)
     {
         GameObject cardinalObj = Instantiate(prefab, spawnPoint.position, Quaternion.identity, GetOrCreateCardinalsContainer());
@@ -446,6 +447,18 @@ public class CardinalManager : MonoBehaviour
     {
         float result = 0;
         foreach (var c in cardinals) if (c.gameObject.activeSelf) result += c.Influence;
+
+        return result;
+    }
+    public float GetCardinalPietySum()
+    {
+        float result = 0;
+
+        foreach(var cardinal in cardinals)
+        {
+            result += cardinal.Piety;
+        }
+
         return result;
     }
 
