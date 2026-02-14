@@ -62,6 +62,14 @@ public class Cardinal : MonoBehaviour
 
             // 초기화된 속도를 에이전트에도 적용
             if (agent != null) agent.speed = moveSpeed;
+
+            if (CompareTag("Player"))
+            {
+                if (InventoryManager.Instance != null)
+                {
+                    InventoryManager.Instance.SetPlayer(this);
+                }
+            }
         }
     }
 
