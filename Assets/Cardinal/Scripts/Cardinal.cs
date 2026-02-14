@@ -62,6 +62,14 @@ public class Cardinal : MonoBehaviour
 
             // 초기화된 속도를 에이전트에도 적용
             if (agent != null) agent.speed = moveSpeed;
+
+            if (CompareTag("Player"))
+            {
+                if (InventoryManager.Instance != null)
+                {
+                    InventoryManager.Instance.SetPlayer(this);
+                }
+            }
         }
     }
 
@@ -130,7 +138,7 @@ public class Cardinal : MonoBehaviour
 
         if (Random.value < balance.SpeechSuccessChance)
         {
-            Debug.Log("성공!");
+            //Debug.Log("성공!");
             if (anim != null) anim.SetSpeechAnimation(2);
             // 연설 성공
             float speechSuccessDeltaInfluence = Random.Range(balance.SpeechSuccessDeltaInfluenceMin, balance.SpeechSuccessDeltaInfluenceMax + 1);
@@ -139,7 +147,7 @@ public class Cardinal : MonoBehaviour
         }
         else
         {
-            Debug.Log("실패!");
+            //Debug.Log("실패!");
             //연설 실패
             if (anim != null) anim.SetSpeechAnimation(3);
             ChangeInfluence(balance.SpeechFailDeltaInfluence);
