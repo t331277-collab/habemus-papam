@@ -1,0 +1,64 @@
+﻿using UnityEditor.Search;
+using UnityEngine;
+using System.Collections;
+
+public class P007 : Plot
+{
+    [Header("해당 공작 설정")]
+    [SerializeField] private int minInfluence;
+    [SerializeField] private int pietyCost;
+    [SerializeField] private float speedPercentDelta;
+    [SerializeField] private int duration;
+
+
+    void Reset()
+    {
+        // 설정 기본값
+        plotID = "P007";
+        plotGrade = PlotGrade.Common;
+        
+        // 텍스트 기본값
+        plotName = "드랍 더 비트";
+        plotDescription = "새긴다! 태양의 비트!";
+
+        // 수치 기본값
+        plotWeightBase = 15;
+        plotWeightMultiplier = 0f;
+
+        minInfluence = 20;
+        pietyCost = 15;
+        speedPercentDelta = 10f;
+        duration = 20;
+    }
+
+    public override bool CanExecute(Cardinal performer)
+    {
+        return performer.Influence >= minInfluence;
+    }
+
+    public override void Execute(Cardinal performer)
+    {
+        if (!CanExecute(performer)) return;
+
+        performer.ChangePiety(-pietyCost);
+
+        performer.StartCoroutine(SpeedBoostRoutine(performer));
+    }
+
+    private IEnumerator SpeedBoostRoutine(Cardinal target)
+    {
+        if (target == null) yield break;
+
+        float delta = target.MoveSpeed * (speedPercentDelta / 100f);
+
+        target.ChangeSpeed(delta);
+
+        yield return new WaitForSeconds(duration);
+
+        if (target != null)
+        {
+            target.ChangeSpeed(-delta);
+        }
+    }
+
+}

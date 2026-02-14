@@ -1,0 +1,57 @@
+﻿using UnityEditor.Search;
+using UnityEngine;
+
+public class P009 : Plot
+{
+    [Header("해당 공작 설정")]
+    [SerializeField] private int minInfluence;
+    [SerializeField] private int pietyCost;
+    [SerializeField] private int hpDelta;
+
+
+    void Reset()
+    {
+        // 설정 기본값
+        plotID = "P009";
+        plotGrade = PlotGrade.Common;
+        
+        // 텍스트 기본값
+        plotName = "태양의 눈";
+        plotDescription = "태양의 눈을 지닌 자여, 신실함을 보여라.";
+
+        // 수치 기본값
+        plotWeightBase = 20;
+        plotWeightMultiplier = 0f;
+
+        minInfluence = 20;
+        pietyCost = 0;
+        hpDelta = -20;
+    }
+
+    public override bool CanExecute(Cardinal performer)
+    {
+        return performer.Influence >= minInfluence;
+    }
+
+    public override void Execute(Cardinal performer)
+    {
+        if (!CanExecute(performer)) return;
+
+        performer.ChangePiety(-pietyCost);
+
+        var cm = CardinalManager.Instance;
+
+        int lowestPietyCardinal = 0;
+
+        for (int i = 1; i < 3; i++)
+        {
+            if (cm.Cardinals[lowestPietyCardinal].Piety > cm.Cardinals[i].Piety)
+            {
+                lowestPietyCardinal = i;
+            }
+        }
+
+        cm.Cardinals[lowestPietyCardinal].ChangeHp(hpDelta);
+    }
+
+}
