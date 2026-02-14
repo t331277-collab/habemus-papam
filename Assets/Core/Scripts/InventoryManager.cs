@@ -20,7 +20,7 @@ public class InventoryManager : MonoBehaviour
     public void SetPlayer(Cardinal player)
     {
         playerCardinal = player;
-        Debug.Log("인벤토리 매니저에 플레이어가 연결되었습니다.");
+        
     }
 
     public bool AddItem(Item newItem)
