@@ -9,15 +9,12 @@ public class FieldItem : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // 닿은 물체가 "Player" 태그인지 확인
         if (other.CompareTag("Player"))
         {
             if (itemData != null)
             {
-                // 인벤토리에 추가 시도
                 bool isAdded = InventoryManager.Instance.AddItem(itemData);
 
-                // 인벤토리에 잘 들어갔으면 필드에서 삭제
                 if (isAdded)
                 {
                     Debug.Log($"[아이템 획득] {itemData.itemName}");
