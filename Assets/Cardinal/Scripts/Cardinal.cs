@@ -98,6 +98,23 @@ public class Cardinal : MonoBehaviour
         piety = Mathf.Clamp(piety + delta, 0f, 100f);
     }
 
+    public void AddPassiveItem(Item item)
+    {
+        if (item == null) return;
+        if (!items.Contains(item))
+        {
+            items.Add(item);
+        }
+    }
+
+    public void RemovePassiveItem(Item item)
+    {
+        if (item != null && items.Contains(item))
+        {
+            items.Remove(item);
+        }
+    }
+
     // ---------------------------------------------------------
     // 고유 행동 함수 (기도, 연설)
     // ---------------------------------------------------------
@@ -106,10 +123,7 @@ public class Cardinal : MonoBehaviour
         if (InGameManager.Instance == null) return;
         GameBalance balance = InGameManager.Instance.Balance;
 
-        foreach (var item in items)
-        {
-            item?.OnPray(this);
-        }
+        
 
         if (Random.value < balance.PraySuccessChance)
         {
@@ -121,6 +135,11 @@ public class Cardinal : MonoBehaviour
             ChangePiety(balance.PrayFailDeltaPiety);
             ChangeHp(balance.PrayFailDeltaHp);
         }
+
+        foreach (var item in items)
+        {
+            item?.OnPray(this);
+        }
     }
 
     public void Speech()
@@ -131,10 +150,7 @@ public class Cardinal : MonoBehaviour
         Animation_Controller anim = GetComponent<Animation_Controller>();
         if (anim == null) anim = GetComponentInChildren<Animation_Controller>();
 
-        foreach (var item in items)
-        {
-            item?.OnSpeech(this);
-        }
+        
 
         if (Random.value < balance.SpeechSuccessChance)
         {
@@ -152,6 +168,11 @@ public class Cardinal : MonoBehaviour
             if (anim != null) anim.SetSpeechAnimation(3);
             ChangeInfluence(balance.SpeechFailDeltaInfluence);
             ChangeHp(balance.SpeechFailDeltaHp);
+        }
+
+        foreach (var item in items)
+        {
+            item?.OnSpeech(this);
         }
     }
 

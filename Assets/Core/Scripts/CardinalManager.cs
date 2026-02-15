@@ -324,6 +324,11 @@ public class CardinalManager : MonoBehaviour
 
         Debug.Log("All cardinals have exited.");
         Time.timeScale = 1f;
+
+        if (InGameManager.Instance != null)
+        {
+            InGameManager.Instance.OnExitSequenceFinished();
+        }
     }
     private void MoveCardinalToExit(Cardinal c, Vector3 exitPos)
     {

@@ -29,110 +29,102 @@ public class TimeUI : MonoBehaviour
     [Header("이미지")]
     [SerializeField] List<Sprite> LightList;
 
-    // 한 번만 호출하기 위한 플래그
-    private bool hasConclaveEnded = false;
 
     void Start()
     {
-        InGameManager.Instance.Context.OnGameContextEvent += OnConclaveStart;
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent += HandleGameContextEvent;
+        }
     }
-
-    private void OnConclaveStart(GameContext.GameContextEvent evt)
+    void Update()
     {
-        Reset();
-        hasConclaveEnded = false;
 
-        Debug.Log("Currentcon = " + InGameManager.Instance.GetCurrentConclave());
+        if (InGameManager.Instance == null) return;
+
+        float remain = InGameManager.Instance.GetRemainingTime();
+        float max = InGameManager.Instance.Balance.MaxConclaveTime;
+
+        ClockHand.transform.rotation = Quaternion.Euler(0, 0, (remain / max) * 360f);
+
+        if (InGameManager.Instance.IsTimeRunning)
+        {
+            RightText2.text = $"{(int)(remain / 60)} : {(remain % 60).ToString("00.00")}";
+        }
     }
 
-    public void Reset()
+    void OnDestroy()
+    {
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent -= HandleGameContextEvent;
+        }
+    }
+
+    private void HandleGameContextEvent(GameContext.GameContextEvent evt)
+    {
+        switch (evt)
+        {
+            case GameContext.GameContextEvent.ConclaveStart:
+                ResetUI();
+                break;
+            case GameContext.GameContextEvent.ConclaveEnd:
+                EndConclaveUI();
+                break;
+        }
+    }
+
+    public void ResetUI()
     {
         var currentDay = InGameManager.Instance.GetCurrentDay();
         var currentCon = InGameManager.Instance.GetCurrentConclave();
-        
+
         LeftText1.text = $"Day {currentDay}";
         LeftText2.text = $"{currentCon}";
         RightText1.text = "남은 시간";
-        RightText2.text = $"{(int)(InGameManager.Instance.Balance.MaxConclaveTime/60)} : {(InGameManager.Instance.Balance.MaxConclaveTime%60).ToString("00.00")}";
-        ClockHand.transform.rotation = Quaternion.identity;
 
-        switch (currentCon)
-        {
-            case GameContext.Conclave.Dawn:
-                {
-                    Dawn.sprite = LightList[1];
-                    Morning.sprite = LightList[0];
-                    Afternoon.sprite = LightList[0];
-                    Evening.sprite = LightList[0];
-                    break;
-                }
-            case GameContext.Conclave.Morning:
-                {
-                    Dawn.sprite = LightList[1];
-                    Morning.sprite = LightList[2];
-                    Afternoon.sprite = LightList[0];
-                    Evening.sprite = LightList[0];
-                    break;
-                }
-            case GameContext.Conclave.Afternoon:
-                {
-                    Dawn.sprite = LightList[1];
-                    Morning.sprite = LightList[2];
-                    Afternoon.sprite = LightList[3];
-                    Evening.sprite = LightList[0];
-                    break;
-                }
-            case GameContext.Conclave.Evening:
-                {
-                    Dawn.sprite = LightList[1];
-                    Morning.sprite = LightList[2];
-                    Afternoon.sprite = LightList[3];
-                    Evening.sprite = LightList[4];
-                    break;
-                }
-            
-        }
-        // 시작 시 종료 플래그 초기화
-        hasConclaveEnded = false;
+        UpdateLights(currentCon);
     }
 
-    public void EndConclave()
+    public void EndConclaveUI()
     {
-        LeftText1.text = $"Day {InGameManager.Instance.GetCurrentDay()}";
-        LeftText2.text = $"{InGameManager.Instance.GetCurrentConclave()}";
-        RightText1.text = "남은 시간";
-        RightText2.text = $"{(int)(InGameManager.Instance.Balance.MaxConclaveTime/60)} : {(InGameManager.Instance.Balance.MaxConclaveTime%60).ToString("00.00")}";
+        RightText2.text = "00 : 00.00";
         ClockHand.transform.rotation = Quaternion.identity;
+
         Dawn.sprite = LightList[0];
         Morning.sprite = LightList[0];
         Afternoon.sprite = LightList[0];
         Evening.sprite = LightList[0];
     }
+
     
-    void Update()
+    private void UpdateLights(GameContext.Conclave currentCon)
     {
-        var currentDay = InGameManager.Instance.GetCurrentDay();
-        var currentCon = InGameManager.Instance.GetCurrentConclave();
-        //시계바늘 돌리기, 우측 텍스트 동기화하기
-        float remain = InGameManager.Instance.GetRemainingTime();
-        float max = InGameManager.Instance.Balance.MaxConclaveTime;
-        ClockHand.transform.rotation = Quaternion.Euler(0, 0, remain/max*360f);
-        LeftText1.text = $"Day {currentDay}";
-        LeftText2.text = $"{currentCon}";
-        RightText2.text = $"{(int)(remain/60)} : {(remain%60).ToString("00.00")}";
+        Dawn.sprite = LightList[0];
+        Morning.sprite = LightList[0];
+        Afternoon.sprite = LightList[0];
+        Evening.sprite = LightList[0];
 
-
-        //시간이 0이 되었을 경우, StopConClave() 호출
-        if (!hasConclaveEnded && remain <= 0f)
+        switch (currentCon)
         {
-            hasConclaveEnded = true; 
-
-            InGameManager.Instance.StopTimer();
-
-            if (CardinalManager.Instance != null)
-            {
-                CardinalManager.Instance.StopConClave();
-            }
+            case GameContext.Conclave.Dawn:
+                Dawn.sprite = LightList[1];
+                break;
+            case GameContext.Conclave.Morning:
+                Dawn.sprite = LightList[1];
+                Morning.sprite = LightList[2];
+                break;
+            case GameContext.Conclave.Afternoon:
+                Dawn.sprite = LightList[1];
+                Morning.sprite = LightList[2];
+                Afternoon.sprite = LightList[3];
+                break;
+            case GameContext.Conclave.Evening:
+                Dawn.sprite = LightList[1];
+                Morning.sprite = LightList[2];
+                Afternoon.sprite = LightList[3];
+                Evening.sprite = LightList[4];
+                break;
         }
     }
 }
