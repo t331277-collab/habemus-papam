@@ -56,13 +56,11 @@ public class Lecture : MonoBehaviour
         {
             overflowPlayer = null;
             removed = true;
-            Debug.Log("연설 3번째 대기석 예약 취소됨.");
         }
         else if (speechList.Contains(playerSC))
         {
             speechList.Remove(playerSC);
             removed = true;
-            Debug.Log("연설 대기열 예약 취소됨.");
 
             if (waitingTrigger != null) waitingTrigger.SetIncomingNPC(null);
         }
@@ -86,7 +84,6 @@ public class Lecture : MonoBehaviour
 
         if (isMainSpotAvailable)
         {
-            Debug.Log("Player entered Speech Waiting Zone! Added to Queue.");
             speechList.Add(playerSC);
             playerSC.OrderToSpeech(waitingPoint.position, true);
         }
@@ -94,7 +91,6 @@ public class Lecture : MonoBehaviour
         {
             if (playerOverflowPoint != null)
             {
-                Debug.Log("연설 대기석이 꽉 차서 플레이어 전용 대기석(3순위)으로 이동합니다.");
                 overflowPlayer = playerSC;
                 playerSC.OrderToSpeech(playerOverflowPoint.position, true);
             }
@@ -186,7 +182,6 @@ public class Lecture : MonoBehaviour
     {
         if (overflowPlayer == null) return;
 
-        Debug.Log("연설 대기석이 비어 플레이어가 3순위 -> 2순위로 이동합니다.");
 
         speechList.Add(overflowPlayer);
 

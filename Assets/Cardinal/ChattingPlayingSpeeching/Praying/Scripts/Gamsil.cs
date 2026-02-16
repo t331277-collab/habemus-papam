@@ -68,13 +68,11 @@ public class Gamsil : MonoBehaviour
         {
             overflowPlayer = null;
             removed = true;
-            Debug.Log("3번째 대기석 예약 취소됨.");
         }
         else if (prayerList.Contains(playerSC))
         {
             prayerList.Remove(playerSC);
             removed = true;
-            Debug.Log("대기열 예약 취소됨.");
 
             if (waitingTrigger != null) waitingTrigger.SetIncomingNPC(null);
         }
@@ -98,7 +96,6 @@ public class Gamsil : MonoBehaviour
 
         if (isMainSpotAvailable)
         {
-            Debug.Log("Player entered Waiting Zone! Added to Queue.");
             prayerList.Add(playerSC);
             playerSC.OrderToPray(waitingPoint.position, true);
         }
@@ -106,7 +103,6 @@ public class Gamsil : MonoBehaviour
         {
             if (playerOverflowPoint != null)
             {
-                Debug.Log("대기석이 꽉 차서 플레이어 전용 대기석(3순위)으로 이동합니다.");
                 overflowPlayer = playerSC;
                 playerSC.OrderToPray(playerOverflowPoint.position, true);
             }
@@ -199,8 +195,6 @@ public class Gamsil : MonoBehaviour
     private void MoveOverflowPlayerToWaitingSpot()
     {
         if (overflowPlayer == null) return;
-
-        Debug.Log("대기석이 비어 플레이어가 3순위 -> 2순위로 이동합니다.");
 
         prayerList.Add(overflowPlayer); 
 

@@ -62,6 +62,14 @@ public class Cardinal : MonoBehaviour
 
             // 초기화된 속도를 에이전트에도 적용
             if (agent != null) agent.speed = moveSpeed;
+
+            if (CompareTag("Player"))
+            {
+                if (InventoryManager.Instance != null)
+                {
+                    InventoryManager.Instance.SetPlayer(this);
+                }
+            }
         }
     }
 
@@ -94,6 +102,23 @@ public class Cardinal : MonoBehaviour
     {
         moveSpeed = moveSpeed + delta;
     }
+    
+    public void AddPassiveItem(Item item)
+    {
+        if (item == null) return;
+        if (!items.Contains(item))
+        {
+            items.Add(item);
+        }
+    }
+
+    public void RemovePassiveItem(Item item)
+    {
+        if (item != null && items.Contains(item))
+        {
+            items.Remove(item);
+        }
+    }
 
     // ---------------------------------------------------------
     // 고유 행동 함수 (기도, 연설)
@@ -103,10 +128,7 @@ public class Cardinal : MonoBehaviour
         if (InGameManager.Instance == null) return;
         GameBalance balance = InGameManager.Instance.Balance;
 
-        foreach (var item in items)
-        {
-            item?.OnPray(this);
-        }
+        
 
         if (Random.value < balance.PraySuccessChance)
         {
@@ -118,6 +140,11 @@ public class Cardinal : MonoBehaviour
             ChangePiety(balance.PrayFailDeltaPiety);
             ChangeHp(balance.PrayFailDeltaHp);
         }
+
+        foreach (var item in items)
+        {
+            item?.OnPray(this);
+        }
     }
 
     public void Speech()
@@ -128,14 +155,11 @@ public class Cardinal : MonoBehaviour
         Animation_Controller anim = GetComponent<Animation_Controller>();
         if (anim == null) anim = GetComponentInChildren<Animation_Controller>();
 
-        foreach (var item in items)
-        {
-            item?.OnSpeech(this);
-        }
+        
 
         if (Random.value < balance.SpeechSuccessChance)
         {
-            Debug.Log("성공!");
+            //Debug.Log("성공!");
             if (anim != null) anim.SetSpeechAnimation(2);
             // 연설 성공
             float speechSuccessDeltaInfluence = Random.Range(balance.SpeechSuccessDeltaInfluenceMin, balance.SpeechSuccessDeltaInfluenceMax + 1);
@@ -144,11 +168,16 @@ public class Cardinal : MonoBehaviour
         }
         else
         {
-            Debug.Log("실패!");
+            //Debug.Log("실패!");
             //연설 실패
             if (anim != null) anim.SetSpeechAnimation(3);
             ChangeInfluence(balance.SpeechFailDeltaInfluence);
             ChangeHp(balance.SpeechFailDeltaHp);
+        }
+
+        foreach (var item in items)
+        {
+            item?.OnSpeech(this);
         }
     }
 
