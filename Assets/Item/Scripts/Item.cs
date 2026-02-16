@@ -33,6 +33,8 @@ public abstract class Item : ScriptableObject
     public virtual void OnPray(Cardinal owner) { }
     public virtual void OnSpeech(Cardinal owner) { }
 
+    public virtual void OnReapply(Cardinal owner) { } //아이템 효과 다시 발동(패시브 아이템으 경우 콘클라베 다시 시작하면 다시 효과적용)
+
     public string GetColoredGrade()
     {
         string colorHex = "";

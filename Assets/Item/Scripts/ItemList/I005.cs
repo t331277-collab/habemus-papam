@@ -1,0 +1,34 @@
+﻿using UnityEngine;
+
+[CreateAssetMenu(fileName = "I005", menuName = "Items/태양주")]
+public class I005 : Item
+{
+    [Header("태양주 설정")]
+    [Tooltip("기도 시 추가로 회복할 체력량")]
+    [SerializeField] private int prayerBonusHp;
+
+    void Reset()
+    {
+        itemID = "I005";
+        itemGrade = ItemGrade.Common;
+        itemExpirationType = ItemExpirationType.Conclave;
+
+        usageType = ItemUsageType.Passive;
+
+        itemName = "태양주";
+        itemDescription = "고향집 뒷산 포도밭에서 따온 포도를 대충 증류해서 만든 달달한 술";
+        itemEffectDescription = "이번 콘클라베 동안 기도 시 체력 회복량 두 배";
+
+        prayerBonusHp = 10;
+    }
+
+    public override void OnPray(Cardinal owner)
+    {
+        float beforeHp = owner.Hp;
+
+        owner.ChangeHp(prayerBonusHp);
+
+        //Debug.Log($"[아이템 효과] 태양주(패시브) 발동! 기도 추가 회복: +{prayerBonusHp}");
+    }
+
+}

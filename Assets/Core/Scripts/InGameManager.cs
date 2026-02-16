@@ -76,6 +76,7 @@ public class InGameManager : MonoBehaviour
 
     [Header("UI 연결")]
     [SerializeField] private Button startButton;
+    [SerializeField] private GameObject inventoryUIPanel;
 
 
     // 시간 흐름 제어 플래그
@@ -153,6 +154,12 @@ public class InGameManager : MonoBehaviour
     public void StartTimer()
     {
         isTimeRunning = true;
+        Debug.Log("타이머 작동 시작");
+
+        if (inventoryUIPanel != null)
+        {
+            inventoryUIPanel.SetActive(true);
+        }
     }
 
     public void StopTimer()
@@ -176,7 +183,8 @@ public class InGameManager : MonoBehaviour
         isTimeRunning = false;
 
         gameContext.InitGameContext();
-        
+        if (inventoryUIPanel != null) inventoryUIPanel.SetActive(false);
+
     }
 
     void HandleGameContextEvent(GameContext.GameContextEvent eventType)
@@ -193,6 +201,10 @@ public class InGameManager : MonoBehaviour
 
             case GameContext.GameContextEvent.ConclaveEnd:
                 Debug.Log($"[InGameManager] 콘클라베 종료 (Time Over)");
+                if (inventoryUIPanel != null)
+                {
+                    inventoryUIPanel.SetActive(false);
+                }
 
                 // 추기경 퇴장 시작 명령
                 if (CardinalManager.Instance != null)

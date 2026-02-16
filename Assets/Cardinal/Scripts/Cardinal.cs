@@ -72,6 +72,32 @@ public class Cardinal : MonoBehaviour
             }
         }
     }
+    void OnEnable()
+    {
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null) item.OnReapply(this);
+            }
+        }
+    }
+
+    public void ChangeSpeed(float delta)
+    {
+        if (agent != null)
+        {
+            agent.speed = moveSpeed * delta;
+        }
+    }
+
+    public void RestoreMoveSpeed()
+    {
+        if (agent != null)
+        {
+            agent.speed = moveSpeed;
+        }
+    }
 
     // NavMeshAgent 크기 조절 (Manager에서 접근하므로 유지)
     public void SetAgentSize(float newRadius, float newHeight)
