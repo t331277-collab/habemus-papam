@@ -42,7 +42,15 @@ public class P007 : Plot
 
         performer.ChangePiety(-pietyCost);
 
+        var cm = CardinalManager.Instance;
+
         performer.StartCoroutine(SpeedBoostRoutine(performer));
+
+        for (int i = 0; i < 3; i++)
+        {
+            var target = cm.Cardinals[i];
+            target.StartCoroutine(SpeedBoostRoutine(target));
+        }
     }
 
     private IEnumerator SpeedBoostRoutine(Cardinal target)
