@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -98,6 +98,11 @@ public class Cardinal : MonoBehaviour
         piety = Mathf.Clamp(piety + delta, 0f, 100f);
     }
 
+    public void ChangeSpeed(float delta)
+    {
+        moveSpeed = moveSpeed + delta;
+    }
+    
     public void AddPassiveItem(Item item)
     {
         if (item == null) return;
