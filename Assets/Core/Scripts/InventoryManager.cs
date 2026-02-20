@@ -13,7 +13,11 @@ public class InventoryManager : MonoBehaviour
     //프로퍼티
     public Cardinal Player => playerCardinal;
 
+    //인벤토리
     private List<Item> inventoryItems = new List<Item>();
+
+    //버프 관리 리스트
+    private List<Item> activeBuffs = new List<Item>();
 
     void Awake()
     {
@@ -47,34 +51,53 @@ public class InventoryManager : MonoBehaviour
 
     private void CheckAndRemoveExpiredItems()
     {
-        List<Item> itemsToRemove = new List<Item>();
-
+        if (InGameManager.Instance == null) return;
         bool isNewDay = InGameManager.Instance.GetCurrentConclave() == GameContext.Conclave.Dawn;
 
-        foreach (var item in inventoryItems)
+        RemoveExpiredFromList(inventoryItems, isNewDay, true);
+
+        //버프 인벤토리
+        RemoveExpiredFromList(activeBuffs, isNewDay, false);
+    }
+
+    private void RemoveExpiredFromList(List<Item> targetList, bool isNewDay, bool shouldUpdateUI)
+    {
+        List<Item> itemsToRemove = new List<Item>();
+
+        foreach (var item in targetList)
         {
             if (item.itemExpirationType == ItemExpirationType.Conclave)
-            {
                 itemsToRemove.Add(item);
-            }
             else if (item.itemExpirationType == ItemExpirationType.Day && isNewDay)
-            {
                 itemsToRemove.Add(item);
-            }
         }
 
         foreach (var item in itemsToRemove)
         {
-            Debug.Log($" '{item.itemName}' 아이템이 만료되어 사라졌습니다.");
-            RemoveItem(item);
+            Debug.Log($"'{item.itemName}' 버프/아이템 만료됨 (유형: {item.itemExpirationType})");
+
+            item.OnRemove();
+            targetList.Remove(item);
+
+            if (playerCardinal != null)
+                playerCardinal.RemovePassiveItem(item); 
+        }
+
+        if (shouldUpdateUI)
+        {
+            inventoryUI.UpdateSlotUI(inventoryItems);
         }
     }
+
+
 
     public void SetPlayer(Cardinal player)
     {
         playerCardinal = player;
         
     }
+
+
 
     public bool AddItem(Item newItem)
     {
@@ -89,7 +112,10 @@ public class InventoryManager : MonoBehaviour
 
         if (playerCardinal != null)
         {
-            playerCardinal.AddPassiveItem(newItem);
+            if (newItem.usageType == ItemUsageType.Passive)
+            {
+                playerCardinal.AddPassiveItem(newItem);
+            }
         }
 
         inventoryUI.UpdateSlotUI(inventoryItems);
@@ -101,10 +127,26 @@ public class InventoryManager : MonoBehaviour
 
         if (inventoryItems.Contains(item))
         {
-            item.OnUse(); // 효과 발동
+            item.OnUse();
 
-            // 소모품이라면 제거
-            RemoveItem(item);
+            if (item.IsDurationBuff)
+            {
+                inventoryItems.Remove(item);
+                activeBuffs.Add(item);
+
+                if (playerCardinal != null)
+                {
+                    playerCardinal.AddPassiveItem(item);
+                }
+
+                inventoryUI.UpdateSlotUI(inventoryItems);
+
+                Debug.Log($"[시스템] '{item.itemName}'의 효과가 버프 목록에 등록되어 지속됩니다.");
+            }
+            else if (item.ConsumeOnUse)
+            {
+                RemoveItem(item);
+            }
         }
     }
 

@@ -22,5 +22,5 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: 52b7409211a774242b4645e1e7908995, type: 3}
   itemGrade: 0
   itemExpirationType: 0
-  usageType: 0
-  prayerBonusHp: 10
+  usageType: 1
+  prayerBonusHp: 5

@@ -7,28 +7,43 @@ public class I005 : Item
     [Tooltip("기도 시 추가로 회복할 체력량")]
     [SerializeField] private int prayerBonusHp;
 
+    public override bool IsDurationBuff => true;
+
     void Reset()
     {
         itemID = "I005";
         itemGrade = ItemGrade.Common;
         itemExpirationType = ItemExpirationType.Conclave;
 
-        usageType = ItemUsageType.Passive;
+        usageType = ItemUsageType.Active;
 
         itemName = "태양주";
         itemDescription = "고향집 뒷산 포도밭에서 따온 포도를 대충 증류해서 만든 달달한 술";
         itemEffectDescription = "이번 콘클라베 동안 기도 시 체력 회복량 두 배";
 
-        prayerBonusHp = 10;
+        prayerBonusHp = 5;
+    }
+
+    public override void OnUse()
+    {
+        
+        Cardinal player = FindPlayer();
+        if (player != null)
+        {
+            Debug.Log("[아이템 사용] 캬! 태양주를 들이켰습니다. 아우 취한다.");
+        }
     }
 
     public override void OnPray(Cardinal owner)
     {
-        float beforeHp = owner.Hp;
-
         owner.ChangeHp(prayerBonusHp);
+        Debug.Log($"[버프 효과] 그냥 태양주의 기운! 기도 추가 회복: +{prayerBonusHp}");
+    }
 
-        //Debug.Log($"[아이템 효과] 태양주(패시브) 발동! 기도 추가 회복: +{prayerBonusHp}");
+    private Cardinal FindPlayer()
+    {
+        if (InventoryManager.Instance != null) return InventoryManager.Instance.Player;
+        return null;
     }
 
 }

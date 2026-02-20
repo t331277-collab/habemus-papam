@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0c188f993bef9c43918b213b411e95b, type: 3}
   m_Name: I006
   m_EditorClassIdentifier: Assembly-CSharp::I006
-  itemID: I006
+  itemID: I005
   itemName: "\uCD5C\uACE0\uAE09 \uD0DC\uC591\uC8FC"
   itemDescription: "\uCD5C\uACE0\uAE09 \uC774\uD0C8\uB9AC\uC544 \uD3EC\uB3C4\uB97C
     \uBC1C\uD6A8\uD55C \uD6C4 \uC218\uB3C4\uC6D0 \uC9C0\uD558\uC5D0\uC11C \uB2E4\uC12F
@@ -22,5 +22,5 @@ MonoBehaviour:
   itemImage: {fileID: 21300000, guid: 52b7409211a774242b4645e1e7908995, type: 3}
   itemGrade: 1
   itemExpirationType: 1
-  usageType: 0
+  usageType: 1
   prayerBonusHp: 10
