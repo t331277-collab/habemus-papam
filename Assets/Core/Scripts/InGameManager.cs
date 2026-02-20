@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -78,6 +79,21 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject inventoryUIPanel;
 
+    [Header("아이템 스폰 설정")]
+    [Tooltip("아이템이 스폰될 수 있는 위치들")]
+    [SerializeField] private List<Transform> spawnPoints;
+
+    [Tooltip("필드에 드랍될 '일반' 등급 아이템 프리팹들")]
+    [SerializeField] private List<GameObject> commonItemPrefabs;
+
+    [Tooltip("필드에 드랍될 '고급' 등급 아이템 프리팹들")]
+    [SerializeField] private List<GameObject> rareItemPrefabs;
+
+    [Range(0, 100)][SerializeField] private float spawnChance = 100f;
+    [Range(0, 100)][SerializeField] private float spawnTwoItemsChance = 30f; 
+    [Range(0, 100)][SerializeField] private float rareItemChance = 20f; 
+
+    private List<GameObject> spawnedFieldItems = new List<GameObject>();
 
     // 시간 흐름 제어 플래그
     private bool isTimeRunning = false;
@@ -160,6 +176,8 @@ public class InGameManager : MonoBehaviour
         {
             inventoryUIPanel.SetActive(true);
         }
+
+        SpawnFieldItems();
     }
 
     public void StopTimer()
@@ -206,11 +224,76 @@ public class InGameManager : MonoBehaviour
                     inventoryUIPanel.SetActive(false);
                 }
 
+                ClearFieldItems();
+
                 // 추기경 퇴장 시작 명령
                 if (CardinalManager.Instance != null)
                     CardinalManager.Instance.StopConClave();
                 break;
         }
+    }
+
+    private void SpawnFieldItems()
+    {
+        if (spawnPoints == null || spawnPoints.Count == 0) return;
+        if (commonItemPrefabs.Count == 0 && rareItemPrefabs.Count == 0) return;
+
+        // 1. 아예 스폰이 안 될 확률 체크
+        if (UnityEngine.Random.Range(0f, 100f) > spawnChance) return;
+
+        // 2. 스폰 개수 결정 (1개 or 2개)
+        int spawnCount = (UnityEngine.Random.Range(0f, 100f) <= spawnTwoItemsChance) ? 2 : 1;
+
+        // 3. 중복 위치 스폰 방지를 위해 스폰 위치 리스트 복사
+        List<Transform> availablePoints = new List<Transform>(spawnPoints);
+
+        for (int i = 0; i < spawnCount; i++)
+        {
+            if (availablePoints.Count == 0) break;
+
+            // 랜덤 위치 지정 후 리스트에서 제거 (같은 자리 중복 방지)
+            int pointIndex = UnityEngine.Random.Range(0, availablePoints.Count);
+            Transform spawnPoint = availablePoints[pointIndex];
+            availablePoints.RemoveAt(pointIndex);
+
+            // 프리팹 가져와서 스폰
+            GameObject prefabToSpawn = GetRandomItemPrefab();
+            if (prefabToSpawn != null)
+            {
+                GameObject spawnedObj = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
+                spawnedFieldItems.Add(spawnedObj); // 추적 리스트에 추가
+            }
+        }
+    }
+
+    private GameObject GetRandomItemPrefab()
+    {
+        // 고급(Rare)이 뜰 확률 체크
+        bool isRare = (UnityEngine.Random.Range(0f, 100f) <= rareItemChance);
+
+        if (isRare && rareItemPrefabs.Count > 0)
+        {
+            return rareItemPrefabs[UnityEngine.Random.Range(0, rareItemPrefabs.Count)];
+        }
+        else if (commonItemPrefabs.Count > 0)
+        {
+            return commonItemPrefabs[UnityEngine.Random.Range(0, commonItemPrefabs.Count)];
+        }
+
+        return null;
+    }
+
+    private void ClearFieldItems()
+    {
+        foreach (var item in spawnedFieldItems)
+        {
+            // 플레이어가 이미 먹어서 Destroy된 아이템은 null이 되므로 체크
+            if (item != null)
+            {
+                Destroy(item);
+            }
+        }
+        spawnedFieldItems.Clear(); // 리스트 비우기
     }
 
     public int GetProgress()
