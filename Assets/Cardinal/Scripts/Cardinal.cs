@@ -153,11 +153,6 @@ public class Cardinal : MonoBehaviour
     {
         piety = Mathf.Clamp(piety + delta, 0f, 100f);
     }
-
-    public void ChangeSpeed(float delta)
-    {
-        moveSpeed = moveSpeed + delta;
-    }
     
     public void AddPassiveItem(Item item)
     {
