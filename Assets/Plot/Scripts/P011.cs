@@ -1,0 +1,74 @@
+﻿using UnityEditor.Search;
+using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
+
+public class P011 : Plot
+{
+    [Header("해당 공작 설정")]
+    [SerializeField] private int minInfluence;
+    [SerializeField] private int pietyCost;
+    [SerializeField] private int hpIncrease;
+    [SerializeField] private int hpDecrease;
+    [SerializeField] private int mentalDelta;
+
+
+    void Reset()
+    {
+        // 설정 기본값
+        plotID = "P011";
+        plotGrade = PlotGrade.Common;
+        
+        // 텍스트 기본값
+        plotName = "태양의 혀";
+        plotDescription = "태양의 혀를 지닌 자여, 정당함을 말하라.";
+
+        // 수치 기본값
+        plotWeightBase = 20;
+        plotWeightMultiplier = 0f;
+
+        minInfluence = 20;
+        pietyCost = 0;
+        hpIncrease = 10;
+        hpDecrease = -20;
+        mentalDelta = 20;
+    }
+
+    public override bool CanExecute(Cardinal performer)
+    {
+        return performer.Influence >= minInfluence;
+    }
+
+    public override void Execute(Cardinal performer)
+    {
+        if (!CanExecute(performer)) return;
+
+        performer.ChangePiety(-pietyCost);
+
+        var cm = CardinalManager.Instance;
+
+        float chance = Random.value;
+
+        if (chance < 0.5f) 
+        {
+            performer.ChangeHp(hpDecrease);
+            //performer.ChangeMental(mentalDelta);  정신력 변화
+
+            for (int i = 0; i < 3; i++)
+            {
+                cm.Cardinals[i].ChangeHp(hpDecrease);
+
+                //cm.Cardinals[i].ChangeMental(mentalDelta);    정신력 변화
+            }
+        }
+        else 
+        {
+            performer.ChangeHp(hpIncrease);
+
+            for (int i = 0; i < 3; i++)
+            {
+                cm.Cardinals[i].ChangeHp(hpIncrease);
+            }
+        }
+    }
+
+}
