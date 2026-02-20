@@ -20,7 +20,7 @@ public class Cardinal : MonoBehaviour
     // 추기경 멤버변수
     private List<Item> items;
     private NavMeshAgent agent;
-
+    private bool isKnockedOut = false;
 
     // 외부(StateController)에서 접근을 위한 프로퍼티
     public float Hp => hp;
@@ -48,7 +48,37 @@ public class Cardinal : MonoBehaviour
         InitCardinal();
     }
 
-    
+    void Update()
+    {
+        //기절 & 부활 로직
+        if (hp <= 0f && !isKnockedOut)
+        {
+            bool isRevived = false;
+
+            foreach (var item in items)
+            {
+                if (item != null && item.OnHpReachedZero(this))
+                {
+                    isRevived = true;
+                    break;
+                }
+            }
+
+            if (!isRevived)
+            {
+                isKnockedOut = true;
+                hp = 0f; 
+
+                Debug.Log($"[{gameObject.name}] 체력이 0이 되어 기절했습니다!");
+            }
+        }
+        else if (hp > 0f)
+        {
+            isKnockedOut = false;
+        }
+    }
+
+
 
     void InitCardinal()
     {
@@ -70,6 +100,32 @@ public class Cardinal : MonoBehaviour
                     InventoryManager.Instance.SetPlayer(this);
                 }
             }
+        }
+    }
+    void OnEnable()
+    {
+        if (items != null)
+        {
+            foreach (var item in items)
+            {
+                if (item != null) item.OnReapply(this);
+            }
+        }
+    }
+
+    public void ChangeSpeed(float delta)
+    {
+        if (agent != null)
+        {
+            agent.speed = moveSpeed * delta;
+        }
+    }
+
+    public void RestoreMoveSpeed()
+    {
+        if (agent != null)
+        {
+            agent.speed = moveSpeed;
         }
     }
 
@@ -163,6 +219,15 @@ public class Cardinal : MonoBehaviour
             if (anim != null) anim.SetSpeechAnimation(2);
             // 연설 성공
             float speechSuccessDeltaInfluence = Random.Range(balance.SpeechSuccessDeltaInfluenceMin, balance.SpeechSuccessDeltaInfluenceMax + 1);
+
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    speechSuccessDeltaInfluence = item.ModifySpeechInfluence(speechSuccessDeltaInfluence, balance, true);
+                }
+            }
+
             ChangeInfluence(speechSuccessDeltaInfluence);
             ChangeHp(balance.SpeechSuccessDeltaHp);
         }
@@ -171,6 +236,17 @@ public class Cardinal : MonoBehaviour
             //Debug.Log("실패!");
             //연설 실패
             if (anim != null) anim.SetSpeechAnimation(3);
+
+            float speechFailDeltaInfluence = balance.SpeechFailDeltaInfluence;
+
+            foreach (var item in items)
+            {
+                if (item != null)
+                {
+                    speechFailDeltaInfluence = item.ModifySpeechInfluence(speechFailDeltaInfluence, balance, false);
+                }
+            }
+
             ChangeInfluence(balance.SpeechFailDeltaInfluence);
             ChangeHp(balance.SpeechFailDeltaHp);
         }

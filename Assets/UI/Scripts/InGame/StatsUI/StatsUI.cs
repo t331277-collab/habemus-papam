@@ -24,6 +24,7 @@ public class StatsUI : MonoBehaviour
     [SerializeField] private float moveTime = 0.3f;
 
     private Cardinal[] linkedCardinals = new Cardinal[4];
+    public Cardinal[] LinkedCardinals => linkedCardinals;
     private float[] MaxStats = new float[4]; 
     private float[] SubStats = new float[4];
     private Coroutine[] moveCoroutines = new Coroutine[4];
@@ -57,6 +58,7 @@ public class StatsUI : MonoBehaviour
             if (uiSlotIndex < 4)
             {
                 linkedCardinals[uiSlotIndex] = allCardinals[i];
+                //Debug.Log($"[StatsUI] Slot[{uiSlotIndex}] 연결 완료: {linkedCardinals[uiSlotIndex].name}");
                 uiSlotIndex++;
             }
             else

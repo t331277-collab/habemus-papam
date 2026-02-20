@@ -67,7 +67,6 @@ public class InventoryUI : MonoBehaviour
         if (descText != null)
             descText.text = item.itemDescription;
 
-        // 3. 등급 및 타입 표시 (색상 적용)
         string gradeStr = item.GetColoredGrade();
         string typeStr = (item.usageType == ItemUsageType.Active)
             ? "<color=green>[수동 사용]</color>"

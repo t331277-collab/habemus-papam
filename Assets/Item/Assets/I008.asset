@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 57dd03d00ed128041ac1bbc4fcf6200a, type: 3}
+  m_Name: I008
+  m_EditorClassIdentifier: Assembly-CSharp::I008
+  itemID: I008
+  itemName: "\uD0DC\uC591 \uD314\uCC0C"
+  itemDescription: "\uD0DC\uC591\uC758 \uD798\uC774 \uD655\uC2E4\uD788 \uB290\uAEF4\uC9C0\uB294
+    \uACBD\uAC74\uD55C \uD314\uCC0C\uB2E4!"
+  itemEffectDescription: "\uAE30\uB3C4 \uC2DC \uACBD\uAC74\uD568 \uD68C\uBCF5\uB7C9
+    5 \uC99D\uAC00"
+  itemImage: {fileID: 6331403572281768256, guid: b63fb59cedf3dd7468964a57accd5e85, type: 3}
+  itemGrade: 0
+  itemExpirationType: 2
+  usageType: 0
+  pietyBonus: 5

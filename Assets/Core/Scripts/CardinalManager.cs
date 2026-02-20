@@ -325,10 +325,7 @@ public class CardinalManager : MonoBehaviour
         Debug.Log("All cardinals have exited.");
         Time.timeScale = 1f;
 
-        if (InGameManager.Instance != null)
-        {
-            InGameManager.Instance.OnExitSequenceFinished();
-        }
+        
     }
     private void MoveCardinalToExit(Cardinal c, Vector3 exitPos)
     {
@@ -350,6 +347,14 @@ public class CardinalManager : MonoBehaviour
         yield return new WaitUntil(() => !sc.IsMoving);
 
         c.gameObject.SetActive(false);
+
+        if (c.CompareTag("Player"))
+        {
+            if (InGameManager.Instance != null)
+            {
+                InGameManager.Instance.OnExitSequenceFinished();
+            }
+        }
     }
 
     private void MoveCardinalToPoint(Cardinal c, Vector3 pos, Transform parent = null)
