@@ -10,7 +10,14 @@ public class InventoryManager : MonoBehaviour
     
     private Cardinal playerCardinal;
 
+    //프로퍼티
+    public Cardinal Player => playerCardinal;
+
+    //인벤토리
     private List<Item> inventoryItems = new List<Item>();
+
+    //버프 관리 리스트
+    private List<Item> activeBuffs = new List<Item>();
 
     void Awake()
     {
@@ -20,7 +27,6 @@ public class InventoryManager : MonoBehaviour
 
     void Start()
     {
-        // [추가] InGameManager의 시간 변화 이벤트 구독
         if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
         {
             InGameManager.Instance.Context.OnGameContextEvent += OnGameContextChanged;
@@ -29,17 +35,14 @@ public class InventoryManager : MonoBehaviour
 
     void OnDestroy()
     {
-        // [추가] 오브젝트 파괴 시 이벤트 구독 해제 (메모리 누수 방지)
         if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
         {
             InGameManager.Instance.Context.OnGameContextEvent -= OnGameContextChanged;
         }
     }
 
-    // [추가] 시간 변화 감지 함수
     private void OnGameContextChanged(GameContext.GameContextEvent eventType)
     {
-        // 새로운 콘클라베(시간대)가 시작될 때
         if (eventType == GameContext.GameContextEvent.ConclaveStart)
         {
             CheckAndRemoveExpiredItems();
@@ -48,32 +51,53 @@ public class InventoryManager : MonoBehaviour
 
     private void CheckAndRemoveExpiredItems()
     {
-        // 리스트를 순회하면서 삭제할 때 오류(Collection Modified)를 방지하기 위해
-        // 삭제할 아이템을 먼저 임시 리스트에 담습니다.
+        if (InGameManager.Instance == null) return;
+        bool isNewDay = InGameManager.Instance.GetCurrentConclave() == GameContext.Conclave.Dawn;
+
+        RemoveExpiredFromList(inventoryItems, isNewDay, true);
+
+        //버프 인벤토리
+        RemoveExpiredFromList(activeBuffs, isNewDay, false);
+    }
+
+    private void RemoveExpiredFromList(List<Item> targetList, bool isNewDay, bool shouldUpdateUI)
+    {
         List<Item> itemsToRemove = new List<Item>();
 
-        foreach (var item in inventoryItems)
+        foreach (var item in targetList)
         {
-            // 조건: 만료 타입이 'Conclave'인 경우
             if (item.itemExpirationType == ItemExpirationType.Conclave)
-            {
                 itemsToRemove.Add(item);
-            }
+            else if (item.itemExpirationType == ItemExpirationType.Day && isNewDay)
+                itemsToRemove.Add(item);
         }
 
-        // 임시 리스트에 담긴 아이템들을 실제로 제거
         foreach (var item in itemsToRemove)
         {
-            Debug.Log($" '{item.itemName}' 아이템이 만료되어 사라졌습니다.");
-            RemoveItem(item);
+            Debug.Log($"'{item.itemName}' 버프/아이템 만료됨 (유형: {item.itemExpirationType})");
+
+            item.OnRemove();
+            targetList.Remove(item);
+
+            if (playerCardinal != null)
+                playerCardinal.RemovePassiveItem(item); 
+        }
+
+        if (shouldUpdateUI)
+        {
+            inventoryUI.UpdateSlotUI(inventoryItems);
         }
     }
+
+
 
     public void SetPlayer(Cardinal player)
     {
         playerCardinal = player;
         
     }
+
+
 
     public bool AddItem(Item newItem)
     {
@@ -88,7 +112,10 @@ public class InventoryManager : MonoBehaviour
 
         if (playerCardinal != null)
         {
-            playerCardinal.AddPassiveItem(newItem);
+            if (newItem.usageType == ItemUsageType.Passive)
+            {
+                playerCardinal.AddPassiveItem(newItem);
+            }
         }
 
         inventoryUI.UpdateSlotUI(inventoryItems);
@@ -100,10 +127,26 @@ public class InventoryManager : MonoBehaviour
 
         if (inventoryItems.Contains(item))
         {
-            item.OnUse(); // 효과 발동
+            item.OnUse();
 
-            // 소모품이라면 제거
-            RemoveItem(item);
+            if (item.IsDurationBuff)
+            {
+                inventoryItems.Remove(item);
+                activeBuffs.Add(item);
+
+                if (playerCardinal != null)
+                {
+                    playerCardinal.AddPassiveItem(item);
+                }
+
+                inventoryUI.UpdateSlotUI(inventoryItems);
+
+                Debug.Log($"[시스템] '{item.itemName}'의 효과가 버프 목록에 등록되어 지속됩니다.");
+            }
+            else if (item.ConsumeOnUse)
+            {
+                RemoveItem(item);
+            }
         }
     }
 

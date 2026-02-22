@@ -1,0 +1,59 @@
+﻿using UnityEngine;
+
+[CreateAssetMenu(fileName = "I009", menuName = "Items/게르마늄 태양 팔찌")]
+public class I009 : Item
+{
+    [Header("게르마늄 태양 팔찌 설정")]
+    [Tooltip("기도 시 추가 경건함")]
+    [SerializeField] private float pietyBonus;
+
+    [Tooltip("기절 방어 시 회복할 체력")]
+    [SerializeField] private float reviveHpAmount;
+
+    // 1회 방어를 체크하기 위한 변수
+    private bool hasUsedRevive = false;
+
+    void Reset()
+    {
+        itemID = "I009";
+        itemName = "게르마늄 태양 팔찌";
+        itemDescription = "태양의 에너지 덕분인지 게르마늄의 원적외선 덕분인지, 몸이 홀가분해졌다!";
+        itemEffectDescription = "기도 시 경건함 회복량 5 증가, 체력 0일 시 기절 1회 방어 및 30으로 회복";
+
+        itemGrade = ItemGrade.Rare;
+        itemExpirationType = ItemExpirationType.Permanent;
+        usageType = ItemUsageType.Passive;
+
+        pietyBonus = 5f;
+        reviveHpAmount = 30f;
+    }
+
+    // 아이템을 처음 획득할 때 1회 방어 기회 활성화
+    public override void OnAcquire()
+    {
+        hasUsedRevive = false;
+    }
+
+    public override void OnPray(Cardinal owner)
+    {
+        float beforePiety = owner.Piety;
+        owner.ChangePiety(pietyBonus);
+        Debug.Log($"[아이템 효과] 게르마늄 팔찌: 경건함 {beforePiety} -> {owner.Piety}");
+    }
+
+    public override bool OnHpReachedZero(Cardinal owner)
+    {
+        if (!hasUsedRevive)
+        {
+            hasUsedRevive = true; 
+
+            owner.ChangeHp(reviveHpAmount); // 체력 30 회복
+
+            Debug.Log($"[아이템 효과 발동!!] 게르마늄의 힘으로 기절을 극복했습니다! 체력 회복: {reviveHpAmount}");
+
+            return true; 
+        }
+
+        return false; 
+    }
+}

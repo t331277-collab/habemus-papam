@@ -1,0 +1,33 @@
+﻿using UnityEngine;
+
+[CreateAssetMenu(fileName = "I004", menuName = "Items/금으로 만든 성배")]
+public class I004 : Item
+{
+    [Header("금으로 만든 성배 설정")]
+    [Tooltip("연설 시 추가로 획득할 정치력")]
+    [SerializeField] private int influenceDelta;
+
+    void Reset()
+    {
+        itemID = "I004";
+        itemGrade = ItemGrade.Common;
+        itemExpirationType = ItemExpirationType.Conclave; 
+        usageType = ItemUsageType.Passive;
+
+        itemName = "금으로 만든 성배";
+        itemDescription = "이 잔으로 미사를 드리자 추기경들의 눈길이 쏠린다. 럭셔리하니까!";
+        itemEffectDescription = "이번 콘클라베 동안 연설 시 정치력 회복량 10 증가";
+
+        influenceDelta = 10;
+    }
+
+    public override void OnSpeech(Cardinal owner)
+    {
+        float beforeInf = owner.Influence;
+
+        // 정치력 증가 적용
+        owner.ChangeInfluence(influenceDelta);
+
+        Debug.Log($"[아이템 효과 발동] 금성배 연설: 정치력 {beforeInf} -> {owner.Influence} (변화량: +{influenceDelta})");
+    }
+}

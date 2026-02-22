@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dd8c44d014d74fe47a06d3f046bb3fe5, type: 3}
+  m_Name: I010
+  m_EditorClassIdentifier: Assembly-CSharp::I010
+  itemID: I010
+  itemName: "\uAD50\uD669\uCCAD \uC8FC\uBCF4"
+  itemDescription: "\uAD50\uD68C\uC758 \uB3D9\uD5A5\uC744 \uD30C\uC545\uD574 \uAD50\uD669
+    \uC790\uB9AC\uB97C \uD55C \uBC1C \uBE60\uB974\uAC8C \uD53C\uD55C\uB2E4."
+  itemEffectDescription: "\uC5F0\uC124 \uC2DC \uC815\uCE58\uB825 \uD68C\uBCF5\uB7C9
+    \uCD5C\uC18C\uB85C \uACE0\uC815, \uB300\uC2E0 \uACBD\uAC74\uD568\uC744 5\uC529
+    \uD68C\uBCF5"
+  itemImage: {fileID: -8188013132830261255, guid: ea7b47fa0b184fc4f81a37378d6cfbf7, type: 3}
+  itemGrade: 0
+  itemExpirationType: 1
+  usageType: 0
+  pietyBonus: 5

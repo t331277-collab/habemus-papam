@@ -21,6 +21,9 @@ public abstract class Item : ScriptableObject
     [SerializeField] public ItemGrade itemGrade;
     [SerializeField] public ItemExpirationType itemExpirationType;
     [SerializeField] public ItemUsageType usageType;
+    public virtual bool IsDurationBuff => false;
+    public virtual bool ConsumeOnUse => true;
+
 
     // 공통
     public virtual void OnAcquire() { }
@@ -33,6 +36,9 @@ public abstract class Item : ScriptableObject
     public virtual void OnPray(Cardinal owner) { }
     public virtual void OnSpeech(Cardinal owner) { }
 
+    public virtual void OnReapply(Cardinal owner) { } //아이템 효과 다시 발동(패시브 아이템으 경우 콘클라베 다시 시작하면 다시 효과적용)
+
+    public virtual bool OnHpReachedZero(Cardinal owner) { return false; } // 부활 관련 함수
     public string GetColoredGrade()
     {
         string colorHex = "";
@@ -55,6 +61,12 @@ public abstract class Item : ScriptableObject
         }
 
         return $"<color={colorHex}>{gradeText}</color>";
+    }
+
+    //아이템에서 정치력을 고정으로 올릴때 참조하는 함수
+    public virtual float ModifySpeechInfluence(float originalDelta, GameBalance balance, bool isSuccess)
+    {
+        return originalDelta;
     }
 
 }
