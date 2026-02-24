@@ -29,5 +29,9 @@ public abstract class Event : ScriptableObject
 
     // 선택지 성공시 true, 실패시 false 반환
     public abstract bool OnChoiceOption1(Cardinal performer);
+<<<<<<< Updated upstream
     public abstract bool OnChocieOption2(Cardinal performer);
+=======
+    public abstract bool OnChoiceOption2(Cardinal performer);
+>>>>>>> Stashed changes
 }

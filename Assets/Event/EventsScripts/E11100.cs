@@ -27,7 +27,11 @@ public class E11100 : Event
         return true;
     }
 
+<<<<<<< Updated upstream
     public override bool OnChocieOption2(Cardinal performer)
+=======
+    public override bool OnChoiceOption2(Cardinal performer)
+>>>>>>> Stashed changes
     {
         return true;
     }
