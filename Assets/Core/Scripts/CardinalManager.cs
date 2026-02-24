@@ -474,6 +474,6 @@ public class CardinalManager : MonoBehaviour
 
     public void DrainAllCardinalHp(float delta)
     {
-        foreach (var c in cardinals) if (c.gameObject.activeSelf) c.ChangeHp(delta);
+        foreach (var c in cardinals) if (c.gameObject.activeSelf) c.ChangeHp(delta * c.HpDrainMultiplier);
     }
 }
