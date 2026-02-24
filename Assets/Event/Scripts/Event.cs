@@ -6,9 +6,13 @@ public abstract class Event : ScriptableObject
     [SerializeField] public string eventName;
     [TextArea] public string eventDescription;
     [SerializeField] public Sprite itemImage;
+    [SerializeField] public int maxAppear;
 
     [SerializeField] public float eventWeightBase;
     [SerializeField] public float eventWeightMultiplier;
+
+    [SerializeField] public Event[] preEvents;
+    [SerializeField] public Event[] conflictEvents;
 
     [SerializeField] public string option1;
     [SerializeField] public float option1Chance;

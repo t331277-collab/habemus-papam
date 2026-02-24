@@ -8,6 +8,7 @@ public class E11100 : Event
     {
         eventID = "E11100";
         eventName = "큰일났다!";
+        maxAppear = 1;
 
         eventWeightBase = 0f;
         eventWeightMultiplier = 0f;
