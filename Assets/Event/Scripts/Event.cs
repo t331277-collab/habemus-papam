@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class Event : ScriptableObject
@@ -11,8 +12,8 @@ public abstract class Event : ScriptableObject
     [SerializeField] public float eventWeightBase;
     [SerializeField] public float eventWeightMultiplier;
 
-    [SerializeField] public Event[] preEvents;
-    [SerializeField] public Event[] conflictEvents;
+    [SerializeField] public List<Event> preEvents;
+    [SerializeField] public List<Event> conflictEvents;
 
     [SerializeField] public string option1;
     [SerializeField] public float option1Chance;
