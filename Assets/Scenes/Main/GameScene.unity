@@ -11173,6 +11173,7 @@ GameObject:
   - component: {fileID: 1034420643}
   - component: {fileID: 1034420644}
   - component: {fileID: 1034420645}
+  - component: {fileID: 1034420646}
   m_Layer: 0
   m_Name: InGameManager
   m_TagString: Untagged
@@ -11253,6 +11254,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   maxSlots: 3
   inventoryUI: {fileID: 1704418380}
+--- !u!114 &1034420646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1034420642}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e170c91330b454b6898b2fdad2cbe960, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EventManager
+  allEvents:
+  - {fileID: 11400000, guid: 4eb935b247fdd49ce9b1b936f2ca6f28, type: 2}
 --- !u!1 &1036295153
 GameObject:
   m_ObjectHideFlags: 0

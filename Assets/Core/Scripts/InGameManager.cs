@@ -74,6 +74,7 @@ public class InGameManager : MonoBehaviour
 
     [SerializeField] private GameBalance balance;
     private GameContext gameContext;
+    [SerializeField] private EventManager eventManager;
 
     [Header("UI 연결")]
     [SerializeField] private Button startButton;
@@ -104,6 +105,7 @@ public class InGameManager : MonoBehaviour
     public GameBalance Balance => balance;
     public GameContext Context => gameContext;
     public bool IsTimeRunning => isTimeRunning;
+    public EventManager EventManager => eventManager;
 
     void Awake()
     {
@@ -119,6 +121,8 @@ public class InGameManager : MonoBehaviour
         // Awake 함수에 들어가야할 로직은 이 아래에
         gameContext = new GameContext();
         gameContext.OnGameContextEvent += HandleGameContextEvent;
+
+        eventManager = GetComponent<EventManager>();
     }
 
     void Start()

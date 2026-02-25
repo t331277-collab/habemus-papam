@@ -7,7 +7,7 @@ public class Cardinal : MonoBehaviour
     [Header("추기경 기본 설정")]
     [Tooltip("추기경 기본 체력")]
     [SerializeField] private float hp;
-    [SerializeField] private float hpDrainMultiplier = 1f;
+    [SerializeField] public float hpDrainMultiplier = 1f;
 
     [Tooltip("추기경 기본 정치력")]
     [SerializeField] private float influence;
