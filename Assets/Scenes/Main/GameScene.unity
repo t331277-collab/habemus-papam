@@ -11037,7 +11037,6 @@ GameObject:
   - component: {fileID: 1034420643}
   - component: {fileID: 1034420644}
   - component: {fileID: 1034420645}
-  - component: {fileID: 1034420646}
   m_Layer: 0
   m_Name: InGameManager
   m_TagString: Untagged
@@ -11118,54 +11117,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   maxSlots: 3
   inventoryUI: {fileID: 1704418380}
---- !u!114 &1034420646
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1034420642}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7aafae76463340248dde6196ff47c98, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::PlotManager
-  plotUI: {fileID: 8152387934090701831}
-  plots:
-  - {fileID: 11400000, guid: 4fec61de60283dd4bbbab1081800f450, type: 2}
-  - {fileID: 11400000, guid: 71b02cf8d9c58b74d9cdbefe5a9ae501, type: 2}
-  - {fileID: 11400000, guid: f1dbe388d1554f849bdc7d6ed4ffc54b, type: 2}
-  - {fileID: 11400000, guid: 2041af932f7426f4fb7bb814dbb0809f, type: 2}
-  - {fileID: 11400000, guid: 42f8f49973752d443ab70593b6b813ba, type: 2}
-  - {fileID: 11400000, guid: 7f79f202240952b429e62ae8d9c5ba03, type: 2}
-  - {fileID: 11400000, guid: 387581c890d63324e9212ec103885669, type: 2}
-  - {fileID: 11400000, guid: 7d6937df0b3c9744b9f8b9da42586775, type: 2}
-  - {fileID: 11400000, guid: 79ec8a12159370342b129c7894ce8a4b, type: 2}
-  - {fileID: 11400000, guid: 3b82ec75506efb741bdf1483b88139b4, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 98d868f455f53cb45b88f4c3a7b80032, type: 2}
-  - {fileID: 11400000, guid: 71275ecaddc0e53469f3d1cd518efdf1, type: 2}
-  - {fileID: 11400000, guid: bdbdd7ed687906b45a1dff1cee08ab36, type: 2}
-  - {fileID: 11400000, guid: 1420a9495bc360b449f335db4434ac95, type: 2}
-  - {fileID: 11400000, guid: 71abdb1e35d4b7641a204359e22bea2b, type: 2}
-  - {fileID: 11400000, guid: aece87da0ba09ec47b77a6d0c53e5724, type: 2}
-  - {fileID: 11400000, guid: e28bb15f741fbca449cec804f224be66, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: b1f8ce0a49c00df409a22e73630baf7a, type: 2}
-  - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
-  - {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: a21770bdc89e5ee4e83d8390b6eb16e6, type: 2}
-  - {fileID: 11400000, guid: 031757fc79980cb44a122e6de9ea522b, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 4311dc8af4aab7148b6fc813d9523ace, type: 2}
 --- !u!1 &1036295153
 GameObject:
   m_ObjectHideFlags: 0
