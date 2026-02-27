@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -1170,7 +1170,15 @@ public class StateController : MonoBehaviour
         {
             Debug.Log($"[Scheme] 모략가 {name}가 플레이어를 감지했습니다!");
 
-            // Plot() 함수 실행 
+            // 2. 나(NPC)와 상대방(Player)의 Cardinal 컴포넌트를 각각 가져옵니다.
+            Cardinal npc = GetComponent<Cardinal>();
+            Cardinal player = other.GetComponent<Cardinal>();
+
+            // 3. 둘 다 정상적으로 존재할 때만 실행
+            if (player != null && npc != null)
+            {
+                player.Plot();
+            }
         }
     }
 

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c57a0e91f31f2704bbf7a18a409a02ac, type: 3}
+  m_Name: P013
+  m_EditorClassIdentifier: Assembly-CSharp::P013
+  plotID: P013
+  plotName: "\uC2EC\uB3C4 \uC788\uB294 \uB17C\uC758"
+  plotDescription: "\uD30C\uC778\uC560\uD50C \uD53C\uC790\uB294 \uC774\uB2E8\uC778\uAC00?"
+  plotEffect: "\uC815\uCE58\uB825 15 \uC99D\uAC00"
+  plotImage: {fileID: 0}
+  plotGrade: 1
+  plotWeightBase: 10
+  plotWeightMultiplier: 0.15
+  minInfluence: 0
+  pietyCost: 15
+  influenceDelta: 15

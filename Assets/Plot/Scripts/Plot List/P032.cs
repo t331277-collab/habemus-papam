@@ -1,0 +1,49 @@
+﻿using UnityEditor.Search;
+using UnityEngine;
+using static UnityEngine.GraphicsBuffer;
+
+[CreateAssetMenu(fileName = "P032", menuName = "Plot/굴뚝 조작(미구현)")]
+
+public class P032 : Plot
+{
+    [Header("해당 공작 설정")]
+    [SerializeField] private int minInfluence;
+    [SerializeField] private int pietyCost;
+
+    public override int cost => pietyCost;
+
+    void Reset()
+    {
+        // 설정 기본값
+        plotID = "P032";
+        plotGrade = PlotGrade.Legendary;
+        
+        // 텍스트 기본값
+        plotName = "굴뚝 조작(미구현)";
+        plotDescription = "금단의 비기";
+
+        // 수치 기본값
+        plotWeightBase = 15;
+        plotWeightMultiplier = 0f;
+
+        minInfluence = 70;
+        pietyCost = 70;
+    }
+
+    public override bool CanExecute(Cardinal performer)
+    {
+        return performer.Hp <= minInfluence;
+    }
+
+    public override void Execute(Cardinal performer)
+    {
+        if (!CanExecute(performer)) return;
+
+        performer.ChangePiety(-pietyCost);
+
+        /*
+         * '연막탄' 획득 로직
+         */
+    }
+
+}

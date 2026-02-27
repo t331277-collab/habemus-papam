@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public enum PlotGrade { Common, Rare, Legendary }
 
@@ -7,10 +7,13 @@ public abstract class Plot : ScriptableObject
     [SerializeField] public string plotID;
     [SerializeField] public string plotName;
     [TextArea] public string plotDescription;
+    [TextArea] public string plotEffect;
     [SerializeField] public Sprite plotImage;
     [SerializeField] public PlotGrade plotGrade;
     [SerializeField] public float plotWeightBase;
     [SerializeField] public float plotWeightMultiplier;
+
+    public virtual int cost => 0;
 
     public float GetPlotWeight()
     {

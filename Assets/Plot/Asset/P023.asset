@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e96f9576ccc8b447b67896083119707, type: 3}
+  m_Name: P023
+  m_EditorClassIdentifier: Assembly-CSharp::P023
+  plotID: P023
+  plotName: "\uB178\uBE14\uB808\uC2A4 \uC624\uBE14\uB9AC\uC8FC"
+  plotDescription: "\uD070 \uD798\uC5D0\uB294 \uD070 \uCC45\uC784\uC774 \uB530\uB978\uB2E4"
+  plotEffect: "\uAC00\uC7A5 \uC815\uCE58\uB825\uC774 \uB192\uC740 \uD6C4\uBCF4 \uACBD\uAC74\uD568
+    30 \uAC10\uC18C\n\uAC00\uC7A5 \uC815\uCE58\uB825\uC774 \uB0AE\uC740 \uD6C4\uBCF4
+    \uACBD\uAC74\uD568 30 \uC99D\uAC00"
+  plotImage: {fileID: 0}
+  plotGrade: 1
+  plotWeightBase: 15
+  plotWeightMultiplier: 0
+  minInfluence: 0
+  pietyCost: 0
+  pietyIncrease: 30
+  pietyDecrease: -30

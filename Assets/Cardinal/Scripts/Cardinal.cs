@@ -252,5 +252,8 @@ public class Cardinal : MonoBehaviour
         }
     }
 
-    public void Plot() { }
+    public void Plot()
+    {
+        PlotManager.Instance.InitializePlotSession(this);
+    }
 }
