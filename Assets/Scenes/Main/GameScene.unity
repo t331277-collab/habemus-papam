@@ -11146,7 +11146,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e7aafae76463340248dde6196ff47c98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlotManager
-  plotUI: {fileID: 0}
+  plotUI: {fileID: 8152387934090701831}
   plots:
   - {fileID: 11400000, guid: 4fec61de60283dd4bbbab1081800f450, type: 2}
   - {fileID: 11400000, guid: 71b02cf8d9c58b74d9cdbefe5a9ae501, type: 2}

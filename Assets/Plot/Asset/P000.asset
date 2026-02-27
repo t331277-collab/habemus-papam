@@ -16,9 +16,10 @@ MonoBehaviour:
   plotName: "\uB354\uBBF8 \uACF5\uC791"
   plotDescription: "\uBBF8\uAD6C\uD604 \uACF5\uC791 \uB55C\uBE75\uC6A9 \uB354\uBBF8
     \uB370\uC774\uD130"
+  plotEffect: 
   plotImage: {fileID: 0}
   plotGrade: 2
   plotWeightBase: 15
   plotWeightMultiplier: 0
-  minInfluence: 101
+  minInfluence: 0
   pietyCost: 60
