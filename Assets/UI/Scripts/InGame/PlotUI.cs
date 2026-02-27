@@ -117,6 +117,8 @@ public class PlotUI : MonoBehaviour
         pm.AvailPlotSets[0].plots[index].Execute(performer);
         pm.AvailPlotSets[0].use(index);
 
+        Debug.Log($"{index}번째 공작 사용");
+
         if (pm.AvailPlotSets[0].isAllUsed())
         {
             pm.IfUseAllPlot();
