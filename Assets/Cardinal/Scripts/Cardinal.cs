@@ -7,6 +7,7 @@ public class Cardinal : MonoBehaviour
     [Header("추기경 기본 설정")]
     [Tooltip("추기경 기본 체력")]
     [SerializeField] private float hp;
+    [SerializeField] public float hpDrainMultiplier = 1f;
 
     [Tooltip("추기경 기본 정치력")]
     [SerializeField] private float influence;
@@ -24,6 +25,7 @@ public class Cardinal : MonoBehaviour
 
     // 외부(StateController)에서 접근을 위한 프로퍼티
     public float Hp => hp;
+    public float HpDrainMultiplier => hpDrainMultiplier;
     public float Influence => influence;
     public float Piety => piety;
     public float MoveSpeed => moveSpeed; 
