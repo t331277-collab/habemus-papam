@@ -197,6 +197,11 @@ public class InGameManager : MonoBehaviour
         {
             startButton.interactable = true;
             startButton.gameObject.SetActive(true);
+
+            if (ElectionManager.Instance != null)
+            {
+                ElectionManager.Instance.OnConclaveEnded();
+            }
         }
     }
 
@@ -233,6 +238,8 @@ public class InGameManager : MonoBehaviour
                 // 추기경 퇴장 시작 명령
                 if (CardinalManager.Instance != null)
                     CardinalManager.Instance.StopConClave();
+                //판정 시작
+                
                 break;
         }
     }
@@ -242,25 +249,20 @@ public class InGameManager : MonoBehaviour
         if (spawnPoints == null || spawnPoints.Count == 0) return;
         if (commonItemPrefabs.Count == 0 && rareItemPrefabs.Count == 0) return;
 
-        // 1. 아예 스폰이 안 될 확률 체크
         if (UnityEngine.Random.Range(0f, 100f) > spawnChance) return;
 
-        // 2. 스폰 개수 결정 (1개 or 2개)
         int spawnCount = (UnityEngine.Random.Range(0f, 100f) <= spawnTwoItemsChance) ? 2 : 1;
 
-        // 3. 중복 위치 스폰 방지를 위해 스폰 위치 리스트 복사
         List<Transform> availablePoints = new List<Transform>(spawnPoints);
 
         for (int i = 0; i < spawnCount; i++)
         {
             if (availablePoints.Count == 0) break;
 
-            // 랜덤 위치 지정 후 리스트에서 제거 (같은 자리 중복 방지)
             int pointIndex = UnityEngine.Random.Range(0, availablePoints.Count);
             Transform spawnPoint = availablePoints[pointIndex];
             availablePoints.RemoveAt(pointIndex);
 
-            // 프리팹 가져와서 스폰
             GameObject prefabToSpawn = GetRandomItemPrefab();
             if (prefabToSpawn != null)
             {
@@ -272,7 +274,6 @@ public class InGameManager : MonoBehaviour
 
     private GameObject GetRandomItemPrefab()
     {
-        // 고급(Rare)이 뜰 확률 체크
         bool isRare = (UnityEngine.Random.Range(0f, 100f) <= rareItemChance);
 
         if (isRare && rareItemPrefabs.Count > 0)
@@ -291,7 +292,6 @@ public class InGameManager : MonoBehaviour
     {
         foreach (var item in spawnedFieldItems)
         {
-            // 플레이어가 이미 먹어서 Destroy된 아이템은 null이 되므로 체크
             if (item != null)
             {
                 Destroy(item);
