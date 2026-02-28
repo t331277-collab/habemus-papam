@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -30,14 +30,40 @@ public class PlotSet
 
 public class PlotManager : MonoBehaviour
 {
+    public static PlotManager Instance { get; private set; }
+
+    [SerializeField] private PlotUI plotUI;
+
     [Header("공작 SO 리스트")]
     [SerializeField] private List<Plot> plots;
 
+    private PlotSet[] availPlotSets = new PlotSet[2];
+
     private List<Plot> usedPlots;
+
+    public PlotSet[] AvailPlotSets => availPlotSets;
 
     void Awake()
     {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         usedPlots = new List<Plot>();
+    }
+    void Start()
+    {
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent += OnGameContextChanged;
+        }
+    }
+
+    void OnDestroy()
+    {
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent -= OnGameContextChanged;
+        }
     }
 
     public PlotSet GeneratePlotSet()
@@ -94,5 +120,26 @@ public class PlotManager : MonoBehaviour
         }
 
         return candidates[0];
+    }
+
+    // 콘클라베 시작 시 새로운 공작 Set 생성
+    private void OnGameContextChanged(GameContext.GameContextEvent eventType)
+    {
+        if (eventType == GameContext.GameContextEvent.ConclaveStart)
+        {
+            availPlotSets[0] = GeneratePlotSet();
+            availPlotSets[1] = GeneratePlotSet();
+        }
+    }
+
+    public void InitializePlotSession(Cardinal performer)
+    {
+        plotUI.ShowPlotUI(performer);
+    }
+
+    public void IfUseAllPlot()
+    {
+        availPlotSets[0] = null;
+        availPlotSets[0] = GeneratePlotSet();
     }
 }

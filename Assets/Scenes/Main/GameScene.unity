@@ -4458,142 +4458,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 259882778}
   m_CullTransparentMesh: 1
---- !u!1 &264558110
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 264558111}
-  - component: {fileID: 264558113}
-  - component: {fileID: 264558112}
-  m_Layer: 5
-  m_Name: Text (TMP)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &264558111
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 264558110}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &264558112
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 264558110}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_text: "\uACF5\uC791 \uBE44\uC6A9"
-  m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 522a6d3a3cede4c40bfa6a8788255d49, type: 2}
-  m_sharedMaterial: {fileID: 3292511129695235805, guid: 522a6d3a3cede4c40bfa6a8788255d49, type: 2}
-  m_fontSharedMaterials: []
-  m_fontMaterial: {fileID: 0}
-  m_fontMaterials: []
-  m_fontColor32:
-    serializedVersion: 2
-    rgba: 4281479730
-  m_fontColor: {r: 0.19607843, g: 0.19607843, b: 0.19607843, a: 1}
-  m_enableVertexGradient: 0
-  m_colorMode: 3
-  m_fontColorGradient:
-    topLeft: {r: 1, g: 1, b: 1, a: 1}
-    topRight: {r: 1, g: 1, b: 1, a: 1}
-    bottomLeft: {r: 1, g: 1, b: 1, a: 1}
-    bottomRight: {r: 1, g: 1, b: 1, a: 1}
-  m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
-  m_tintAllSprites: 0
-  m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: -1183493901
-  m_overrideHtmlColors: 0
-  m_faceColor:
-    serializedVersion: 2
-    rgba: 4294967295
-  m_fontSize: 18
-  m_fontSizeBase: 18
-  m_fontWeight: 400
-  m_enableAutoSizing: 0
-  m_fontSizeMin: 18
-  m_fontSizeMax: 72
-  m_fontStyle: 0
-  m_HorizontalAlignment: 2
-  m_VerticalAlignment: 512
-  m_textAlignment: 65535
-  m_characterSpacing: 0
-  m_wordSpacing: 0
-  m_lineSpacing: 0
-  m_lineSpacingMax: 0
-  m_paragraphSpacing: 0
-  m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 1
-  m_wordWrappingRatios: 0.4
-  m_overflowMode: 0
-  m_linkedTextComponent: {fileID: 0}
-  parentLinkedComponent: {fileID: 0}
-  m_enableKerning: 0
-  m_ActiveFontFeatures: 6e72656b
-  m_enableExtraPadding: 0
-  checkPaddingRequired: 0
-  m_isRichText: 1
-  m_EmojiFallbackSupport: 1
-  m_parseCtrlCharacters: 1
-  m_isOrthographic: 1
-  m_isCullingEnabled: 0
-  m_horizontalMapping: 0
-  m_verticalMapping: 0
-  m_uvLineOffset: 0
-  m_geometrySortingOrder: 0
-  m_IsTextObjectScaleStatic: 0
-  m_VertexBufferAutoSizeReduction: 0
-  m_useMaxVisibleDescender: 1
-  m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: 0, w: 0}
-  m_isUsingLegacyAnimationComponent: 0
-  m_isVolumetricText: 0
-  m_hasFontAssetChanged: 0
-  m_baseMaterial: {fileID: 0}
-  m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!222 &264558113
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 264558110}
-  m_CullTransparentMesh: 1
 --- !u!1 &274630091
 GameObject:
   m_ObjectHideFlags: 0
@@ -5328,7 +5192,7 @@ MonoBehaviour:
   Stats: {fileID: 1118991176}
   Event: {fileID: 937297531}
   Item: {fileID: 1776774286}
-  Scheme: {fileID: 0}
+  Plot: {fileID: 0}
   Hotkeys: {fileID: 503638746}
 --- !u!1 &341831180
 GameObject:
@@ -14891,23 +14755,45 @@ MonoBehaviour:
   m_GameObject: {fileID: 1034420642}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3348521afb9c8a04f8a21a1748effed9, type: 3}
+  m_Script: {fileID: 11500000, guid: e7aafae76463340248dde6196ff47c98, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ElectionManager
-  statsUI: {fileID: 1118991176}
-  judgmentStartPanel: {fileID: 1219930288}
-  openJudgeButton: {fileID: 1715233721}
-  judgmentPanel: {fileID: 1809161059}
-  startJudgmentButton: {fileID: 140532843}
-  gameOverPanel: {fileID: 1891464583}
-  gameClearPanel: {fileID: 1381380102}
-  electionFailedPanel: {fileID: 1150433301}
-  closeFailedPanelButton: {fileID: 718000542}
-  progressDivisor: 100
-  progressExponent: 1.5
-  scoreDivisor: 2
-  finalWeight: 0.7
-  baseProbability: 0
+  m_EditorClassIdentifier: Assembly-CSharp::PlotManager
+  plotUI: {fileID: 8152387934090701831}
+  plots:
+  - {fileID: 11400000, guid: 4fec61de60283dd4bbbab1081800f450, type: 2}
+  - {fileID: 11400000, guid: 71b02cf8d9c58b74d9cdbefe5a9ae501, type: 2}
+  - {fileID: 11400000, guid: f1dbe388d1554f849bdc7d6ed4ffc54b, type: 2}
+  - {fileID: 11400000, guid: 2041af932f7426f4fb7bb814dbb0809f, type: 2}
+  - {fileID: 11400000, guid: 42f8f49973752d443ab70593b6b813ba, type: 2}
+  - {fileID: 11400000, guid: 7f79f202240952b429e62ae8d9c5ba03, type: 2}
+  - {fileID: 11400000, guid: 387581c890d63324e9212ec103885669, type: 2}
+  - {fileID: 11400000, guid: 7d6937df0b3c9744b9f8b9da42586775, type: 2}
+  - {fileID: 11400000, guid: 79ec8a12159370342b129c7894ce8a4b, type: 2}
+  - {fileID: 11400000, guid: 3b82ec75506efb741bdf1483b88139b4, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 98d868f455f53cb45b88f4c3a7b80032, type: 2}
+  - {fileID: 11400000, guid: 71275ecaddc0e53469f3d1cd518efdf1, type: 2}
+  - {fileID: 11400000, guid: bdbdd7ed687906b45a1dff1cee08ab36, type: 2}
+  - {fileID: 11400000, guid: 1420a9495bc360b449f335db4434ac95, type: 2}
+  - {fileID: 11400000, guid: 71abdb1e35d4b7641a204359e22bea2b, type: 2}
+  - {fileID: 11400000, guid: aece87da0ba09ec47b77a6d0c53e5724, type: 2}
+  - {fileID: 11400000, guid: e28bb15f741fbca449cec804f224be66, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: b1f8ce0a49c00df409a22e73630baf7a, type: 2}
+  - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
+  - {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: a21770bdc89e5ee4e83d8390b6eb16e6, type: 2}
+  - {fileID: 11400000, guid: 031757fc79980cb44a122e6de9ea522b, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 4311dc8af4aab7148b6fc813d9523ace, type: 2}
 --- !u!1 &1036295153
 GameObject:
   m_ObjectHideFlags: 0
@@ -28818,7 +28704,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -29714,7 +29600,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\uD6A8\uACFC\uB97C \uB098\uD0C0\uB0B4\uB294 \uD14D\uC2A4\uD2B8"
+  m_text: "\uAC00\uC7A5 \uC815\uCE58\uB825\uC774 \uB192\uC740 \uC0C1\uB300 \uD6C4\uBCF4
+    \uACBD\uAC74\uD568 <sprite name=\"Piety\"> 30 \uC99D\uAC00"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 522a6d3a3cede4c40bfa6a8788255d49, type: 2}
   m_sharedMaterial: {fileID: 3292511129695235805, guid: 522a6d3a3cede4c40bfa6a8788255d49, type: 2}
@@ -29733,7 +29620,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -30340,7 +30227,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -30802,7 +30689,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -30897,7 +30784,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 178979472018626943}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8152387934090701831}
+        m_TargetAssemblyTypeName: PlotUI, Assembly-CSharp
+        m_MethodName: OnSelectPlot
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 1
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &4737100192772828936
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -31658,7 +31557,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2961407155087268258}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8152387934090701831}
+        m_TargetAssemblyTypeName: PlotUI, Assembly-CSharp
+        m_MethodName: OnSelectPlot
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!224 &5990749260252684272
 RectTransform:
   m_ObjectHideFlags: 0
@@ -32077,7 +31988,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 7929544426798244870}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 8152387934090701831}
+        m_TargetAssemblyTypeName: PlotUI, Assembly-CSharp
+        m_MethodName: OnSelectPlot
+        m_Mode: 3
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 2
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!222 &6970846153850254375
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -32234,12 +32157,12 @@ GameObject:
   - component: {fileID: 6818418464125067207}
   - component: {fileID: 8152387934090701831}
   m_Layer: 5
-  m_Name: SchemeUI
+  m_Name: PlotUI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &7277357760402722303
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -32485,7 +32408,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -32866,13 +32789,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SchemeUI
   plotSelectUI: {fileID: 7261365404289603822}
   plotPanels:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  plotButtons:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 1222115183564907288}
+  - {fileID: 2749972060640840555}
+  - {fileID: 4032692186229339854}
+  plotUseButtons:
+  - {fileID: 5948076319864970839}
+  - {fileID: 4720656999732587064}
+  - {fileID: 6967310404797255386}
+  plotGradeList:
+  - {fileID: 5454774714029805826}
+  - {fileID: 7976503747319205804}
+  - {fileID: 8281685153795245632}
+  plotNameList:
+  - {fileID: 374563755281618850}
+  - {fileID: 8376713305924059784}
+  - {fileID: 5124071966834877208}
+  plotDescList:
+  - {fileID: 144364061245242663}
+  - {fileID: 8430877978206297329}
+  - {fileID: 3301344353239198925}
+  plotEffectList:
+  - {fileID: 1675189937472069261}
+  - {fileID: 7694611818735176735}
+  - {fileID: 4505269470862173109}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -33121,7 +33060,7 @@ MonoBehaviour:
     bottomLeft: {r: 1, g: 1, b: 1, a: 1}
     bottomRight: {r: 1, g: 1, b: 1, a: 1}
   m_fontColorGradientPreset: {fileID: 0}
-  m_spriteAsset: {fileID: 0}
+  m_spriteAsset: {fileID: 11400000, guid: c1bdda5bc729aab4aaeaf137ca55b530, type: 2}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
   m_TextStyleHashCode: -1183493901
@@ -33510,4 +33449,3 @@ SceneRoots:
   - {fileID: 1506415304}
   - {fileID: 808176699}
   - {fileID: 1494573537}
-  - {fileID: 264558111}

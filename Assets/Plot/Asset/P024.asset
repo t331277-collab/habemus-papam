@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a0d40b8e796b97e4e8eea1b8dc375abe, type: 3}
+  m_Name: P024
+  m_EditorClassIdentifier: Assembly-CSharp::P024
+  plotID: P024
+  plotName: "\uAC00\uC9C0\uCE58\uAE30"
+  plotDescription: "\uC904\uAC74 \uC918"
+  plotEffect: "\uCCB4\uB825, \uC815\uCE58\uB825, \uACBD\uAC74\uD568 \uC911 \uAC00\uC7A5
+    \uC801\uC740 \uC218\uCE58 \uC808\uBC18\uC73C\uB85C \uAC10\uC18C\n\uB098\uBA38\uC9C0
+    15 \uC99D\uAC00"
+  plotImage: {fileID: 0}
+  plotGrade: 1
+  plotWeightBase: 15
+  plotWeightMultiplier: 0
+  minHp: 40
+  pietyCost: 0
+  statsDelta: 15
