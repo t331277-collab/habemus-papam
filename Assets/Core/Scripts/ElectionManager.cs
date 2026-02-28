@@ -1,5 +1,7 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class ElectionManager : MonoBehaviour
 {
@@ -13,6 +15,8 @@ public class ElectionManager : MonoBehaviour
     [SerializeField] private Button openJudgeButton;
     [Tooltip("판정을 진행할 팝업 UI 패널")]
     [SerializeField] private GameObject judgmentPanel;
+    [Tooltip("판정 팝업 내 당선 확률을 표시할 TMP 텍스트")]
+    [SerializeField] private TextMeshProUGUI probabilityText;
     [Tooltip("판정 팝업 안에 있는 '판정 시작' 버튼")]
     [SerializeField] private Button startJudgmentButton;
     [Tooltip("플레이어 당선 시 (게임 오버)")]
@@ -41,7 +45,11 @@ public class ElectionManager : MonoBehaviour
     [Tooltip("기본으로 깔고 가는 최소 당선 확률 (기본: 0)")]
     [SerializeField] private float baseProbability = 0f;
 
+    [Tooltip("숫자가 빙그르르 지속될 시간 (초)")]
+    [SerializeField] private float jackpotDuration = 2.5f;
+
     private Cardinal currentWinnerCandidate;
+    private Coroutine jackpotCoroutine;
 
     void Awake()
     {
@@ -109,9 +117,43 @@ public class ElectionManager : MonoBehaviour
 
         if (currentWinnerCandidate != null)
         {
-            Debug.Log($"[판정 대기] 유력 후보: {currentWinnerCandidate.name} (합산 점수: {maxCombinedStat})");
+            float winProbability = CalculateWinProbability(currentWinnerCandidate);
+
             if (judgmentPanel != null) judgmentPanel.SetActive(true);
+
+            if (jackpotCoroutine != null) StopCoroutine(jackpotCoroutine);
+            jackpotCoroutine = StartCoroutine(JackpotRoutine(winProbability));
         }
+    }
+
+    private IEnumerator JackpotRoutine(float finalProb)
+    {
+        float elapsed = 0f;
+
+        if (startJudgmentButton != null) startJudgmentButton.interactable = false;
+
+        while (elapsed < jackpotDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float randomTick = Random.Range(0f, 100f);
+
+            if (probabilityText != null)
+            {
+                probabilityText.text = $" <color=black>{randomTick:F1}%</color>";
+            }
+
+            yield return null;
+        }
+
+        if (probabilityText != null)
+        {
+            probabilityText.text = $" <color=black>{finalProb:F1}%</color>";
+        }
+
+        if (startJudgmentButton != null) startJudgmentButton.interactable = true;
+
+        jackpotCoroutine = null;
     }
 
     // 최종 확률 판정 및 게임 결과 도출
@@ -131,8 +173,6 @@ public class ElectionManager : MonoBehaviour
 
         float diceRoll = UnityEngine.Random.Range(0f, 100f);
         bool isElected = diceRoll <= winProbability;
-
-        Debug.Log($"[판정 결과] 확률: {winProbability:F2}% | 주사위: {diceRoll:F2}");
 
         if (isElected)
         {
@@ -163,5 +203,18 @@ public class ElectionManager : MonoBehaviour
         {
             electionFailedPanel.SetActive(false);
         }
+    }
+
+    private float CalculateWinProbability(Cardinal candidate)
+    {
+        float progress = InGameManager.Instance.GetProgress();
+        float candidateScore = candidate.Piety + candidate.Influence;
+
+        float prob = Mathf.Pow(progress / progressDivisor, progressExponent)
+                   * (candidateScore / scoreDivisor)
+                   * finalWeight
+                   + baseProbability;
+
+        return Mathf.Clamp(prob, 0f, 100f);
     }
 }
