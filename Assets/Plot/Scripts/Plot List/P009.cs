@@ -1,4 +1,4 @@
-﻿using UnityEditor.Search;
+﻿
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "P009", menuName = "Plot/태양의 눈")]

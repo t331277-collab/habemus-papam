@@ -1,5 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "P021", menuName = "Plot/무릎 꿇기(미구현)")]
 

@@ -1,5 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections;
 
 [CreateAssetMenu(fileName = "P022", menuName = "Plot/꼬리 자르기")]

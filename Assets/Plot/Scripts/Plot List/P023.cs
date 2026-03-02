@@ -1,5 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "P023", menuName = "Plot/노블레스 오블리주")]
 

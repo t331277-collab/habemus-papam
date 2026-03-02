@@ -1,5 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "P032", menuName = "Plot/굴뚝 조작(미구현)")]

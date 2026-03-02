@@ -1,5 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
+﻿using UnityEngine;
 
 [CreateAssetMenu(fileName = "P026", menuName = "Plot/주사위 굴리기(미구현)")]
 

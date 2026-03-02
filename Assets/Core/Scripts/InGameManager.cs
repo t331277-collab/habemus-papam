@@ -311,10 +311,10 @@ public class InGameManager : MonoBehaviour
         CardinalManager cm = CardinalManager.Instance;
 
         int dayFactor = (gameContext.CurrentDay - 1) * 10;
-        int hpFactor = Mathf.RoundToInt(Mathf.Clamp((400 - cm.GetCardinalHpSum()) * 0.025f, 0, 10));
-        int polFactor = Mathf.RoundToInt(Mathf.Clamp(cm.GetCardinalPolSum() * 0.075f, 0, 30));
+        int hpFactor = Mathf.RoundToInt(Mathf.Clamp((400 - cm.GetCardinalHpSum()) * 0.05f, 0, 10));
+        int polFactor = Mathf.RoundToInt(Mathf.Clamp(cm.GetCardinalPolSum() * 0.2f, 0, 30));
 
-        return dayFactor + hpFactor + polFactor;
+        return Mathf.Clamp((dayFactor + hpFactor + polFactor), 0 , 100);
     }
 
     public int GetCurrentDay()

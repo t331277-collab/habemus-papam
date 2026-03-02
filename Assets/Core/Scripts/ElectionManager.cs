@@ -166,8 +166,8 @@ public class ElectionManager : MonoBehaviour
         float candidateScore = currentWinnerCandidate.Piety + currentWinnerCandidate.Influence;
 
         // 공식: (진행도 / 진행도기준값)^지수 * (후보점수 / 점수나누기값) * 가중치 + 기본확률
-        float winProbability = Mathf.Pow(progress / progressDivisor, progressExponent)
-                               * (candidateScore / scoreDivisor)
+        float winProbability = progress * 0.3f
+                               * (candidateScore * scoreDivisor)
                                * finalWeight
                                + baseProbability;
 

@@ -1,6 +1,4 @@
-﻿using UnityEditor.Search;
-using UnityEngine;
-
+﻿using UnityEngine;
 [CreateAssetMenu(fileName = "P014", menuName = "Plot/태양 경배 자세")]
 
 public class P014 : Plot

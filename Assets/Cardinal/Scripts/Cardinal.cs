@@ -17,6 +17,7 @@ public class Cardinal : MonoBehaviour
 
     [Header("이동 관련 설정")]
     [SerializeField] private float baseMoveSpeed;
+
     private float speedMultiplier = 1f;
 
     // 추기경 멤버변수
