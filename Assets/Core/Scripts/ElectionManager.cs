@@ -203,6 +203,15 @@ public class ElectionManager : MonoBehaviour
         {
             electionFailedPanel.SetActive(false);
         }
+
+        if (InGameManager.Instance.IsSushiOn && SushiUI.Instance != null)
+        {
+            SushiUI.Instance.Show();
+        }
+        else
+        {
+            InGameManager.Instance.StartConclaveCycle();
+        }
     }
 
     private float CalculateWinProbability(Cardinal candidate)

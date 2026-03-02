@@ -98,8 +98,12 @@ public class InGameManager : MonoBehaviour
 
     // 시간 흐름 제어 플래그
     private bool isTimeRunning = false;
-    //첫 시작인지 판별 (공동선택 관련 플래그)
-    private bool isFirstStart = true;
+    //첫 시작, 두번째 시작 판별 플래그 (공동선택 , 아이템 관련 관련 플래그)
+    private bool isFirstStart = true; //아이템 스폰 관련
+    public bool IsFirstStart => isFirstStart;
+
+    private bool isSushiOn = false; //공동선택 활성화 관련
+    public bool IsSushiOn => isSushiOn;
 
     // 프로퍼티
     public GameBalance Balance => balance;
@@ -147,6 +151,7 @@ public class InGameManager : MonoBehaviour
         }
         else
         {
+            isSushiOn = true;
             Debug.Log(">>> 다음 콘클라베 진행");
             gameContext.AdvanceConclave();
         }
