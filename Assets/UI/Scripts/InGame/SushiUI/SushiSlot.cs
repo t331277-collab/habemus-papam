@@ -1,0 +1,59 @@
+﻿using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
+
+public class SushiSlot : MonoBehaviour
+{
+    [Header("UI 요소")]
+    public Image itemIcon;
+    public TextMeshProUGUI itemNameText;
+    public TextMeshProUGUI itemGradeText;
+    public TextMeshProUGUI itemDescText;
+    public TextMeshProUGUI itemEffectText;
+    public Button useButton;
+    public CanvasGroup canvasGroup;
+
+    private Item currentItem;
+    private bool isSelectable = true;
+
+    public void Setup(Item item)
+    {
+        currentItem = item;
+        itemIcon.sprite = item.itemImage;
+        itemNameText.text = item.itemName;
+        itemGradeText.text = $"[{item.itemGrade}]";
+        itemDescText.text = item.itemDescription;
+        itemEffectText.text = item.itemEffectDescription;
+
+        SetSelectable(true); 
+
+        useButton.onClick.RemoveAllListeners();
+        useButton.onClick.AddListener(OnPickItem);
+    }
+
+    public void SetSelectable(bool selectable)
+    {
+        isSelectable = selectable;
+        useButton.interactable = selectable;
+
+        if (selectable)
+        {
+            itemIcon.color = Color.white;
+            canvasGroup.alpha = 1.0f;
+        }
+        else
+        {
+            itemIcon.color = Color.gray;
+            canvasGroup.alpha = 0.5f;
+        }
+    }
+
+    private void OnPickItem()
+    {
+        if (currentItem == null || !isSelectable) return;
+
+        InventoryManager.Instance.AddItem(currentItem);
+        SushiUI.Instance.Close();
+        InGameManager.Instance.StartConclaveCycle();
+    }
+}

@@ -43,7 +43,7 @@ public class InventoryManager : MonoBehaviour
 
     private void OnGameContextChanged(GameContext.GameContextEvent eventType)
     {
-        if (eventType == GameContext.GameContextEvent.ConclaveStart)
+        if (eventType == GameContext.GameContextEvent.ConclaveEnd)
         {
             CheckAndRemoveExpiredItems();
         }
@@ -52,12 +52,11 @@ public class InventoryManager : MonoBehaviour
     private void CheckAndRemoveExpiredItems()
     {
         if (InGameManager.Instance == null) return;
-        bool isNewDay = InGameManager.Instance.GetCurrentConclave() == GameContext.Conclave.Dawn;
+        bool isEndOfDay = InGameManager.Instance.GetCurrentConclave() == GameContext.Conclave.Evening;
 
-        RemoveExpiredFromList(inventoryItems, isNewDay, true);
+        RemoveExpiredFromList(inventoryItems, isEndOfDay, true);
 
-        //버프 인벤토리
-        RemoveExpiredFromList(activeBuffs, isNewDay, false);
+        RemoveExpiredFromList(activeBuffs, isEndOfDay, false);
     }
 
     private void RemoveExpiredFromList(List<Item> targetList, bool isNewDay, bool shouldUpdateUI)

@@ -16,7 +16,8 @@ public class Cardinal : MonoBehaviour
     [SerializeField] private float piety;
 
     [Header("이동 관련 설정")]
-    [SerializeField] private float moveSpeed;
+    [SerializeField] private float baseMoveSpeed;
+    private float speedMultiplier = 1f;
 
     // 추기경 멤버변수
     private List<Item> items;
@@ -28,7 +29,7 @@ public class Cardinal : MonoBehaviour
     public float HpDrainMultiplier => hpDrainMultiplier;
     public float Influence => influence;
     public float Piety => piety;
-    public float MoveSpeed => moveSpeed; 
+    public float MoveSpeed => baseMoveSpeed * speedMultiplier;
 
 
     void Awake()
@@ -41,7 +42,7 @@ public class Cardinal : MonoBehaviour
         {
             agent.updateRotation = false;
             agent.updateUpAxis = false;
-            agent.speed = moveSpeed;
+ 
         }
     }
 
@@ -90,10 +91,10 @@ public class Cardinal : MonoBehaviour
             hp = balance.InitialHp;
             influence = balance.InitialInfluence;
             piety = balance.InitialPiety;
-            moveSpeed = balance.InitialMoveSpeed;
+            baseMoveSpeed = balance.InitialMoveSpeed;
 
             // 초기화된 속도를 에이전트에도 적용
-            if (agent != null) agent.speed = moveSpeed;
+            if (agent != null) agent.speed = baseMoveSpeed;
 
             if (CompareTag("Player"))
             {
@@ -117,18 +118,19 @@ public class Cardinal : MonoBehaviour
 
     public void ChangeSpeed(float delta)
     {
+        speedMultiplier = delta;
+
+        // 마우스 이동(NavMeshAgent)의 속도를 즉시 업데이트합니다.
         if (agent != null)
         {
-            agent.speed = moveSpeed * delta;
+            agent.speed = MoveSpeed;
         }
     }
 
     public void RestoreMoveSpeed()
     {
-        if (agent != null)
-        {
-            agent.speed = moveSpeed;
-        }
+        speedMultiplier = 1f;
+        if (agent != null) agent.speed = baseMoveSpeed;
     }
 
     // NavMeshAgent 크기 조절 (Manager에서 접근하므로 유지)
@@ -244,7 +246,7 @@ public class Cardinal : MonoBehaviour
                 }
             }
 
-            ChangeInfluence(balance.SpeechFailDeltaInfluence);
+            ChangeInfluence(speechFailDeltaInfluence);
             ChangeHp(balance.SpeechFailDeltaHp);
         }
 
