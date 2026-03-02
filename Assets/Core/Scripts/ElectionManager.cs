@@ -30,17 +30,10 @@ public class ElectionManager : MonoBehaviour
     [SerializeField] private Button closeFailedPanelButton;
 
     [Header("당선 확률 공식 설정")]
-    [Tooltip("진행도를 나눌 기준값 (기본: 100)")]
-    [SerializeField] private float progressDivisor = 100f;
-
-    [Tooltip("진행도에 곱할 지수(제곱) 값 (기본: 1.5)")]
-    [SerializeField] private float progressExponent = 1.5f;
-
-    [Tooltip("후보자 합산 점수(경건함+정치력)를 나눌 값 (기본: 2)")]
-    [SerializeField] private float scoreDivisor = 2f;
-
-    [Tooltip("최종 계산식에 곱할 가중치 (기본: 0.7)")]
-    [SerializeField] private float finalWeight = 0.7f;
+    [Tooltip("후보자 합산 점수(경건함+정치력)에 곲할 값 -> 가중치(기본: 0.035)")]
+    [SerializeField] private float scoreDivisor = 0.6f;
+    [Tooltip("진행도에 곱할 값 -> 가중치(기본: 0.035)")]
+    [SerializeField] private float progressDivisor = 0.035f;
 
     [Tooltip("기본으로 깔고 가는 최소 당선 확률 (기본: 0)")]
     [SerializeField] private float baseProbability = 0f;
@@ -165,11 +158,7 @@ public class ElectionManager : MonoBehaviour
 
         float candidateScore = currentWinnerCandidate.Piety + currentWinnerCandidate.Influence;
 
-        // 공식: (진행도 / 진행도기준값)^지수 * (후보점수 / 점수나누기값) * 가중치 + 기본확률
-        float winProbability = progress * 0.3f
-                               * (candidateScore * scoreDivisor)
-                               * finalWeight
-                               + baseProbability;
+        float winProbability = (progress * scoreDivisor) + (candidateScore * progressDivisor) + baseProbability;
 
         float diceRoll = UnityEngine.Random.Range(0f, 100f);
         bool isElected = diceRoll <= winProbability;
@@ -216,14 +205,13 @@ public class ElectionManager : MonoBehaviour
 
     private float CalculateWinProbability(Cardinal candidate)
     {
+        if (InGameManager.Instance == null) return 0f;
+
         float progress = InGameManager.Instance.GetProgress();
         float candidateScore = candidate.Piety + candidate.Influence;
 
-        float prob = Mathf.Pow(progress / progressDivisor, progressExponent)
-                   * (candidateScore / scoreDivisor)
-                   * finalWeight
-                   + baseProbability;
+        float winProbability = (progress * scoreDivisor) + (candidateScore * progressDivisor) + baseProbability;
 
-        return Mathf.Clamp(prob, 0f, 100f);
+        return Mathf.Clamp(winProbability, 0.1f, 200f);
     }
 }

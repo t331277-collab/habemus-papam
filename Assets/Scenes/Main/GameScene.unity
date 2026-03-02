@@ -14868,10 +14868,8 @@ MonoBehaviour:
   gameClearPanel: {fileID: 1381380102}
   electionFailedPanel: {fileID: 1150433301}
   closeFailedPanelButton: {fileID: 718000542}
-  progressDivisor: 100
-  progressExponent: 1.5
-  scoreDivisor: 0.3
-  finalWeight: 0.7
+  scoreDivisor: 0.5
+  progressDivisor: 0.025
   baseProbability: 0
   jackpotDuration: 1
 --- !u!1 &1036295153
