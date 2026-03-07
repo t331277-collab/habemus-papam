@@ -674,10 +674,17 @@ public class StateController : MonoBehaviour
 
     public void EnterChatListener()
     {
-        if (currentState != CardinalState.CutScene && currentState != CardinalState.ChatMaster)
+        if (currentState == CardinalState.ReadyPraying ||
+        currentState == CardinalState.Praying ||
+        currentState == CardinalState.ReadyInSpeech ||
+        currentState == CardinalState.InSpeech ||
+        currentState == CardinalState.CutScene ||
+        currentState == CardinalState.ChatMaster)
         {
-            ChangeState(CardinalState.Chatting);
+            return;
         }
+
+        ChangeState(CardinalState.Chatting);
     }
 
     public void MoveToPosition(Vector3 targetPos)
