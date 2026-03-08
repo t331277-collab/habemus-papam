@@ -12612,6 +12612,7 @@ MonoBehaviour:
   itemEffectText: {fileID: 1512145694}
   useButton: {fileID: 750014910}
   canvasGroup: {fileID: 872947657}
+  sushiGradeImage: {fileID: 872947654}
 --- !u!225 &872947657
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -12829,6 +12830,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 519688442f4ab4a43a23e3718d910ed3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SushiUI
+  commonSprite: {fileID: -222549919845697694, guid: ac3b23821c4eb5a41b07f967bf2467fd, type: 3}
+  rareSprite: {fileID: 5101671700007261310, guid: 940191dd1ef4e0b4c86229f3f46aed9e, type: 3}
   sushiPanel: {fileID: 1242547527}
   slots:
   - {fileID: 1154001513}
@@ -15838,6 +15841,7 @@ MonoBehaviour:
   itemEffectText: {fileID: 1295884999}
   useButton: {fileID: 1927120507}
   canvasGroup: {fileID: 1154001514}
+  sushiGradeImage: {fileID: 1154001511}
 --- !u!225 &1154001514
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -17671,6 +17675,7 @@ MonoBehaviour:
   itemEffectText: {fileID: 723401464}
   useButton: {fileID: 1676224978}
   canvasGroup: {fileID: 1324437624}
+  sushiGradeImage: {fileID: 1324437621}
 --- !u!225 &1324437624
 CanvasGroup:
   m_ObjectHideFlags: 0
