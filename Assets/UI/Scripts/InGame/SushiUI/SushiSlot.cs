@@ -12,11 +12,12 @@ public class SushiSlot : MonoBehaviour
     public TextMeshProUGUI itemEffectText;
     public Button useButton;
     public CanvasGroup canvasGroup;
+    public Image sushiGradeImage;
 
     private Item currentItem;
     private bool isSelectable = true;
 
-    public void Setup(Item item)
+    public void Setup(Item item, Sprite gradeSprite)
     {
         currentItem = item;
         itemIcon.sprite = item.itemImage;
@@ -24,6 +25,11 @@ public class SushiSlot : MonoBehaviour
         itemGradeText.text = $"[{item.itemGrade}]";
         itemDescText.text = item.itemDescription;
         itemEffectText.text = item.itemEffectDescription;
+
+        if (sushiGradeImage != null)
+        {
+            sushiGradeImage.sprite = gradeSprite;
+        }
 
         SetSelectable(true); 
 

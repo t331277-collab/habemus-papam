@@ -8,6 +8,10 @@ public class SushiUI : MonoBehaviour
 {
     public static SushiUI Instance { get; private set; }
 
+    [Header("등급별 스프라이트 설정")]
+    [SerializeField] private Sprite commonSprite;
+    [SerializeField] private Sprite rareSprite;
+
     [Header("UI 연결")]
     [SerializeField] private GameObject sushiPanel;
     [SerializeField] private SushiSlot[] slots = new SushiSlot[3];
@@ -36,7 +40,10 @@ public class SushiUI : MonoBehaviour
         for (int i = 0; i < 3; i++)
         {
             int randomIndex = Random.Range(0, tempItems.Count);
-            slots[i].Setup(tempItems[randomIndex]);
+            Item selectedItem = tempItems[randomIndex];
+            Sprite targetSprite = (selectedItem.itemGrade == ItemGrade.Rare) ? rareSprite : commonSprite;
+
+            slots[i].Setup(selectedItem, targetSprite);
             tempItems.RemoveAt(randomIndex); 
         }
 
