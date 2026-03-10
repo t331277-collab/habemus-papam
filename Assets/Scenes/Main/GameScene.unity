@@ -14886,7 +14886,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7d6937df0b3c9744b9f8b9da42586775, type: 2}
   - {fileID: 11400000, guid: 79ec8a12159370342b129c7894ce8a4b, type: 2}
   - {fileID: 11400000, guid: 3b82ec75506efb741bdf1483b88139b4, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: e2fcafa8ee32f5f4db71ad1574424230, type: 2}
   - {fileID: 11400000, guid: 98d868f455f53cb45b88f4c3a7b80032, type: 2}
   - {fileID: 11400000, guid: 71275ecaddc0e53469f3d1cd518efdf1, type: 2}
   - {fileID: 11400000, guid: bdbdd7ed687906b45a1dff1cee08ab36, type: 2}
@@ -14895,7 +14895,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: aece87da0ba09ec47b77a6d0c53e5724, type: 2}
   - {fileID: 11400000, guid: e28bb15f741fbca449cec804f224be66, type: 2}
   - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
+  - {fileID: 11400000, guid: 3d9ebbc6674fe654aa53e7e8156cc276, type: 2}
   - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
   - {fileID: 11400000, guid: b1f8ce0a49c00df409a22e73630baf7a, type: 2}
   - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
@@ -29962,7 +29962,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'ShowPlot
+  m_text: 'PlotTest
 
 '
   m_isRightToLeft: 0
@@ -30950,7 +30950,7 @@ GameObject:
   - component: {fileID: 2571747882566063718}
   - component: {fileID: 5731220345367175174}
   m_Layer: 5
-  m_Name: ShowPlotUI
+  m_Name: PlotTestButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -31950,9 +31950,9 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 8152387934090701831}
-        m_TargetAssemblyTypeName: SchemeUI, Assembly-CSharp
-        m_MethodName: ShowPlotUI
-        m_Mode: 3
+        m_TargetAssemblyTypeName: PlotUI, Assembly-CSharp
+        m_MethodName: PlotTest
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -33307,6 +33307,7 @@ MonoBehaviour:
   - {fileID: 1675189937472069261}
   - {fileID: 7694611818735176735}
   - {fileID: 4505269470862173109}
+  testPlot: {fileID: 0}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
   m_ObjectHideFlags: 0

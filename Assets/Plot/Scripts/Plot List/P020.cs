@@ -1,12 +1,13 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P020", menuName = "Plot/선물 개봉(미구현)")]
+[CreateAssetMenu(fileName = "P020", menuName = "Plot/선물 개봉")]
 
 public class P020 : Plot
 {
     [Header("해당 공작 설정")]
     [SerializeField] private int minInfluence;
     [SerializeField] private int pietyCost;
+    [SerializeField] private int rewardCount;
 
     public override int cost => pietyCost;
 
@@ -17,8 +18,9 @@ public class P020 : Plot
         plotGrade = PlotGrade.Rare;
         
         // 텍스트 기본값
-        plotName = "선물 개봉(미구현)";
+        plotName = "선물 개봉";
         plotDescription = "한 번 만에 나왔는데 이거 좋은 건가요?";
+        plotEffect = "랜덤 아이템 2개 획득";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -26,6 +28,7 @@ public class P020 : Plot
 
         minInfluence = 0;
         pietyCost = 20;
+        rewardCount = 2;
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -39,10 +42,34 @@ public class P020 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        /*
-         *  아이템 획득 함수
-        performer.GetItem()
-        */
+        for (int i = 0; i < rewardCount; i++)
+        {
+            GiveRandomItem();
+        }
+    }
+
+    private void GiveRandomItem()
+    {
+        GameObject itemPrefab = InGameManager.Instance.GetRandomItemPrefab();
+
+        if (itemPrefab != null)
+        {
+            // 1. FieldItem 컴포넌트를 먼저 찾고
+            FieldItem fieldItem = itemPrefab.GetComponent<FieldItem>();
+
+            if (fieldItem != null)
+            {
+                // 2. 추가한 프로퍼티(ItemData)를 통해 진짜 데이터(SO)를 쏙 빼옵니다.
+                Item data = fieldItem.ItemData;
+
+                if (data != null)
+                {
+                    InventoryManager.Instance.AddItem(data);
+                }
+            }
+        }
     }
 
 }
+
+ 

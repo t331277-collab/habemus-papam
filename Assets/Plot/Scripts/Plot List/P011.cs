@@ -10,7 +10,7 @@ public class P011 : Plot
     [SerializeField] private int pietyCost;
     [SerializeField] private int hpIncrease;
     [SerializeField] private int hpDecrease;
-    [SerializeField] private int mentalDelta;
+    [SerializeField] private int influenceDelta;
 
     public override int cost => pietyCost;
 
@@ -32,7 +32,7 @@ public class P011 : Plot
         pietyCost = 0;
         hpIncrease = 10;
         hpDecrease = -20;
-        mentalDelta = 20;
+        influenceDelta = 20;
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -53,13 +53,13 @@ public class P011 : Plot
         if (chance < 0.5f) 
         {
             performer.ChangeHp(hpDecrease);
-            //performer.ChangeMental(mentalDelta);  정신력 변화
+            performer.ChangeInfluence(influenceDelta);
 
             for (int i = 0; i < 3; i++)
             {
                 cm.Cardinals[i].ChangeHp(hpDecrease);
 
-                //cm.Cardinals[i].ChangeMental(mentalDelta);    정신력 변화
+                cm.Cardinals[i].ChangeInfluence(influenceDelta);
             }
         }
         else 

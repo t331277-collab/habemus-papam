@@ -17,6 +17,9 @@ public class PlotUI : MonoBehaviour
     public TextMeshProUGUI[] plotDescList = new TextMeshProUGUI[3];
     public TextMeshProUGUI[] plotEffectList = new TextMeshProUGUI[3];
 
+    [Header("--- 테스트용 공작 ---")]
+    public Plot testPlot;
+
     private Cardinal performer;
 
     void Start()
@@ -125,5 +128,10 @@ public class PlotUI : MonoBehaviour
         }
 
         OnClickClose();
+    }
+
+    public void PlotTest()
+    {
+        testPlot.Execute(performer);
     }
 }
