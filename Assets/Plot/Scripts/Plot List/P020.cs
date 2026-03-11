@@ -54,13 +54,11 @@ public class P020 : Plot
 
         if (itemPrefab != null)
         {
-            // 1. FieldItem 컴포넌트를 먼저 찾고
-            FieldItem fieldItem = itemPrefab.GetComponent<FieldItem>();
+            FieldItem rewardItem = itemPrefab.GetComponent<FieldItem>();
 
-            if (fieldItem != null)
+            if (rewardItem != null)
             {
-                // 2. 추가한 프로퍼티(ItemData)를 통해 진짜 데이터(SO)를 쏙 빼옵니다.
-                Item data = fieldItem.ItemData;
+                Item data = rewardItem.ItemData;
 
                 if (data != null)
                 {

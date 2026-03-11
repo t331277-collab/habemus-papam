@@ -14,7 +14,8 @@ public enum CardinalState
     ChatMaster,
     Chatting,
     Scheme, // Plot..? 일단 기획서에는 Scheme 라 써있어서 남겨둠 SchemeChatiing 도 같이 수행
-    CutScene
+    CutScene,
+    Stun
 }
 
 public class StateController : MonoBehaviour
@@ -89,13 +90,13 @@ public class StateController : MonoBehaviour
                                             currentState == CardinalState.InSpeech;
 
     // 컴포넌트 참조
-    private Cardinal cardinal;                  
+    private Cardinal cardinal;
     private NavMeshAgent agent;
-    private ICardinalController inputController; 
+    private ICardinalController inputController;
     private Animation_Controller animController;
 
     // 말풍선 인스턴스
-    private GameObject currentBubbleInstance; 
+    private GameObject currentBubbleInstance;
 
     // 이동 경로 큐 (컷씬용)
     private Queue<Vector3> waypoints = new Queue<Vector3>();
@@ -106,6 +107,7 @@ public class StateController : MonoBehaviour
     private Coroutine chatSequenceCoroutine;    //Chat
     private Coroutine praySequenceCoroutine;    //Praying
     private Coroutine speechSequenceCoroutine;  //Speeching
+    private Coroutine stunCoroutine;            //Stun
 
     // 프로퍼티
     public bool IsMoving => pathCoroutine != null;
@@ -144,10 +146,10 @@ public class StateController : MonoBehaviour
                 // 필요한 경우 대기 로직
                 break;
             case CardinalState.InSpeech: // 연설 중 상태
-                
+
                 break;
             case CardinalState.ReadyInSpeech: // 연설 준비 상태
-               
+
                 break;
             case CardinalState.Scheme:  //공작가 상태... 쉽지 않..
                 HandleSchemeState();
@@ -495,7 +497,7 @@ public class StateController : MonoBehaviour
             ChangeState(CardinalState.Idle);
         }
     }
-    
+
 
     // ---------------------------------------------------------
     // AI 배회 (Idle)
@@ -507,7 +509,7 @@ public class StateController : MonoBehaviour
         {
             if (currentState != CardinalState.Idle && currentState != CardinalState.Scheme) yield break;
 
-            
+
             if (CardinalManager.Instance != null && CardinalManager.Instance.GetCurrentChatMasterCount() < 2)
             {
                 if (Random.Range(0f, 100f) < ChatMaster)
@@ -618,10 +620,10 @@ public class StateController : MonoBehaviour
         //에이전트 물리 상태 강제 리셋
         if (agent != null && agent.isOnNavMesh)
         {
-            agent.isStopped = false;        
-            agent.ResetPath();              
-            agent.velocity = Vector3.zero;  
-            agent.avoidancePriority = 50;   
+            agent.isStopped = false;
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+            agent.avoidancePriority = 50;
         }
 
         // 경로 설정 및 이동 시작
@@ -833,7 +835,7 @@ public class StateController : MonoBehaviour
                 GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
                 if (playerObj != null)
                 {
-                    playerDetected = true; 
+                    playerDetected = true;
 
                     // 말풍선 교체
                     if (masterAlertBubblePrefab != null) ShowBubble(masterAlertBubblePrefab);
@@ -936,14 +938,14 @@ public class StateController : MonoBehaviour
             agent.velocity.sqrMagnitude <= 0.1f
         );
 
-        if (!IsHeadingToQueue) yield break; 
+        if (!IsHeadingToQueue) yield break;
 
         if (currentState != CardinalState.ReadyPraying)
         {
             ChangeState(CardinalState.ReadyPraying);
         }
 
-        IsHeadingToQueue = false; 
+        IsHeadingToQueue = false;
 
         if (isWaitingInLine)
         {
@@ -1189,5 +1191,93 @@ public class StateController : MonoBehaviour
         }
     }
 
-   
+    // =========================================================
+    // Stun 행동불가 상태로 만드는 함수
+    // =========================================================
+    public void ApplyStun(float duration)
+    {
+        // 1. 기존 스턴 예약이 있다면 취소 (중첩 시 시간 갱신을 위해)
+        if (stunCoroutine != null) StopCoroutine(stunCoroutine);
+
+        // 2. 상태 변경 및 즉시 정지 로직 실행
+        ChangeState(CardinalState.Stun);
+        StopAllActionCoroutines(); // 개발자님이 만든 모든 코루틴/플래그 정리 함수
+        ResetPhysicalStatus();      // 물리 정지 전용 함수 (아래 참고)
+        HideBubble();               // 말풍선 정리 (개발자님 코드 유지)
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.red;
+        }
+
+        // 3. 시간 설정에 따른 분기
+        if (duration > 0)
+        {
+            // 시간제 스턴: 지정된 시간 후 자동 해제
+            stunCoroutine = StartCoroutine(StunTimerRoutine(duration));
+        }
+        else
+        {
+            // 턴제/무한 스턴: 외부에서 ReleaseStun()을 부를 때까지 대기
+            Debug.Log($"콘클라베 종료 시까지 행동 불가.");
+        }
+    }
+
+    private void StopAllActionCoroutines()
+    {
+        // 실행 중인 모든 시퀀스 코루틴 정지
+        if (pathCoroutine != null) { StopCoroutine(pathCoroutine); pathCoroutine = null; }
+        if (chatSequenceCoroutine != null) { StopCoroutine(chatSequenceCoroutine); chatSequenceCoroutine = null; }
+        if (praySequenceCoroutine != null) { StopCoroutine(praySequenceCoroutine); praySequenceCoroutine = null; }
+        if (aiWanderCoroutine != null) { StopCoroutine(aiWanderCoroutine); aiWanderCoroutine = null; }
+        if (speechSequenceCoroutine != null) { StopCoroutine(speechSequenceCoroutine); speechSequenceCoroutine = null; }
+
+        IsHeadingToQueue = false;
+        IsHeadingToSpeech = false;
+        isWaitingInLine = false;
+
+        // 추가로 현재 경로가 있다면 제거
+        if (agent != null && agent.isOnNavMesh) agent.ResetPath();
+    }
+
+    private IEnumerator StunTimerRoutine(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+        ReleaseStun(); // 시간이 다 되면 공용 해제 함수 호출
+    }
+
+    public void ReleaseStun(bool resetState = true)
+    {
+        if (currentState != CardinalState.Stun) return;
+
+        if (resetState)
+        {
+            ChangeState(CardinalState.Idle);
+        }
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+        }
+
+        // 데이터 정리
+        if (stunCoroutine != null) { StopCoroutine(stunCoroutine); stunCoroutine = null; }
+        Debug.Log($"{name} : 스턴 해제 및 복귀.");
+    }
+
+    // 중복되는 물리 초기화 로직을 하나로 묶음
+    private void ResetPhysicalStatus()
+    {
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = true;
+            agent.velocity = Vector3.zero;
+            agent.ResetPath();
+        }
+    }
 }

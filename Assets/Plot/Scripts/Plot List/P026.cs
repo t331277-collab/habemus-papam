@@ -7,6 +7,8 @@ public class P026 : Plot
     [Header("해당 공작 설정")]
     [SerializeField] private int minInfluence;
     [SerializeField] private int pietyCost;
+    [SerializeField] private GameObject diceItem;
+    [SerializeField] private int rewardCount;
 
     public override int cost => pietyCost;
 
@@ -26,6 +28,7 @@ public class P026 : Plot
 
         minInfluence = 0;
         pietyCost = 20;
+        rewardCount = 2;
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -39,9 +42,20 @@ public class P026 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        /*
-         * '주사위' 아이템 2개 획득
-         */
+        for (int i = 0; i < rewardCount; i++)
+        {
+            FieldItem rewardItem = diceItem.GetComponent<FieldItem>();
+
+            if (rewardItem != null)
+            {
+                Item data = rewardItem.ItemData;
+
+                if (data != null)
+                {
+                    InventoryManager.Instance.AddItem(data);
+                }
+            }
+        }
     }
 
 }
