@@ -63,7 +63,10 @@ public class PlotUI : MonoBehaviour
 
         for (int i = 0; i < 3; i++)
         {
-            switch (pm.AvailPlotSets[0].plots[i].plotGrade)
+            var currentPlot = pm.AvailPlotSets[0].plots[i];
+            var buttonText = plotUseButtons[i].GetComponentInChildren<TextMeshProUGUI>();
+
+            switch (currentPlot.plotGrade)
             {
                 case PlotGrade.Common:
                     plotGradeList[i].text = "일반";
@@ -81,10 +84,10 @@ public class PlotUI : MonoBehaviour
                     // 혹시 모를 예외 처리
                     break;
             }
-            plotNameList[i].text = pm.AvailPlotSets[0].plots[i].plotName;
-            plotDescList[i].text = pm.AvailPlotSets[0].plots[i].plotDescription;
-            plotEffectList[i].text = pm.AvailPlotSets[0].plots[i].plotEffect;
-            plotUseButtons[i].GetComponentInChildren<TextMeshProUGUI>().text = $"경건함 {pm.AvailPlotSets[0].plots[i].cost}";
+            plotNameList[i].text = currentPlot.plotName;
+            plotDescList[i].text = currentPlot.plotDescription;
+            plotEffectList[i].text = currentPlot.plotEffect;
+            buttonText.text = $"경건함 {pm.AvailPlotSets[0].plots[i].cost}";
 
             if (pm.AvailPlotSets[0].isUsed[i])
             {
@@ -96,11 +99,22 @@ public class PlotUI : MonoBehaviour
             {
                 Debug.Log($"{i}번 공작사용안됨");
                 plotPanels[i].color = new Color(1f, 1f, 1f);
-                plotUseButtons[i].interactable = pm.AvailPlotSets[0].plots[i].CanExecute(performer);
+
+                // 조건 확인
+                bool isPietyEnough = performer.Piety >= currentPlot.cost;
+                bool canExecute = currentPlot.CanExecute(performer);
+
+                // 버튼 활성화 여부 설정
+                plotUseButtons[i].interactable = isPietyEnough && canExecute;
+
+                if (!isPietyEnough)
+                {
+                    buttonText.text += "<br><color=red><size=60%>경건함이 부족합니다</size></color>";
+                }
             }
         }
     }
-
+    
     // 공작 UI 정보 리셋 함수
     public void ResetPlotUI()
     {
