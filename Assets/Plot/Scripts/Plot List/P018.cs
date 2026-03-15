@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P018", menuName = "Plot/스몰 토크")]
+[CreateAssetMenu(fileName = "P018", menuName = "Plot/스몰 토크", order = 018)]
 
 public class P018 : Plot
 {

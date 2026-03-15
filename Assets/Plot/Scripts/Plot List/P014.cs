@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-[CreateAssetMenu(fileName = "P014", menuName = "Plot/태양 경배 자세")]
+[CreateAssetMenu(fileName = "P014", menuName = "Plot/태양 경배 자세", order = 014)]
 
 public class P014 : Plot
 {

@@ -14882,7 +14882,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2041af932f7426f4fb7bb814dbb0809f, type: 2}
   - {fileID: 11400000, guid: 42f8f49973752d443ab70593b6b813ba, type: 2}
   - {fileID: 11400000, guid: 7f79f202240952b429e62ae8d9c5ba03, type: 2}
-  - {fileID: 11400000, guid: 387581c890d63324e9212ec103885669, type: 2}
   - {fileID: 11400000, guid: 7d6937df0b3c9744b9f8b9da42586775, type: 2}
   - {fileID: 11400000, guid: 79ec8a12159370342b129c7894ce8a4b, type: 2}
   - {fileID: 11400000, guid: 3b82ec75506efb741bdf1483b88139b4, type: 2}
@@ -14896,19 +14895,11 @@ MonoBehaviour:
   - {fileID: 11400000, guid: e28bb15f741fbca449cec804f224be66, type: 2}
   - {fileID: 11400000, guid: 5eabd7eeff29777409fe0aac8a996ba3, type: 2}
   - {fileID: 11400000, guid: 3d9ebbc6674fe654aa53e7e8156cc276, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: b1f8ce0a49c00df409a22e73630baf7a, type: 2}
   - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
   - {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
   - {fileID: 11400000, guid: a21770bdc89e5ee4e83d8390b6eb16e6, type: 2}
   - {fileID: 11400000, guid: 031757fc79980cb44a122e6de9ea522b, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
   - {fileID: 11400000, guid: 2b49347dd840d9340ae1627811130400, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
-  - {fileID: 11400000, guid: 143b8f73378fb3d4182afcfd5a6d19dc, type: 2}
   - {fileID: 11400000, guid: 4311dc8af4aab7148b6fc813d9523ace, type: 2}
 --- !u!114 &1034420648
 MonoBehaviour:
@@ -29101,8 +29092,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -200}
-  m_SizeDelta: {x: 300, y: 50}
+  m_AnchoredPosition: {x: 0, y: -170}
+  m_SizeDelta: {x: 300, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &39576613991000550
 MonoBehaviour:
@@ -30131,7 +30122,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 1024
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -31200,7 +31191,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 1024
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -32081,8 +32072,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -200}
-  m_SizeDelta: {x: 300, y: 50}
+  m_AnchoredPosition: {x: 0, y: -170}
+  m_SizeDelta: {x: 300, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6003722894865307886
 CanvasRenderer:
@@ -32394,8 +32385,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -200}
-  m_SizeDelta: {x: 300, y: 50}
+  m_AnchoredPosition: {x: 0, y: -170}
+  m_SizeDelta: {x: 300, y: 125}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &6818418464125067207
 RectTransform:
@@ -32919,7 +32910,7 @@ MonoBehaviour:
   m_fontSizeMax: 72
   m_fontStyle: 0
   m_HorizontalAlignment: 2
-  m_VerticalAlignment: 1024
+  m_VerticalAlignment: 256
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -33307,7 +33298,10 @@ MonoBehaviour:
   - {fileID: 1675189937472069261}
   - {fileID: 7694611818735176735}
   - {fileID: 4505269470862173109}
-  testPlot: {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
+  commonSprite: {fileID: -222549919845697694, guid: ac3b23821c4eb5a41b07f967bf2467fd, type: 3}
+  rareSprite: {fileID: -1766780945608371564, guid: 1bde739df2e6e4844a28363854ec5265, type: 3}
+  legendSprite: {fileID: 5101671700007261310, guid: 940191dd1ef4e0b4c86229f3f46aed9e, type: 3}
+  testPlot: {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
   m_ObjectHideFlags: 0

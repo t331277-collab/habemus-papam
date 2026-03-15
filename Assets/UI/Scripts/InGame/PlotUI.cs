@@ -17,6 +17,13 @@ public class PlotUI : MonoBehaviour
     public TextMeshProUGUI[] plotDescList = new TextMeshProUGUI[3];
     public TextMeshProUGUI[] plotEffectList = new TextMeshProUGUI[3];
 
+    [Header("등급별 스프라이트 설정")]
+    [SerializeField] private Sprite commonSprite;
+    [SerializeField] private Sprite rareSprite;
+    [SerializeField] private Sprite legendSprite;
+
+
+
     [Header("--- 테스트용 공작 ---")]
     public Plot testPlot;
 
@@ -69,14 +76,17 @@ public class PlotUI : MonoBehaviour
             switch (currentPlot.plotGrade)
             {
                 case PlotGrade.Common:
+                    plotPanels[i].sprite = commonSprite;
                     plotGradeList[i].text = "일반";
                     break;
 
                 case PlotGrade.Rare:
+                    plotPanels[i].sprite = rareSprite;
                     plotGradeList[i].text = "고급";
                     break;
 
                 case PlotGrade.Legendary:
+                    plotPanels[i].sprite = legendSprite;
                     plotGradeList[i].text = "TOP SECRET";
                     break;
 

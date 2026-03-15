@@ -15,7 +15,7 @@ MonoBehaviour:
   plotID: P014
   plotName: "\uD0DC\uC591 \uACBD\uBC30 \uC790\uC138"
   plotDescription: "Yoga \uACE0\uC218\uAC00 \uB420 \uAC70\uC57C!"
-  plotEffect: "\uACBD\uAC74\uD568 30 \uC99D\uAC00"
+  plotEffect: 
   plotImage: {fileID: 0}
   plotGrade: 1
   plotWeightBase: 20

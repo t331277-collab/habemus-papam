@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P029", menuName = "Plot/점심 복사 버그(미구현)")]
+[CreateAssetMenu(fileName = "P029", menuName = "Plot/점심 복사 버그(미구현)", order = 029)]
 
 public class P029 : Plot
 {

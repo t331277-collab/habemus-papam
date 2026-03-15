@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P028", menuName = "Plot/레수르스망")]
+[CreateAssetMenu(fileName = "P028", menuName = "Plot/레수르스망", order = 028)]
 
 public class P028 : Plot
 {

@@ -15,7 +15,7 @@ MonoBehaviour:
   plotID: P013
   plotName: "\uC2EC\uB3C4 \uC788\uB294 \uB17C\uC758"
   plotDescription: "\uD30C\uC778\uC560\uD50C \uD53C\uC790\uB294 \uC774\uB2E8\uC778\uAC00?"
-  plotEffect: "\uC815\uCE58\uB825 15 \uC99D\uAC00"
+  plotEffect: 
   plotImage: {fileID: 0}
   plotGrade: 1
   plotWeightBase: 10
