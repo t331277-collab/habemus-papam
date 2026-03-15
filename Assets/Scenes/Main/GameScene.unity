@@ -33301,7 +33301,7 @@ MonoBehaviour:
   commonSprite: {fileID: -222549919845697694, guid: ac3b23821c4eb5a41b07f967bf2467fd, type: 3}
   rareSprite: {fileID: -1766780945608371564, guid: 1bde739df2e6e4844a28363854ec5265, type: 3}
   legendSprite: {fileID: 5101671700007261310, guid: 940191dd1ef4e0b4c86229f3f46aed9e, type: 3}
-  testPlot: {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
+  testPlot: {fileID: 11400000, guid: 7d6937df0b3c9744b9f8b9da42586775, type: 2}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
   m_ObjectHideFlags: 0

@@ -48,25 +48,24 @@ public class P011 : Plot
 
         var cm = CardinalManager.Instance;
 
-        float chance = Random.value;
-
-        if (chance < 0.5f) 
+        if (Random.value < 0.5f)
         {
             performer.ChangeHp(hpDecrease);
             performer.ChangeInfluence(influenceDelta);
-
-            for (int i = 0; i < 3; i++)
-            {
-                cm.Cardinals[i].ChangeHp(hpDecrease);
-
-                cm.Cardinals[i].ChangeInfluence(influenceDelta);
-            }
         }
-        else 
+        else
         {
             performer.ChangeHp(hpIncrease);
+        }
 
-            for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
+        {
+            if (Random.value < 0.5f)
+            {
+                cm.Cardinals[i].ChangeHp(hpDecrease);
+                cm.Cardinals[i].ChangeInfluence(influenceDelta);
+            }
+            else
             {
                 cm.Cardinals[i].ChangeHp(hpIncrease);
             }
