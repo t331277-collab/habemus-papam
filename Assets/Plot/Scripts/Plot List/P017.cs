@@ -44,14 +44,12 @@ public class P017 : Plot
 
         var cm = CardinalManager.Instance;
 
-        int lowestPietyCardinal = 0;
-
         var target = cm.Cardinals.Take(3)
             .OrderByDescending(c => c.Hp)
             .ThenBy(c => Random.value)
             .LastOrDefault();
 
-        cm.Cardinals[lowestPietyCardinal].ChangeHp(hpDelta);
+        target.ChangeHp(hpDelta);
     }
 
 }

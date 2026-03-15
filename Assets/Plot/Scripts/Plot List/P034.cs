@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
 [CreateAssetMenu(fileName = "P034", menuName = "Plot/언더독", order = 034)]
@@ -45,23 +46,21 @@ public class P034 : Plot
 
         var cm = CardinalManager.Instance;
 
-        int lowestHpCardinal = 0;
+        var candidates = cm.Cardinals.Take(3).ToList();
 
-        for (int i = 1; i < 3; i++)
+        if (!candidates.Contains(performer))
         {
-            if (cm.Cardinals[lowestHpCardinal].Piety > cm.Cardinals[i].Piety)
-            {
-                lowestHpCardinal = i;
-            }
+            candidates.Add(performer);
         }
 
-        if (cm.Cardinals[lowestHpCardinal].Hp > performer.Hp)
+        var target = candidates
+            .OrderBy(c => c.Hp)
+            .ThenBy(c => Random.value)
+            .FirstOrDefault();
+
+        if (target != null)
         {
-            performer.ChangePiety(pietyDelta);
-        }
-        else
-        {
-            cm.Cardinals[lowestHpCardinal].ChangePiety(pietyDelta);
+            target.ChangePiety(pietyDelta);
         }
     }
 
