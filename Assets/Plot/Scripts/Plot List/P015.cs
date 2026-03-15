@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "P015", menuName = "Plot/열렬한 찬양", order = 015)]
 
@@ -44,17 +45,12 @@ public class P015 : Plot
 
         var cm = CardinalManager.Instance;
 
-        int highestInfluenceCardinal = 0;
+        var target = cm.Cardinals.Take(3)
+            .OrderByDescending(c => c.Influence)
+            .ThenBy(c => Random.value)
+            .FirstOrDefault();
 
-        for (int i = 1; i < 3; i++)
-        {
-            if (cm.Cardinals[highestInfluenceCardinal].Piety < cm.Cardinals[i].Piety)
-            {
-                highestInfluenceCardinal = i;
-            }
-        }
-
-        cm.Cardinals[highestInfluenceCardinal].ChangePiety(pietyDelta);
+        target.ChangePiety(pietyDelta);
     }
 
 }
