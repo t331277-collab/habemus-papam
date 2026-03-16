@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "P023", menuName = "Plot/노블레스 오블리주")]
+[CreateAssetMenu(fileName = "P023", menuName = "Plot/노블레스 오블리주", order = 023)]
 
 public class P023 : Plot
 {
@@ -45,24 +46,19 @@ public class P023 : Plot
 
         var cm = CardinalManager.Instance;
 
-        int highestInfluCardinal = 0;
-        int lowestInfluCardinal = 0;
+        var candidates = cm.Cardinals.Take(3).ToList();
+        if (!candidates.Contains(performer)) candidates.Add(performer);
 
-        for (int i = 1; i < 3; i++)
-        {
-            if (cm.Cardinals[lowestInfluCardinal].Piety > cm.Cardinals[i].Piety)
-            {
-                lowestInfluCardinal = i;
-            }
-            if (cm.Cardinals[highestInfluCardinal].Piety < cm.Cardinals[i].Piety)
-            {
-                highestInfluCardinal = i;
-            }
-        }
+        var sorted = candidates
+            .OrderByDescending(c => c.Influence)    //정치력 순 정렬
+            .ThenBy(c => Random.value)              //동률 시 랜덤
+            .ToList();
 
-        cm.Cardinals[lowestInfluCardinal].ChangePiety(pietyIncrease);
+        Cardinal highest = sorted[0];
+        Cardinal lowest = sorted[sorted.Count - 1];
 
-        cm.Cardinals[highestInfluCardinal].ChangePiety(pietyDecrease);
+        lowest.ChangePiety(pietyIncrease);
+        highest.ChangePiety(pietyDecrease);
     }
 
 }

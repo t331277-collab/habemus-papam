@@ -7,6 +7,8 @@ public class FieldItem : MonoBehaviour
     [Tooltip("획득할 ScriptableObject 아이템 데이터 연결")]
     [SerializeField] private Item itemData;
 
+    public Item ItemData => itemData;
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("Player"))

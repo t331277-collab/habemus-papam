@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(fileName = "P022", menuName = "Plot/꼬리 자르기")]
+[CreateAssetMenu(fileName = "P022", menuName = "Plot/꼬리 자르기(버그 픽스 중)", order = 022)]
 
 public class P022 : Plot
 {

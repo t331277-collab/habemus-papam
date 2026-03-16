@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P011", menuName = "Plot/태양의 혀")]
+[CreateAssetMenu(fileName = "P011", menuName = "Plot/태양의 혀", order = 011)]
 
 public class P011 : Plot
 {
@@ -10,7 +10,7 @@ public class P011 : Plot
     [SerializeField] private int pietyCost;
     [SerializeField] private int hpIncrease;
     [SerializeField] private int hpDecrease;
-    [SerializeField] private int mentalDelta;
+    [SerializeField] private int influenceDelta;
 
     public override int cost => pietyCost;
 
@@ -32,7 +32,7 @@ public class P011 : Plot
         pietyCost = 0;
         hpIncrease = 10;
         hpDecrease = -20;
-        mentalDelta = 20;
+        influenceDelta = 20;
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -48,25 +48,24 @@ public class P011 : Plot
 
         var cm = CardinalManager.Instance;
 
-        float chance = Random.value;
-
-        if (chance < 0.5f) 
+        if (Random.value < 0.5f)
         {
             performer.ChangeHp(hpDecrease);
-            //performer.ChangeMental(mentalDelta);  정신력 변화
-
-            for (int i = 0; i < 3; i++)
-            {
-                cm.Cardinals[i].ChangeHp(hpDecrease);
-
-                //cm.Cardinals[i].ChangeMental(mentalDelta);    정신력 변화
-            }
+            performer.ChangeInfluence(influenceDelta);
         }
-        else 
+        else
         {
             performer.ChangeHp(hpIncrease);
+        }
 
-            for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++)
+        {
+            if (Random.value < 0.5f)
+            {
+                cm.Cardinals[i].ChangeHp(hpDecrease);
+                cm.Cardinals[i].ChangeInfluence(influenceDelta);
+            }
+            else
             {
                 cm.Cardinals[i].ChangeHp(hpIncrease);
             }

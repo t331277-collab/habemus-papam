@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P024", menuName = "Plot/가지치기")]
+[CreateAssetMenu(fileName = "P024", menuName = "Plot/가지치기", order = 024)]
 
 public class P024 : Plot
 {
@@ -47,24 +47,20 @@ public class P024 : Plot
 
         float minVal = Mathf.Min(hp, Mathf.Min(pol, piety));
 
-        if (Mathf.Approximately(minVal, hp)) // 체력이 제일 적다면
-        {
-            performer.ChangeHp(-(hp / 2f)); 
-            performer.ChangeInfluence(statsDelta);  
-            performer.ChangePiety(statsDelta);
-        }
-        else if (Mathf.Approximately(minVal, pol)) // 정치력이 제일 적다면
-        {
-            performer.ChangeInfluence(-(pol / 2f));
-            performer.ChangeHp(statsDelta);
-            performer.ChangePiety(statsDelta);
-        }
-        else // 경건함이 제일 적다면
-        {
-            performer.ChangePiety(-(piety / 2f));
-            performer.ChangeHp(statsDelta);
-            performer.ChangeInfluence(statsDelta);
-        }
+        // 3. 누가 깎일 대상인지 판별 (동률 포함)
+        bool isHpMin = Mathf.Approximately(hp, minVal);
+        bool isPolMin = Mathf.Approximately(pol, minVal);
+        bool isPieMin = Mathf.Approximately(piety, minVal);
+
+        // 4. [페널티] 최솟값인 스탯들은 모두 절반으로 감소
+        if (isHpMin) performer.ChangeHp(-(hp / 2f));
+        if (isPolMin) performer.ChangeInfluence(-(pol / 2f));
+        if (isPieMin) performer.ChangePiety(-(piety / 2f));
+
+        // 5. [보너스] 깎이지 않은 "나머지" 스탯들만 15 증가
+        if (!isHpMin) performer.ChangeHp(statsDelta);
+        if (!isPolMin) performer.ChangeInfluence(statsDelta);
+        if (!isPieMin) performer.ChangePiety(statsDelta);
     }
 
 }

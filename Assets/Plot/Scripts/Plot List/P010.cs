@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P010", menuName = "Plot/태양의 발")]
+[CreateAssetMenu(fileName = "P010", menuName = "Plot/태양의 발", order = 010)]
 
 public class P010 : Plot
 {
@@ -49,9 +49,16 @@ public class P010 : Plot
 
         for (int i = 1; i < 3; i++)
         {
-            if (cm.Cardinals[lowestPietyCardinal].Piety > cm.Cardinals[i].Piety)
+            if (cm.Cardinals[i].Piety < cm.Cardinals[lowestPietyCardinal].Piety)
             {
                 lowestPietyCardinal = i;
+            }
+            else if (cm.Cardinals[i].Piety == cm.Cardinals[lowestPietyCardinal].Piety)
+            {
+                if (Random.value > 0.5f)
+                {
+                    lowestPietyCardinal = i;
+                }
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P031", menuName = "Plot/숙면(미구현)")]
+[CreateAssetMenu(fileName = "P031", menuName = "Plot/숙면", order = 031)]
 
 public class P031 : Plot
 {
@@ -19,7 +19,7 @@ public class P031 : Plot
         plotGrade = PlotGrade.Legendary;
         
         // 텍스트 기본값
-        plotName = "숙면(미구현)";
+        plotName = "숙면";
         plotDescription = "드르렁 쿨쿨...";
 
         // 수치 기본값
@@ -33,7 +33,7 @@ public class P031 : Plot
 
     public override bool CanExecute(Cardinal performer)
     {
-        return performer.Hp <= minInfluence;
+        return performer.Influence >= minInfluence;
     }
 
     public override void Execute(Cardinal performer)
@@ -47,9 +47,11 @@ public class P031 : Plot
         performer.ChangeInfluence(-currentInfluence);
         performer.ChangeInfluence(influenceTarget);
 
-        /*
-         * 이번 콘클라베 동안 행동 불가
-         */
+        StateController performerSC = performer.GetComponent<StateController>();
+        if (performerSC != null)
+        {
+            performerSC.ApplyStun(-1f);
+        }
     }
 
 }

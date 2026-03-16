@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "P017", menuName = "Plot/이 불경한 자가")]
+[CreateAssetMenu(fileName = "P017", menuName = "Plot/이 불경한 자가", order = 017)]
 
 public class P017 : Plot
 {
@@ -43,17 +44,12 @@ public class P017 : Plot
 
         var cm = CardinalManager.Instance;
 
-        int lowestPietyCardinal = 0;
+        var target = cm.Cardinals.Take(3)
+            .OrderByDescending(c => c.Hp)
+            .ThenBy(c => Random.value)
+            .LastOrDefault();
 
-        for (int i = 1; i < 3; i++)
-        {
-            if (cm.Cardinals[lowestPietyCardinal].Piety > cm.Cardinals[i].Piety)
-            {
-                lowestPietyCardinal = i;
-            }
-        }
-
-        cm.Cardinals[lowestPietyCardinal].ChangeHp(hpDelta);
+        target.ChangeHp(hpDelta);
     }
 
 }

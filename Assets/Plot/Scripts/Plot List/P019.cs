@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P019", menuName = "Plot/목 좀 축이세요(미구현)")]
+[CreateAssetMenu(fileName = "P019", menuName = "Plot/목 좀 축이세요", order = 019)]
 
 public class P019 : Plot
 {
     [Header("해당 공작 설정")]
     [SerializeField] private int maxInfluence;
     [SerializeField] private int pietyCost;
-    [SerializeField] private int stunTime;
+    [SerializeField] private float stunTime;
 
     public override int cost => pietyCost;
 
@@ -18,7 +18,7 @@ public class P019 : Plot
         plotGrade = PlotGrade.Rare;
         
         // 텍스트 기본값
-        plotName = "목 좀 축이세요(미구현)";
+        plotName = "목 좀 축이세요";
         plotDescription = "푸룬 주스가 뭘까...?";
 
         // 수치 기본값
@@ -27,6 +27,7 @@ public class P019 : Plot
 
         maxInfluence = 45;
         pietyCost = 45;
+        stunTime = 45f;
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -46,16 +47,24 @@ public class P019 : Plot
 
         for (int i = 1; i < 3; i++)
         {
-            if (cm.Cardinals[highestHpCardinal].Piety < cm.Cardinals[i].Piety)
+            if (cm.Cardinals[highestHpCardinal].Hp < cm.Cardinals[i].Hp)
             {
                 highestHpCardinal = i;
             }
         }
 
-        /*
-         * 행동 불가 함수
-        cm.Cardinals[highestHpCardinal].Stun(stunTime);
-        */
+
+        Cardinal target = cm.Cardinals[highestHpCardinal];
+
+        if (target != null)
+        {
+            StateController targetSC = target.GetComponent<StateController>();
+
+            if (targetSC != null)
+            {
+                targetSC.ApplyStun(stunTime);
+            }
+        }
     }
 
 }

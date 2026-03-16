@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -277,7 +277,7 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    private GameObject GetRandomItemPrefab()
+    public GameObject GetRandomItemPrefab()
     {
         bool isRare = (UnityEngine.Random.Range(0f, 100f) <= rareItemChance);
 

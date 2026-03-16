@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
@@ -283,8 +283,11 @@ public class CardinalManager : MonoBehaviour
             sc.ConClaving = true;
             c.SetAgentSize(0.1f, 0.1f);
 
+            sc.ReleaseStun(false);   //행동불가 상태라면 풀어주기
+
             // 모든 코루틴 멈추고 이동 명령 
             sc.MoveToWaypoints(new Transform[] { tempPoint.transform });
+
         }
 
         Destroy(targetParent, 1f);

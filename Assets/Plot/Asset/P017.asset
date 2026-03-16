@@ -21,6 +21,6 @@ MonoBehaviour:
   plotGrade: 1
   plotWeightBase: 10
   plotWeightMultiplier: 0.05
-  minInfluence: 50
+  minInfluence: 0
   pietyCost: 50
   hpDelta: -40

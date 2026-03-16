@@ -1,6 +1,7 @@
-﻿using UnityEngine;
+﻿using NUnit.Framework;
+using UnityEngine;
 
-[CreateAssetMenu(fileName = "P001", menuName = "Plot/한 숨 돌리기")]
+[CreateAssetMenu(fileName = "P001", menuName = "Plot/한 숨 돌리기", order = 001)]
 
 public class P001 : Plot
 {
