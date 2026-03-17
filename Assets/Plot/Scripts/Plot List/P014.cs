@@ -43,7 +43,7 @@ public class P014 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        performer.ChangeInfluence(pietyDelta);
+        performer.ChangePiety(pietyDelta);
     }
     
 }

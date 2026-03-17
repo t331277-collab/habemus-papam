@@ -31,6 +31,11 @@ public class PlotUI : MonoBehaviour
 
     void Start()
     {
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent += OnGameContextChanged;
+        }
+
         plotSelectUI.SetActive(false);
 
         for (int i = 0; i < 3; i++)
@@ -40,9 +45,24 @@ public class PlotUI : MonoBehaviour
         }
 
         ResetPlotUI();
-
-
     }
+
+    void OnDestroy()
+    {
+        if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
+        {
+            InGameManager.Instance.Context.OnGameContextEvent -= OnGameContextChanged;
+        }
+    }
+
+    private void OnGameContextChanged(GameContext.GameContextEvent eventType)
+    {
+        if (eventType == GameContext.GameContextEvent.ConclaveEnd)
+        {
+            OnClickClose();
+        }
+    }
+
 
     public void ShowPlotUI(Cardinal performer)
     {
