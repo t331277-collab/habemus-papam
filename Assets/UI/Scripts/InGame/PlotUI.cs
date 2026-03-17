@@ -33,7 +33,15 @@ public class PlotUI : MonoBehaviour
     {
         plotSelectUI.SetActive(false);
 
+        for (int i = 0; i < 3; i++)
+        {
+            int index = i;
+            plotUseButtons[index].onClick.AddListener(() => OnSelectPlot(index));
+        }
+
         ResetPlotUI();
+
+
     }
 
     public void ShowPlotUI(Cardinal performer)
