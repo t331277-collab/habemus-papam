@@ -21,6 +21,9 @@ public class P005 : Plot
         // 텍스트 기본값
         plotName = "골탕 먹이기";
         plotDescription = "안 아 줘 요";
+        plotEffect = "무작위 상대 후보 한명 체력<sprite name=hp> 15 감소";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
 
         // 수치 기본값
         plotWeightBase = 20;

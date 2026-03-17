@@ -18,10 +18,6 @@ public class P023 : Plot
         // 설정 기본값
         plotID = "P023";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "노블레스 오블리주";
-        plotDescription = "큰 힘에는 큰 책임이 따른다";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -31,6 +27,13 @@ public class P023 : Plot
         pietyCost = 0;
         pietyIncrease = 30;
         pietyDecrease = -30;
+
+        // 텍스트 기본값
+        plotName = "노블레스 오블리주";
+        plotDescription = "큰 힘에는 큰 책임이 따른다";
+        plotEffect = "가장 정치력<sprite name=influence>이 높은 후보 경건함<sprite name=piety> 30 감소\n가장 정치력<sprite name=influence>이 낮은 후보 경건함<sprite name=piety> 30 증가";
+        plotCondiText = $"";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

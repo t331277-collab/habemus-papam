@@ -16,10 +16,6 @@ public class P002 : Plot
         // 설정 기본값
         plotID = "P002";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "은밀한 논의";
-        plotDescription = "...점심 뭐 먹지?";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -28,6 +24,14 @@ public class P002 : Plot
         maxInfluence = 30;
         pietyCost = 20;
         influenceDelta = 15;
+
+        // 텍스트 기본값
+        plotName = "은밀한 논의";
+        plotDescription = "...점심 뭐 먹지?";
+        plotEffect = "정치력<sprite name=influence> 15 증가";
+        plotCondiText = $"<sprite name=influence>{maxInfluence}<sprite name=down>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

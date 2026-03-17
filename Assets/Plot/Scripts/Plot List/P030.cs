@@ -17,10 +17,6 @@ public class P030 : Plot
         // 설정 기본값
         plotID = "P030";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "결코 다시 전쟁!(미구현)";
-        plotDescription = "성전이다, 우매한 이단들아!";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -29,6 +25,14 @@ public class P030 : Plot
         minInfluence = 55;
         pietyCost = 0;
         influenceDelta = 20;
+
+        // 텍스트 기본값
+        plotName = "결코 다시 전쟁!(미구현)";
+        plotDescription = "성전이다, 우매한 이단들아!";
+        plotEffect = "모든 후보 정치력<sprite name=influence> 40 증가\n이번 콘클라베 동안 자신의 체력<sprite name=hp> 최소 1 유지";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

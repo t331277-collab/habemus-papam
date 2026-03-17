@@ -17,10 +17,6 @@ public class P001 : Plot
         // 설정 기본값
         plotID = "P001";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "한 숨 돌리기";
-        plotDescription = "휴우...";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -29,6 +25,13 @@ public class P001 : Plot
         minInfluence = 15;
         pietyCost = 20;
         hpDelta = 20;
+
+        // 텍스트 기본값
+        plotName = "한 숨 돌리기";
+        plotDescription = "휴우...";
+        plotEffect = "체력<sprite name=hp> 20 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

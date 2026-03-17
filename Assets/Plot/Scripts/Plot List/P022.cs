@@ -6,7 +6,7 @@ using System.Collections;
 public class P022 : Plot
 {
     [Header("해당 공작 설정")]
-    [SerializeField] private int minInfluence;
+    [SerializeField] private int minHp;
     [SerializeField] private int hpCost;
     [SerializeField] private float speedPercentDelta;
     [SerializeField] private int duration;
@@ -18,24 +18,27 @@ public class P022 : Plot
         // 설정 기본값
         plotID = "P022";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "꼬리 자르기";
-        plotDescription = "쌀을 내주고 벼를 취한다";
 
         // 수치 기본값
         plotWeightBase = 10;
         plotWeightMultiplier = 0.1f;
 
-        minInfluence = 50;
+        minHp = 50;
         hpCost = 30;
         speedPercentDelta = 30f;
         duration = 30;
+
+        // 텍스트 기본값
+        plotName = "꼬리 자르기";
+        plotDescription = "쌀을 내주고 벼를 취한다";
+        plotEffect = "이동 속도 30% 증가 30초";
+        plotCondiText = $"<sprite name=hp>{minHp}<sprite name=up>";
+        plotCostText = $"<sprite name=hp>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
     {
-        return performer.Influence >= minInfluence;
+        return performer.Hp >= minHp;
     }
 
     public override void Execute(Cardinal performer)

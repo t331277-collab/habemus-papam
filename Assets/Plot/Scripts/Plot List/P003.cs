@@ -16,10 +16,6 @@ public class P003 : Plot
         // 설정 기본값
         plotID = "P003";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "마니또";
-        plotDescription = "소소한 선물이야";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -28,6 +24,14 @@ public class P003 : Plot
         minInfluence = 30;
         pietyCost = 15;
         pietyDelta = 30;
+
+        // 텍스트 기본값
+        plotName = "마니또";
+        plotDescription = "소소한 선물이야";
+        plotEffect = "무작위 상대 후보 한명 경건함<sprite name=piety> 30 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

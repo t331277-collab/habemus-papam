@@ -16,10 +16,6 @@ public class P021 : Plot
         // 설정 기본값
         plotID = "P021";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "무릎 꿇기(미구현)";
-        plotDescription = "추진력을 얻기 위함이었다!";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -28,6 +24,14 @@ public class P021 : Plot
         minInfluence = 55;
         pietyCost = 10;
         influenceDelta = -15;
+
+        // 텍스트 기본값
+        plotName = "무릎 꿇기(미구현)";
+        plotDescription = "추진력을 얻기 위함이었다!";
+        plotEffect = "모든 상대 후보 정치력<sprite name=influence> 15 감소\n다음 날 첫 콘클라베 때 지난 콘클라베 수에 따라 모든 상대 후보 정치력<sprite name=influence> 20 ~ 50 증가 ";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

@@ -18,10 +18,6 @@ public class P029 : Plot
         // 설정 기본값
         plotID = "P029";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "점심 복사 버그(미구현)";
-        plotDescription = "떡과 생선이 복사가 돼요";
 
         // 수치 기본값
         plotWeightBase = 5;
@@ -31,6 +27,13 @@ public class P029 : Plot
         pietyCost = 35;
         hpDelta = 5;
         influenceDelta = 2;
+
+        // 텍스트 기본값
+        plotName = "점심 복사 버그(미구현)";
+        plotDescription = "떡과 생선이 복사가 돼요";
+        plotEffect = "체력<sprite name=hp> 5 증가\n정치력<sprite name=influence> 2 증가\n(경건함)% 확률로 특수 엔딩";
+        plotCondiText = $"";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

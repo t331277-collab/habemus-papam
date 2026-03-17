@@ -16,10 +16,6 @@ public class P032 : Plot
         // 설정 기본값
         plotID = "P032";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "굴뚝 조작(미구현)";
-        plotDescription = "금단의 비기";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -27,6 +23,13 @@ public class P032 : Plot
 
         minInfluence = 70;
         pietyCost = 70;
+
+        // 텍스트 기본값
+        plotName = "굴뚝 조작(미구현)";
+        plotDescription = "금단의 비기";
+        plotEffect = "특수 아이템 '연막탄' 1개 획득";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

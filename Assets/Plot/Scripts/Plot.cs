@@ -8,6 +8,8 @@ public abstract class Plot : ScriptableObject
     [SerializeField] public string plotName;
     [TextArea] public string plotDescription;
     [TextArea] public string plotEffect;
+    [TextArea] public string plotCondiText;
+    [TextArea] public string plotCostText;
     [SerializeField] public Sprite plotImage;
     [SerializeField] public PlotGrade plotGrade;
     [SerializeField] public float plotWeightBase;
