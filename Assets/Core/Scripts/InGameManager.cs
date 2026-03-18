@@ -62,6 +62,11 @@ public class GameContext
         }
     }
 
+    public void ChangeRemainingTime(float deltaTime)
+    {
+        remainingTime = Mathf.Clamp(remainingTime + deltaTime, 0f, InGameManager.Instance.Balance.MaxConclaveTime);
+    }
+
     public void StartGame()
     {
         OnGameContextEvent?.Invoke(GameContextEvent.ConclaveStart);
