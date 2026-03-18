@@ -58,6 +58,13 @@ public class CardinalManager : MonoBehaviour
         InitializeCardinals();
     }
 
+    public List<Cardinal> GetAICardinlas()
+    {
+        var aiCardinals = cardinals.Where(c => !c.CompareTag("Player")).ToList();
+
+        return aiCardinals;
+    }
+
     //게임 시작시 NPC, Player 생성 및 대기
     private void InitializeCardinals()
     {
