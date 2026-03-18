@@ -20,7 +20,7 @@ MonoBehaviour:
   itemEffectDescription: "\uC0AC\uC6A9\uD55C \uCF58\uD074\uB77C\uBCA0 \uB3D9\uC548
     \uC5F0\uC124 \uC2DC \uC815\uCE58\uB825 \uB300\uC2E0 \uCCB4\uB825\uACFC \uACBD\uAC74\uD568\uC744
     10\uC529 \uD68C\uBCF5"
-  itemImage: {fileID: 6548157265494232766, guid: 95cf4cf7a18d7254d823c2e44688b2c3, type: 3}
+  itemImage: {fileID: 6527845173001157465, guid: 2550094c5d260f34f86d67d9b05643eb, type: 3}
   itemGrade: 1
   itemExpirationType: 0
   usageType: 1

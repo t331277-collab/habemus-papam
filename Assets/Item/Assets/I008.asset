@@ -18,7 +18,7 @@ MonoBehaviour:
     \uACBD\uAC74\uD55C \uD314\uCC0C\uB2E4!"
   itemEffectDescription: "\uAE30\uB3C4 \uC2DC \uACBD\uAC74\uD568 \uD68C\uBCF5\uB7C9
     5 \uC99D\uAC00"
-  itemImage: {fileID: 6331403572281768256, guid: b63fb59cedf3dd7468964a57accd5e85, type: 3}
+  itemImage: {fileID: -194224930418327051, guid: 9d9ca0b1f3a562042818da62901b41e2, type: 3}
   itemGrade: 0
   itemExpirationType: 2
   usageType: 0

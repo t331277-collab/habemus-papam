@@ -19,7 +19,7 @@ MonoBehaviour:
   itemEffectDescription: "\uC5F0\uC124 \uC2DC \uC815\uCE58\uB825 \uD68C\uBCF5\uB7C9
     \uCD5C\uC18C\uB85C \uACE0\uC815, \uB300\uC2E0 \uACBD\uAC74\uD568\uC744 5\uC529
     \uD68C\uBCF5"
-  itemImage: {fileID: -8188013132830261255, guid: ea7b47fa0b184fc4f81a37378d6cfbf7, type: 3}
+  itemImage: {fileID: 780759684653237311, guid: a6f51c839b9ce9b43bfaab591e9757f9, type: 3}
   itemGrade: 0
   itemExpirationType: 1
   usageType: 0
