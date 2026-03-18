@@ -119,7 +119,7 @@ public class Cardinal : MonoBehaviour
 
     public void ChangeSpeed(float delta)
     {
-        speedMultiplier = delta;
+        speedMultiplier += delta;
 
         // 마우스 이동(NavMeshAgent)의 속도를 즉시 업데이트합니다.
         if (agent != null)

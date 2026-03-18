@@ -27,6 +27,9 @@ public class PlotUI : MonoBehaviour
     [Header("--- 테스트용 공작 ---")]
     public Plot testPlot;
 
+    [Header("--- 테스트용 아이템 ---")]
+    public GameObject testItem;
+
     private Cardinal performer;
 
     void Start()
@@ -186,5 +189,21 @@ public class PlotUI : MonoBehaviour
     public void PlotTest()
     {
         testPlot.Execute(performer);
+    }
+
+    public void ItemTest()
+    {
+        FieldItem rewardItem = testItem.GetComponent<FieldItem>();
+
+        if (rewardItem != null)
+        {
+            Item data = rewardItem.ItemData;
+
+            if (data != null)
+            {
+                InventoryManager.Instance.AddItem(data);
+            }
+        }
+
     }
 }

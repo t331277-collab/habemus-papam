@@ -78,24 +78,24 @@ public class I001 : Item
                 target.StopCoroutine(heavyRoutine);
                 heavyRoutine = null;
             }
-            target.RestoreMoveSpeed();
+            target.ChangeSpeed(currentReductionLevel);
         }
     }
 
     private IEnumerator BecomeHeavierRoutine(Cardinal target)
     {
+        target.ChangeSpeed(-currentReductionLevel);
+
         while (true)
         {
-            float speedMultiplier = 1.0f - currentReductionLevel;
-            if (speedMultiplier < 0.01f) speedMultiplier = 0.01f;
-
-            target.ChangeSpeed(speedMultiplier);
-
             yield return new WaitForSeconds(tickInterval);
 
-            currentReductionLevel += reductionPerTick;
+            if (currentReductionLevel < 0.99f)
+            {
+                target.ChangeSpeed(-reductionPerTick);
 
-            if (currentReductionLevel > 0.99f) currentReductionLevel = 0.99f;
+                currentReductionLevel += reductionPerTick;
+            }
         }
     }
 
