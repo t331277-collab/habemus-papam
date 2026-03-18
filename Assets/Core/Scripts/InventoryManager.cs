@@ -96,6 +96,20 @@ public class InventoryManager : MonoBehaviour
         
     }
 
+    public Item GetItemByID(string id)
+    {
+        foreach (var item in inventoryItems)
+        {
+            if (item != null && item.itemID == id) return item;
+        }
+
+        foreach (var item in activeBuffs)
+        {
+            if (item != null && item.itemID == id) return item;
+        }
+
+        return null;
+    }
 
 
     public bool AddItem(Item newItem)
