@@ -4,8 +4,8 @@
 public class I002 : Item
 {
     [Header("나무지팡이 설정")]
-    [Tooltip("이동 속도 증가율 (1.4 = 40% 증가)")]
-    [SerializeField] private float speedMultiplier = 1.4f;
+    [Tooltip("이동 속도 증가율 (0.4 = 40% 증가)")]
+    [SerializeField] private float speedMultiplier = 0.4f;
 
     [Tooltip("사용 시 감소시킬 체력")]
     [SerializeField] private int damageAmount = 40;
@@ -21,7 +21,7 @@ public class I002 : Item
         itemDescription = "걷기가 편해진다. 마음에 안 드는 사람을 위협할 수도 있다!";
         itemEffectDescription = "소지 시 이동 속도 40% 증가. 사용 시 체력이 가장 낮은 후보(NPC)의 체력 40 감소.";
 
-        speedMultiplier = 1.4f;
+        speedMultiplier = 0.4f;
         damageAmount = 40;
     }
 
@@ -47,7 +47,7 @@ public class I002 : Item
         Cardinal player = FindPlayer();
         if (player != null)
         {
-            player.RestoreMoveSpeed();
+            player.ChangeSpeed(-speedMultiplier);
         }
     }
 

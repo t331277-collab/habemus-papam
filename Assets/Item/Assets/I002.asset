@@ -23,5 +23,5 @@ MonoBehaviour:
   itemGrade: 1
   itemExpirationType: 2
   usageType: 1
-  speedMultiplier: 1.4
+  speedMultiplier: 0.4
   damageAmount: 40

@@ -19,10 +19,6 @@ public class P007 : Plot
         // 설정 기본값
         plotID = "P007";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "드랍 더 비트";
-        plotDescription = "새긴다! 태양의 비트!";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -32,6 +28,14 @@ public class P007 : Plot
         pietyCost = 15;
         speedPercentDelta = 10f;
         duration = 20;
+
+        // 텍스트 기본값
+        plotName = "드랍 더 비트";
+        plotDescription = "새긴다! 태양의 비트!";
+        plotEffect = "모든 후보 이동속도 10% 증가 20초";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

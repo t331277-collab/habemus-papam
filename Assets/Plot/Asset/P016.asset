@@ -15,8 +15,11 @@ MonoBehaviour:
   plotID: P016
   plotName: "\uC0BC\uC704\uC77C\uCCB4?"
   plotDescription: "\uC0BC\uC0BC \uAE08\uC9C0"
-  plotEffect: "\uAC00\uC7A5 \uC815\uCE58\uB825\uC774 \uB192\uC740 \uC0C1\uB300 \uD6C4\uBCF4
-    \uACBD\uAC74\uD568 30 \uC99D\uAC00"
+  plotEffect: "\uCCB4\uB825<sprite name=hp> 33 \uC99D\uAC00\n\uC815\uCE58\uB825<sprite
+    name=influence>, \uACBD\uAC74\uD568<sprite name=piety> 33 \uAC10\uC18C"
+  plotCondiText: <sprite name=hp>33<sprite name=hp> <sprite name=influence>33<sprite
+    name=up> <sprite name=piety>33<sprite name=up>
+  plotCostText: <sprite name=piety>  0
   plotImage: {fileID: 0}
   plotGrade: 0
   plotWeightBase: 20

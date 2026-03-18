@@ -16,10 +16,6 @@ public class P025 : Plot
         // 설정 기본값
         plotID = "P025";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "앙코르(미구현)";
-        plotDescription = "좋은 건 한 번 더 해야지";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -28,6 +24,13 @@ public class P025 : Plot
         minInfluence = 60;
         pietyCost = 40;
         influenceDelta = 30;
+
+        // 텍스트 기본값
+        plotName = "앙코르(미구현)";
+        plotDescription = "좋은 건 한 번 더 해야지";
+        plotEffect = "저번 콘클라베에서 선출되었던 후보 정치력<sprite name=influence> 30 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

@@ -16,10 +16,6 @@ public class P028 : Plot
         // 설정 기본값
         plotID = "P028";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "레수르스망";
-        plotDescription = "나 다시 돌아갈래!";
 
         // 수치 기본값
         plotWeightBase = 5;
@@ -27,6 +23,13 @@ public class P028 : Plot
 
         maxInfluence = 30;
         pietyCost = 40;
+
+        // 텍스트 기본값
+        plotName = "레수르스망";
+        plotDescription = "나 다시 돌아갈래!";
+        plotEffect = "모든 후보의 정치력<sprite name=influence>을 경건함<sprite name=piety>으로 전환";
+        plotCondiText = $"<sprite name=influence>{maxInfluence}<sprite name=down>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

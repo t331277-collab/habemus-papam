@@ -20,10 +20,6 @@ public class P016 : Plot
         // 설정 기본값
         plotID = "P016";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "삼위일체?";
-        plotDescription = "삼삼 금지";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -36,6 +32,14 @@ public class P016 : Plot
         hpDelta = 33;
         influenceDelta = -33;
         pietyDelta = -33;
+
+        // 텍스트 기본값
+        plotName = "삼위일체?";
+        plotDescription = "삼삼 금지";
+        plotEffect = "체력<sprite name=hp> 33 증가\n정치력<sprite name=influence>, 경건함<sprite name=piety> 33 감소";
+        plotCondiText = $"<sprite name=hp>{minHp}<sprite name=hp> <sprite name=influence>{minInfluence}<sprite name=up> <sprite name=piety>{minPiety}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)

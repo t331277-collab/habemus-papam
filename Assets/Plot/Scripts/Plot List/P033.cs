@@ -16,10 +16,6 @@ public class P033 : Plot
         // 설정 기본값
         plotID = "P033";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "나는 용서하마(미구현)";
-        plotDescription = "하지만 이 녀석이 용서할까?";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -27,6 +23,13 @@ public class P033 : Plot
 
         minInfluence = 60;
         pietyCost = 60;
+
+        // 텍스트 기본값
+        plotName = "나는 용서하마(미구현)";
+        plotDescription = "하지만 이 녀석이 용서할까?";
+        plotEffect = "다음 콘클라베 때, 이번 콘클라베 동안 감소한 체력<sprite name=hp>만큼 모든 상대 후보의 체력<sprite name=hp> 감소";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

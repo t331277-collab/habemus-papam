@@ -17,11 +17,6 @@ public class P015 : Plot
         // 설정 기본값
         plotID = "P015";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "열렬한 찬양";
-        plotDescription = "추기경님 축지법 쓰신다";
-        plotEffect = $"가장 정치력이 높은 상대 후보 경건함 <sprite name='Piety'> 30 증가";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -30,6 +25,13 @@ public class P015 : Plot
         minInfluence = 40;
         pietyCost = 15;
         pietyDelta = 30;
+
+        // 텍스트 기본값
+        plotName = "열렬한 찬양";
+        plotDescription = "추기경님 축지법 쓰신다";
+        plotEffect = "가장 정치력<sprite name=influence>이 높은 상대 후보 경건함<sprite name=piety> 30 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

@@ -19,10 +19,6 @@ public class P034 : Plot
         // 설정 기본값
         plotID = "P034";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "언더독";
-        plotDescription = "중요한 것은 깎이지 않는 마음";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -31,6 +27,13 @@ public class P034 : Plot
         minInfluence = 50;
         pietyCost = 40;
         pietyDelta = 60;
+
+        // 텍스트 기본값
+        plotName = "언더독";
+        plotDescription = "중요한 것은 깎이지 않는 마음";
+        plotEffect = "가장 체력<sprite name=hp> 이 낮은 후보 정치력<sprite name=influence>, 경건함<sprite name=piety>  60 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

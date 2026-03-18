@@ -17,10 +17,6 @@ public class P017 : Plot
         // 설정 기본값
         plotID = "P017";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "이 불경한 자가";
-        plotDescription = "깡!";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -29,6 +25,13 @@ public class P017 : Plot
         minInfluence = 50;
         pietyCost = 50;
         hpDelta = -40;
+
+        // 텍스트 기본값
+        plotName = "이 불경한 자가";
+        plotDescription = "깡!";
+        plotEffect = "가장 경건함<sprite name=piety>이 낮은 상대 후보 체력<sprite name=hp> 40 감소";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

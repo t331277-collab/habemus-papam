@@ -17,10 +17,6 @@ public class P006 : Plot
         // 설정 기본값
         plotID = "P006";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "커피 회동";
-        plotDescription = "커피 한 잔의 여유";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -29,6 +25,13 @@ public class P006 : Plot
         minInfluence = 25;
         pietyCost = 20;
         influenceDelta = 10;
+
+        // 텍스트 기본값
+        plotName = "커피 회동";
+        plotDescription = "커피 한 잔의 여유";
+        plotEffect = "모든 후보 정치력<sprite name=influence> 10 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)

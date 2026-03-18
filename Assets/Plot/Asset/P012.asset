@@ -15,7 +15,9 @@ MonoBehaviour:
   plotID: P012
   plotName: "\uD479 \uC26C\uAE30"
   plotDescription: "\uC26C\uC5C8\uC74C \uCD94\uAE30\uACBD"
-  plotEffect: "\uCCB4\uB825 20 \uC99D\uAC00"
+  plotEffect: "\uCCB4\uB825<sprite name=hp> 20 \uC99D\uAC00"
+  plotCondiText: <sprite name=influence>40<sprite name=up>
+  plotCostText: <sprite name=piety>  35
   plotImage: {fileID: 0}
   plotGrade: 1
   plotWeightBase: 20

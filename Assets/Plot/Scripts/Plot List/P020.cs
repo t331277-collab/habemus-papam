@@ -16,11 +16,6 @@ public class P020 : Plot
         // 설정 기본값
         plotID = "P020";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "선물 개봉";
-        plotDescription = "한 번 만에 나왔는데 이거 좋은 건가요?";
-        plotEffect = "랜덤 아이템 2개 획득";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -29,6 +24,13 @@ public class P020 : Plot
         minInfluence = 0;
         pietyCost = 20;
         rewardCount = 2;
+
+        // 텍스트 기본값
+        plotName = "선물 개봉";
+        plotDescription = "한 번 만에 나왔는데 이거 좋은 건가요?";
+        plotEffect = "랜덤 아이템 2개 획득";
+        plotCondiText = $"";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
