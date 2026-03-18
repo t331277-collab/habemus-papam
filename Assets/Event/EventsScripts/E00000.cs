@@ -1,22 +1,19 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "E11200", menuName = "Events/기도")]
-public class E11200 : Event
+[CreateAssetMenu(fileName = "E00000", menuName = "Events/이벤트이름")]
+public class E00000 : Event
 {
     void Reset()
     {
-        eventID = "E11200";
-        eventName = "기도";
-        maxAppear = 1;
+        eventID = "E00000";
+        eventName = "이벤트이름";
+        maxAppear = 2;
 
         eventWeightBase = 0f;
         eventWeightMultiplier = 0f;
 
         option1Chance = 1f;
         option2Chance = 1f;
-
-        // 선행 충돌 이벤트는 일단 인스펙터에서 드래그드롭으로처리
-        //preEvents.Add(InGameManager.Instance.EventManager.GetEventById("E11100"));
     }
 
     public override bool CanChoiceOption1(Cardinal performer)
@@ -31,18 +28,38 @@ public class E11200 : Event
 
     public override bool OnChoiceOption1(Cardinal performer)
     {
-        if(Random.value > option1Chance) return false;
         if(!CanChoiceOption1(performer)) return false;
 
-        
+        if(Random.value <= option1Chance)
+        {  // 성공했을 때 로직
 
-        return true;
+
+            return true;
+        }
+        else
+        {  // 실패했을 때 로직
+            
+
+            return false;
+        }
     }
 
 
     public override bool OnChoiceOption2(Cardinal performer)
     {
         if(!CanChoiceOption2(performer)) return false;
-        return true;
+
+        if(Random.value <= option2Chance)
+        {  // 성공했을 때 로직
+
+
+            return true;
+        }
+        else
+        {  // 실패했을 때 로직
+            
+
+            return false;
+        }
     }
 }

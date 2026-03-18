@@ -27,5 +27,5 @@ MonoBehaviour:
   speechSuccessDeltaHp: -5
   speechFailDeltaInfluence: -2
   speechFailDeltaHp: -5
-  maxConclaveTime: 20
+  maxConclaveTime: 30
   hpDeltaPerSec: -0.3

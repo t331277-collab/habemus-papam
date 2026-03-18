@@ -20,6 +20,9 @@ public class Cardinal : MonoBehaviour
 
     private float speedMultiplier = 1f;
 
+    // 이벤트에서 기도시 체력회복량 증가 옵션을 위한 변수
+    public float prayDeltaHpEvent = 0f;
+
     // 추기경 멤버변수
     private List<Item> items;
     private NavMeshAgent agent;
@@ -189,7 +192,7 @@ public class Cardinal : MonoBehaviour
         if (Random.value < balance.PraySuccessChance)
         {
             ChangePiety(balance.PraySuccessDeltaPiety);
-            ChangeHp(balance.PraySuccessDeltaHp);
+            ChangeHp(balance.PraySuccessDeltaHp + prayDeltaHpEvent);
         }
         else
         {

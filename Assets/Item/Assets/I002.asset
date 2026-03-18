@@ -19,7 +19,7 @@ MonoBehaviour:
   itemEffectDescription: "\uC18C\uC9C0 \uC2DC \uC774\uB3D9 \uC18D\uB3C4 40% \uC99D\uAC00.
     \uC0AC\uC6A9 \uC2DC \uCCB4\uB825\uC774 \uAC00\uC7A5 \uB0AE\uC740 \uD6C4\uBCF4(NPC)\uC758
     \uCCB4\uB825 40 \uAC10\uC18C."
-  itemImage: {fileID: 0}
+  itemImage: {fileID: -1558343435522932048, guid: 0d33f8596e8db3046bf2055c0cb7abdd, type: 3}
   itemGrade: 1
   itemExpirationType: 2
   usageType: 1
