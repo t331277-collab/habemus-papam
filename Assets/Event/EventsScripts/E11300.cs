@@ -19,16 +19,6 @@ public class E11300 : Event
         //preEvents.Add(InGameManager.Instance.EventManager.GetEventById("E11100"));
     }
 
-    public override bool CanChoiceOption1(Cardinal performer)
-    {
-        return true;
-    }
-
-    public override bool CanChoiceOption2(Cardinal performer)
-    {
-        return true;
-    }
-
     public override bool OnChoiceOption1(Cardinal performer)
     {
         if(Random.value > option1Chance) return false;

@@ -16,16 +16,6 @@ public class E11100 : Event
         option2Chance = 1f;
     }
 
-    public override bool CanChoiceOption1(Cardinal performer)
-    {
-        return true;
-    }
-
-    public override bool CanChoiceOption2(Cardinal performer)
-    {
-        return true;
-    }
-
     public override bool OnChoiceOption1(Cardinal performer)
     {
         if(Random.value > option1Chance) return false;
