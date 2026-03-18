@@ -32,7 +32,15 @@ public abstract class Event : ScriptableObject
         return eventWeightBase + progressWeight;
     }
 
-    // 선택지 성공시 true, 실패시 false 반환
+    public virtual bool CanChoiceOption1(Cardinal performer)
+    {
+        return true;
+    }
+    public virtual bool CanChoiceOption2(Cardinal performer)
+    {
+        return true;
+    }
+
     public abstract bool OnChoiceOption1(Cardinal performer);
     public abstract bool OnChoiceOption2(Cardinal performer);
 }
