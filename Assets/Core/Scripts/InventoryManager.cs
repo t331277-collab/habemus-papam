@@ -35,6 +35,8 @@ public class InventoryManager : MonoBehaviour
         {
             InGameManager.Instance.Context.OnGameContextEvent += OnGameContextChanged;
         }
+
+        RefreshUI();
     }
 
     void OnDestroy()
@@ -84,8 +86,6 @@ public class InventoryManager : MonoBehaviour
 
         foreach (var item in itemsToRemove)
         {
-            Debug.Log($"'{item.itemName}' 버프/아이템 만료됨 (유형: {item.itemExpirationType})");
-
             item.OnRemove();
             targetList.Remove(item);
 
@@ -95,9 +95,9 @@ public class InventoryManager : MonoBehaviour
             }
         }
 
-        if (shouldUpdateUI && inventoryUI != null)
+        if (shouldUpdateUI)
         {
-            inventoryUI.UpdateSlotUI(inventoryItems);
+            RefreshUI();
         }
     }
 
@@ -131,7 +131,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (inventoryItems.Count >= maxSlots)
         {
-            Debug.Log("인벤토리가 가득 참");
+            Debug.Log("[Inventory] No empty slots.");
             return false;
         }
 
@@ -143,11 +143,7 @@ public class InventoryManager : MonoBehaviour
             playerCardinal.AddPassiveItem(newItem);
         }
 
-        if (inventoryUI != null)
-        {
-            inventoryUI.UpdateSlotUI(inventoryItems);
-        }
-
+        RefreshUI();
         return true;
     }
 
@@ -170,12 +166,8 @@ public class InventoryManager : MonoBehaviour
                 playerCardinal.AddPassiveItem(item);
             }
 
-            if (inventoryUI != null)
-            {
-                inventoryUI.UpdateSlotUI(inventoryItems);
-            }
-
-            Debug.Log($"[시스템] '{item.itemName}'의 효과가 버프 목록에 등록되었습니다.");
+            RefreshUI();
+            Debug.Log($"[Inventory] '{item.itemName}' moved to active buffs.");
         }
         else if (item.ConsumeOnUse)
         {
@@ -191,7 +183,7 @@ public class InventoryManager : MonoBehaviour
         }
 
         RemoveItem(item);
-        Debug.Log($"아이템 제거: {item.itemName}");
+        Debug.Log($"[Inventory] Removed item: {item.itemName}");
     }
 
     public void RemoveItem(Item item)
@@ -209,10 +201,7 @@ public class InventoryManager : MonoBehaviour
             playerCardinal.RemovePassiveItem(item);
         }
 
-        if (inventoryUI != null)
-        {
-            inventoryUI.UpdateSlotUI(inventoryItems);
-        }
+        RefreshUI();
     }
 
     public InventorySaveData CaptureSaveData()
@@ -265,10 +254,7 @@ public class InventoryManager : MonoBehaviour
 
         if (saveData == null || itemCatalog == null)
         {
-            if (inventoryUI != null)
-            {
-                inventoryUI.UpdateSlotUI(inventoryItems);
-            }
+            RefreshUI();
             return;
         }
 
@@ -276,11 +262,7 @@ public class InventoryManager : MonoBehaviour
         RestoreItemList(saveData.activeBuffs, activeBuffs, itemCatalog);
 
         ReapplyItemsAfterLoad();
-
-        if (inventoryUI != null)
-        {
-            inventoryUI.UpdateSlotUI(inventoryItems);
-        }
+        RefreshUI();
     }
 
     private void RestoreItemList(List<ItemSaveData> source, List<Item> target, Dictionary<string, Item> itemCatalog)
@@ -299,7 +281,7 @@ public class InventoryManager : MonoBehaviour
 
             if (!itemCatalog.TryGetValue(itemSave.itemId, out Item item) || item == null)
             {
-                Debug.LogWarning($"[Save] 아이템 '{itemSave.itemId}'를 찾지 못해 복원을 건너뜁니다.");
+                Debug.LogWarning($"[Save] Missing item asset: {itemSave.itemId}");
                 continue;
             }
 
@@ -341,6 +323,14 @@ public class InventoryManager : MonoBehaviour
 
             item.OnReapply(playerCardinal);
             playerCardinal.AddPassiveItem(item);
+        }
+    }
+
+    public void RefreshUI()
+    {
+        if (inventoryUI != null)
+        {
+            inventoryUI.UpdateSlotUI(inventoryItems);
         }
     }
 }
