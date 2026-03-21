@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -7,12 +7,16 @@ public class GameContext
 {
     public enum Conclave
     {
-        Dawn, Morning, Afternoon, Evening
+        Dawn,
+        Morning,
+        Afternoon,
+        Evening
     }
 
     public enum GameContextEvent
     {
-        ConclaveStart, ConclaveEnd
+        ConclaveStart,
+        ConclaveEnd
     }
 
     int currentDay;
@@ -20,20 +24,28 @@ public class GameContext
     float remainingTime;
 
     public event Action<GameContextEvent> OnGameContextEvent;
+
     public int CurrentDay => currentDay;
     public Conclave CurrentConclave => currentConclave;
     public float RemainingTime => remainingTime;
 
-    public void InitGameContext(int day=1, Conclave conclave=Conclave.Dawn)
+    public void InitGameContext(int day = 1, Conclave conclave = Conclave.Dawn)
     {
         currentDay = day;
         currentConclave = conclave;
         remainingTime = InGameManager.Instance.Balance.MaxConclaveTime;
     }
 
+    public void RestoreState(int day, Conclave conclave, float restoredRemainingTime)
+    {
+        currentDay = day;
+        currentConclave = conclave;
+        remainingTime = Mathf.Clamp(restoredRemainingTime, 0f, InGameManager.Instance.Balance.MaxConclaveTime);
+    }
+
     public void AdvanceConclave()
     {
-        if(currentConclave == Conclave.Evening)
+        if (currentConclave == Conclave.Evening)
         {
             currentConclave = Conclave.Dawn;
             currentDay++;
@@ -58,7 +70,10 @@ public class GameContext
         if (remainingTime > 0)
         {
             remainingTime -= deltaTime;
-            if (remainingTime < 0) remainingTime = 0;
+            if (remainingTime < 0)
+            {
+                remainingTime = 0;
+            }
         }
     }
 
@@ -96,30 +111,24 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private List<GameObject> rareItemPrefabs;
 
     [Range(0, 100)][SerializeField] private float spawnChance = 100f;
-    [Range(0, 100)][SerializeField] private float spawnTwoItemsChance = 30f; 
-    [Range(0, 100)][SerializeField] private float rareItemChance = 20f; 
+    [Range(0, 100)][SerializeField] private float spawnTwoItemsChance = 30f;
+    [Range(0, 100)][SerializeField] private float rareItemChance = 20f;
 
     private List<GameObject> spawnedFieldItems = new List<GameObject>();
-
-    // 시간 흐름 제어 플래그
     private bool isTimeRunning = false;
-    //첫 시작, 두번째 시작 판별 플래그 (공동선택 , 아이템 관련 관련 플래그)
-    private bool isFirstStart = true; //아이템 스폰 관련
-    public bool IsFirstStart => isFirstStart;
+    private bool isFirstStart = true;
+    private bool isSushiOn = false;
 
-    private bool isSushiOn = false; //공동선택 활성화 관련
-    public bool IsSushiOn => isSushiOn;
-
-    // 프로퍼티
     public GameBalance Balance => balance;
     public GameContext Context => gameContext;
     public bool IsTimeRunning => isTimeRunning;
     public EventManager EventManager => eventManager;
+    public bool IsFirstStart => isFirstStart;
+    public bool IsSushiOn => isSushiOn;
 
     void Awake()
     {
-        // 싱글톤
-        if(Instance != null && Instance != this)
+        if (Instance != null && Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -127,7 +136,6 @@ public class InGameManager : MonoBehaviour
 
         Instance = this;
 
-        // Awake 함수에 들어가야할 로직은 이 아래에
         gameContext = new GameContext();
         gameContext.OnGameContextEvent += HandleGameContextEvent;
 
@@ -137,16 +145,11 @@ public class InGameManager : MonoBehaviour
     void Start()
     {
         InitGame();
-
     }
 
     public void StartConclaveCycle()
     {
-        if (startButton != null)
-        {
-            startButton.interactable = false;
-            startButton.gameObject.SetActive(false);
-        }
+        ConfigureStartButton(false, false);
 
         if (isFirstStart)
         {
@@ -164,20 +167,22 @@ public class InGameManager : MonoBehaviour
 
     void Update()
     {
-        if(isTimeRunning)
+        if (!isTimeRunning)
         {
-            gameContext.Tick(Time.deltaTime);
+            return;
+        }
 
-            if (gameContext.RemainingTime <= 0)
-            {
-                StopTimer();             // 타이머 정지
-                gameContext.TimeOver();  // 종료 이벤트 발생
-            }
+        gameContext.Tick(Time.deltaTime);
 
-            if (CardinalManager.Instance != null)
-            {
-                CardinalManager.Instance.DrainAllCardinalHp(balance.HpDeltaPerSec * Time.deltaTime);
-            }
+        if (gameContext.RemainingTime <= 0)
+        {
+            StopTimer();
+            gameContext.TimeOver();
+        }
+
+        if (CardinalManager.Instance != null)
+        {
+            CardinalManager.Instance.DrainAllCardinalHp(balance.HpDeltaPerSec * Time.deltaTime);
         }
     }
 
@@ -203,25 +208,27 @@ public class InGameManager : MonoBehaviour
     {
         Debug.Log("퇴장 완료.");
 
-        if (startButton != null)
-        {
-            startButton.interactable = true;
-            startButton.gameObject.SetActive(true);
+        ConfigureStartButton(true, true);
 
-            if (ElectionManager.Instance != null)
-            {
-                ElectionManager.Instance.OnConclaveEnded();
-            }
+        if (ElectionManager.Instance != null)
+        {
+            ElectionManager.Instance.OnConclaveEnded();
         }
     }
 
     void InitGame()
     {
         isTimeRunning = false;
+        isFirstStart = true;
+        isSushiOn = false;
 
         gameContext.InitGameContext();
-        if (inventoryUIPanel != null) inventoryUIPanel.SetActive(false);
+        ConfigureStartButton(true, true);
 
+        if (inventoryUIPanel != null)
+        {
+            inventoryUIPanel.SetActive(false);
+        }
     }
 
     void HandleGameContextEvent(GameContext.GameContextEvent eventType)
@@ -231,13 +238,15 @@ public class InGameManager : MonoBehaviour
             case GameContext.GameContextEvent.ConclaveStart:
                 Debug.Log($"[InGameManager] 콘클라베 시작: {gameContext.CurrentConclave}");
 
-                // 추기경 입장 시작 명령
                 if (CardinalManager.Instance != null)
+                {
                     CardinalManager.Instance.StartConClave();
+                }
                 break;
 
             case GameContext.GameContextEvent.ConclaveEnd:
-                Debug.Log($"[InGameManager] 콘클라베 종료 (Time Over)");
+                Debug.Log("[InGameManager] 콘클라베 종료 (Time Over)");
+
                 if (inventoryUIPanel != null)
                 {
                     inventoryUIPanel.SetActive(false);
@@ -245,52 +254,66 @@ public class InGameManager : MonoBehaviour
 
                 ClearFieldItems();
 
-                // 추기경 퇴장 시작 명령
                 if (CardinalManager.Instance != null)
+                {
                     CardinalManager.Instance.StopConClave();
-                //판정 시작
-                
+                }
                 break;
         }
     }
 
     private void SpawnFieldItems()
     {
-        if (spawnPoints == null || spawnPoints.Count == 0) return;
-        if (commonItemPrefabs.Count == 0 && rareItemPrefabs.Count == 0) return;
+        if (spawnPoints == null || spawnPoints.Count == 0)
+        {
+            return;
+        }
 
-        if (UnityEngine.Random.Range(0f, 100f) > spawnChance) return;
+        if (commonItemPrefabs.Count == 0 && rareItemPrefabs.Count == 0)
+        {
+            return;
+        }
 
-        int spawnCount = (UnityEngine.Random.Range(0f, 100f) <= spawnTwoItemsChance) ? 2 : 1;
+        if (UnityEngine.Random.Range(0f, 100f) > spawnChance)
+        {
+            return;
+        }
 
+        int spawnCount = UnityEngine.Random.Range(0f, 100f) <= spawnTwoItemsChance ? 2 : 1;
         List<Transform> availablePoints = new List<Transform>(spawnPoints);
 
         for (int i = 0; i < spawnCount; i++)
         {
-            if (availablePoints.Count == 0) break;
+            if (availablePoints.Count == 0)
+            {
+                break;
+            }
 
             int pointIndex = UnityEngine.Random.Range(0, availablePoints.Count);
             Transform spawnPoint = availablePoints[pointIndex];
             availablePoints.RemoveAt(pointIndex);
 
             GameObject prefabToSpawn = GetRandomItemPrefab();
-            if (prefabToSpawn != null)
+            if (prefabToSpawn == null)
             {
-                GameObject spawnedObj = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
-                spawnedFieldItems.Add(spawnedObj); // 추적 리스트에 추가
+                continue;
             }
+
+            GameObject spawnedObj = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
+            spawnedFieldItems.Add(spawnedObj);
         }
     }
 
     public GameObject GetRandomItemPrefab()
     {
-        bool isRare = (UnityEngine.Random.Range(0f, 100f) <= rareItemChance);
+        bool isRare = UnityEngine.Random.Range(0f, 100f) <= rareItemChance;
 
         if (isRare && rareItemPrefabs.Count > 0)
         {
             return rareItemPrefabs[UnityEngine.Random.Range(0, rareItemPrefabs.Count)];
         }
-        else if (commonItemPrefabs.Count > 0)
+
+        if (commonItemPrefabs.Count > 0)
         {
             return commonItemPrefabs[UnityEngine.Random.Range(0, commonItemPrefabs.Count)];
         }
@@ -298,7 +321,44 @@ public class InGameManager : MonoBehaviour
         return null;
     }
 
-    private void ClearFieldItems()
+    public GameObject GetFieldItemPrefabByItemId(string itemId)
+    {
+        if (string.IsNullOrWhiteSpace(itemId))
+        {
+            return null;
+        }
+
+        foreach (var prefab in commonItemPrefabs)
+        {
+            if (PrefabMatchesItem(prefab, itemId))
+            {
+                return prefab;
+            }
+        }
+
+        foreach (var prefab in rareItemPrefabs)
+        {
+            if (PrefabMatchesItem(prefab, itemId))
+            {
+                return prefab;
+            }
+        }
+
+        return null;
+    }
+
+    private bool PrefabMatchesItem(GameObject prefab, string itemId)
+    {
+        if (prefab == null)
+        {
+            return false;
+        }
+
+        FieldItem fieldItem = prefab.GetComponent<FieldItem>();
+        return fieldItem != null && fieldItem.ItemData != null && fieldItem.ItemData.itemID == itemId;
+    }
+
+    public void ClearFieldItems()
     {
         foreach (var item in spawnedFieldItems)
         {
@@ -307,29 +367,145 @@ public class InGameManager : MonoBehaviour
                 Destroy(item);
             }
         }
-        spawnedFieldItems.Clear(); // 리스트 비우기
+
+        spawnedFieldItems.Clear();
+    }
+
+    public List<FieldItemSaveData> CaptureFieldItemSaveData()
+    {
+        List<FieldItemSaveData> saveData = new List<FieldItemSaveData>();
+
+        foreach (var spawnedItem in spawnedFieldItems)
+        {
+            if (spawnedItem == null)
+            {
+                continue;
+            }
+
+            FieldItem fieldItem = spawnedItem.GetComponent<FieldItem>();
+            if (fieldItem == null || fieldItem.ItemData == null)
+            {
+                continue;
+            }
+
+            saveData.Add(new FieldItemSaveData
+            {
+                itemId = fieldItem.ItemData.itemID,
+                position = SerializableVector3.FromVector3(spawnedItem.transform.position),
+                rotationZ = spawnedItem.transform.eulerAngles.z
+            });
+        }
+
+        return saveData;
+    }
+
+    public void RestoreFieldItems(List<FieldItemSaveData> saveData)
+    {
+        ClearFieldItems();
+
+        if (saveData == null)
+        {
+            return;
+        }
+
+        foreach (var fieldItemSave in saveData)
+        {
+            if (fieldItemSave == null || string.IsNullOrWhiteSpace(fieldItemSave.itemId))
+            {
+                continue;
+            }
+
+            GameObject prefab = GetFieldItemPrefabByItemId(fieldItemSave.itemId);
+            if (prefab == null)
+            {
+                Debug.LogWarning($"[Save] 필드 아이템 프리팹 '{fieldItemSave.itemId}'를 찾지 못했습니다.");
+                continue;
+            }
+
+            GameObject restored = Instantiate(
+                prefab,
+                fieldItemSave.position.ToVector3(),
+                Quaternion.Euler(0f, 0f, fieldItemSave.rotationZ));
+
+            spawnedFieldItems.Add(restored);
+        }
+    }
+
+    public GameContextSaveData CaptureSaveData()
+    {
+        return new GameContextSaveData
+        {
+            day = gameContext.CurrentDay,
+            conclave = (int)gameContext.CurrentConclave,
+            remainingTime = gameContext.RemainingTime,
+            isTimeRunning = isTimeRunning,
+            isFirstStart = isFirstStart,
+            isSushiOn = isSushiOn,
+            showStartButton = startButton != null && startButton.gameObject.activeSelf,
+            startButtonInteractable = startButton == null || startButton.interactable,
+            showInventoryPanel = inventoryUIPanel != null && inventoryUIPanel.activeSelf
+        };
+    }
+
+    public void RestoreGameContext(GameContextSaveData saveData)
+    {
+        if (saveData == null)
+        {
+            return;
+        }
+
+        GameContext.Conclave conclave = (GameContext.Conclave)Mathf.Clamp(saveData.conclave, 0, Enum.GetValues(typeof(GameContext.Conclave)).Length - 1);
+
+        gameContext.RestoreState(saveData.day, conclave, saveData.remainingTime);
+        isTimeRunning = saveData.isTimeRunning;
+        isFirstStart = saveData.isFirstStart;
+        isSushiOn = saveData.isSushiOn;
+
+        ConfigureStartButton(saveData.showStartButton, saveData.startButtonInteractable);
+
+        if (inventoryUIPanel != null)
+        {
+            inventoryUIPanel.SetActive(saveData.showInventoryPanel);
+        }
+    }
+
+    public void ConfigureStartButton(bool visible, bool interactable)
+    {
+        if (startButton == null)
+        {
+            return;
+        }
+
+        startButton.interactable = interactable;
+        startButton.gameObject.SetActive(visible);
     }
 
     public int GetProgress()
     {
-        if (CardinalManager.Instance == null) return 0;
+        if (CardinalManager.Instance == null)
+        {
+            return 0;
+        }
+
         CardinalManager cm = CardinalManager.Instance;
 
         int dayFactor = (gameContext.CurrentDay - 1) * 10;
         int hpFactor = Mathf.RoundToInt(Mathf.Clamp((400 - cm.GetCardinalHpSum()) * 0.05f, 0, 10));
         int polFactor = Mathf.RoundToInt(Mathf.Clamp(cm.GetCardinalPolSum() * 0.2f, 0, 30));
 
-        return Mathf.Clamp((dayFactor + hpFactor + polFactor), 0 , 100);
+        return Mathf.Clamp(dayFactor + hpFactor + polFactor, 0, 100);
     }
 
     public int GetCurrentDay()
     {
         return gameContext.CurrentDay;
     }
+
     public GameContext.Conclave GetCurrentConclave()
     {
         return gameContext.CurrentConclave;
     }
+
     public float GetRemainingTime()
     {
         return gameContext.RemainingTime;

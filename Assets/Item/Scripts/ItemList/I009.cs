@@ -3,6 +3,12 @@
 [CreateAssetMenu(fileName = "I009", menuName = "Items/게르마늄 태양 팔찌")]
 public class I009 : Item
 {
+    [System.Serializable]
+    private class RuntimeState
+    {
+        public bool hasUsedRevive;
+    }
+
     [Header("게르마늄 태양 팔찌 설정")]
     [Tooltip("기도 시 추가 경건함")]
     [SerializeField] private float pietyBonus;
@@ -55,5 +61,36 @@ public class I009 : Item
         }
 
         return false; 
+    }
+
+    public override void ResetRuntimeState()
+    {
+        hasUsedRevive = false;
+    }
+
+    public override string CaptureRuntimeState()
+    {
+        RuntimeState state = new RuntimeState
+        {
+            hasUsedRevive = hasUsedRevive
+        };
+
+        return JsonUtility.ToJson(state);
+    }
+
+    public override void RestoreRuntimeState(string runtimeStateJson)
+    {
+        ResetRuntimeState();
+
+        if (string.IsNullOrWhiteSpace(runtimeStateJson))
+        {
+            return;
+        }
+
+        RuntimeState state = JsonUtility.FromJson<RuntimeState>(runtimeStateJson);
+        if (state != null)
+        {
+            hasUsedRevive = state.hasUsedRevive;
+        }
     }
 }

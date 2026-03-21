@@ -1,14 +1,20 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+
 public class MainScene : MonoBehaviour
 {
     public void OnClickStartGame()
     {
-        SceneManager.LoadScene("GameScene");
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.StartNewGame();
+        }
     }
 
     public void OnClickLoad()
     {
-
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.LoadGame();
+        }
     }
 }

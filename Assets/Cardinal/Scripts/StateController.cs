@@ -108,6 +108,7 @@ public class StateController : MonoBehaviour
     private Coroutine praySequenceCoroutine;    //Praying
     private Coroutine speechSequenceCoroutine;  //Speeching
     private Coroutine stunCoroutine;            //Stun
+    private bool skipInitialCutScene = false;
 
     // 프로퍼티
     public bool IsMoving => pathCoroutine != null;
@@ -125,6 +126,11 @@ public class StateController : MonoBehaviour
 
     void Start()
     {
+        if (skipInitialCutScene)
+        {
+            return;
+        }
+
         EnterState(CardinalState.CutScene);
     }
 
@@ -167,6 +173,50 @@ public class StateController : MonoBehaviour
         ExitState(currentState);
         currentState = newState;
         EnterState(currentState);
+    }
+
+    public void PrepareForLoadedState()
+    {
+        skipInitialCutScene = true;
+        currentState = CardinalState.Idle;
+    }
+
+    public void ApplyLoadedState(CardinalState loadedState, bool isSchemer, bool isConClaving)
+    {
+        skipInitialCutScene = true;
+        StopAllActionCoroutines();
+        HideBubble();
+
+        ConClaving = isConClaving;
+        IsSchemer = false;
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+            agent.avoidancePriority = CompareTag("Player") ? 10 : 50;
+        }
+
+        currentState = CardinalState.CutScene;
+
+        if (loadedState == CardinalState.Stun)
+        {
+            ApplyStun(0f);
+            return;
+        }
+
+        ChangeState(loadedState);
+
+        if (isSchemer)
+        {
+            SetSchemerMode(true);
+        }
     }
 
     private void EnterState(CardinalState state)
