@@ -26,7 +26,7 @@ public class P007 : Plot
 
         minInfluence = 20;
         pietyCost = 15;
-        speedPercentDelta = 10f;
+        speedPercentDelta = 0.1f;
         duration = 20;
 
         // 텍스트 기본값
@@ -64,7 +64,7 @@ public class P007 : Plot
     {
         if (target == null) yield break;
 
-        float delta = target.MoveSpeed * (speedPercentDelta / 100f);
+        float delta = speedPercentDelta;
 
         target.ChangeSpeed(delta);
 
