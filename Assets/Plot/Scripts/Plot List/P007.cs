@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트(버그 픽스 중)", order = 007)]
+[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트", order = 007)]
 
 public class P007 : Plot
 {
