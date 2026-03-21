@@ -15168,6 +15168,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c257523d825ded3489fb7da3a82f9543, type: 2}
   - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
   - {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
+  - {fileID: 11400000, guid: 59e40dec1a0df584d866360ef9043650, type: 2}
   - {fileID: 11400000, guid: a21770bdc89e5ee4e83d8390b6eb16e6, type: 2}
   - {fileID: 11400000, guid: 031757fc79980cb44a122e6de9ea522b, type: 2}
   - {fileID: 11400000, guid: 2b49347dd840d9340ae1627811130400, type: 2}
@@ -33362,7 +33363,7 @@ MonoBehaviour:
   commonSprite: {fileID: -222549919845697694, guid: ac3b23821c4eb5a41b07f967bf2467fd, type: 3}
   rareSprite: {fileID: -1766780945608371564, guid: 1bde739df2e6e4844a28363854ec5265, type: 3}
   legendSprite: {fileID: 5101671700007261310, guid: 940191dd1ef4e0b4c86229f3f46aed9e, type: 3}
-  testPlot: {fileID: 11400000, guid: c257523d825ded3489fb7da3a82f9543, type: 2}
+  testPlot: {fileID: 11400000, guid: 59e40dec1a0df584d866360ef9043650, type: 2}
   testItem: {fileID: 0}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
