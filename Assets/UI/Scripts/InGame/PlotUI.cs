@@ -179,18 +179,19 @@ public class PlotUI : MonoBehaviour
         plotUseButtons[index].interactable = isPietyEnough && canExecute;
 
         string finalProgressText = currentPlot.plotCostText;
+        string statusMessage = "";
 
         if (!isPietyEnough)
         {
-            finalProgressText += "<br><color=red><size=60%>경건함 부족</size></color>";
+            statusMessage += " 경건함 부족";
         }
 
         if (!canExecute)
         {
-            finalProgressText += "<br><color=red><size=60%>조건 미충족</size></color>";
+            statusMessage += " 조건 미충족";
         }
 
-        buttonText.text = finalProgressText;
+        buttonText.text = finalProgressText + $"<br><color=red><size=60%>{statusMessage}</size></color>";
     }
 
     // 공작 UI 정보 리셋 함수
