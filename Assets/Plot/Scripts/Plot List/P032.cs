@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P032", menuName = "Plot/굴뚝 조작(미구현)", order = 032)]
+[CreateAssetMenu(fileName = "P032", menuName = "Plot/굴뚝 조작", order = 032)]
 
 public class P032 : Plot
 {
     [Header("해당 공작 설정")]
     [SerializeField] private int minInfluence;
     [SerializeField] private int pietyCost;
+    [SerializeField] private GameObject smokeBomb;
+    [SerializeField] private int rewardCount;
 
     public override int cost => pietyCost;
 
@@ -23,9 +25,10 @@ public class P032 : Plot
 
         minInfluence = 70;
         pietyCost = 70;
+        rewardCount = 1;
 
         // 텍스트 기본값
-        plotName = "굴뚝 조작(미구현)";
+        plotName = "굴뚝 조작";
         plotDescription = "금단의 비기";
         plotEffect = "특수 아이템 '연막탄' 1개 획득";
         plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
@@ -34,7 +37,7 @@ public class P032 : Plot
 
     public override bool CanExecute(Cardinal performer)
     {
-        return performer.Hp <= minInfluence;
+        return performer.Influence >= minInfluence;
     }
 
     public override void Execute(Cardinal performer)
@@ -43,9 +46,20 @@ public class P032 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        /*
-         * '연막탄' 획득 로직
-         */
+        for (int i = 0; i < rewardCount; i++)
+        {
+            FieldItem rewardItem = smokeBomb.GetComponent<FieldItem>();
+
+            if (rewardItem != null)
+            {
+                Item data = rewardItem.ItemData;
+
+                if (data != null)
+                {
+                    InventoryManager.Instance.AddItem(data);
+                }
+            }
+        }
     }
 
 }

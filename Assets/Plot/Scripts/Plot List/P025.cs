@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P025", menuName = "Plot/앙코르(미구현)", order = 025)]
+[CreateAssetMenu(fileName = "P025", menuName = "Plot/앙코르", order = 025)]
 
 public class P025 : Plot
 {
@@ -26,7 +26,7 @@ public class P025 : Plot
         influenceDelta = 30;
 
         // 텍스트 기본값
-        plotName = "앙코르(미구현)";
+        plotName = "앙코르";
         plotDescription = "좋은 건 한 번 더 해야지";
         plotEffect = "저번 콘클라베에서 선출되었던 후보 정치력<sprite name=influence> 30 증가";
         plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
@@ -44,9 +44,16 @@ public class P025 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        /*
-         * 지난 콘클라베에서 선출되었던 후보 정치력 증가 로직 예정
-         */
+        var em = ElectionManager.Instance;
+
+        var lastConclaveWinner = em.CurrentWinnerCandidate;
+
+        if (lastConclaveWinner == null)
+        {
+            return;
+        }
+
+        lastConclaveWinner.ChangeInfluence(influenceDelta);
     }
 
 }

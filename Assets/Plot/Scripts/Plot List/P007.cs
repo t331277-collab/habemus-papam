@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트(버그 픽스 중)", order = 007)]
+[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트", order = 007)]
 
 public class P007 : Plot
 {
@@ -26,7 +26,7 @@ public class P007 : Plot
 
         minInfluence = 20;
         pietyCost = 15;
-        speedPercentDelta = 10f;
+        speedPercentDelta = 0.1f;
         duration = 20;
 
         // 텍스트 기본값
@@ -64,7 +64,7 @@ public class P007 : Plot
     {
         if (target == null) yield break;
 
-        float delta = target.MoveSpeed * (speedPercentDelta / 100f);
+        float delta = speedPercentDelta;
 
         target.ChangeSpeed(delta);
 

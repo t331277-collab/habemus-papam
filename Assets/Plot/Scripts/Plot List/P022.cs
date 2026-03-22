@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(fileName = "P022", menuName = "Plot/꼬리 자르기(버그 픽스 중)", order = 022)]
+[CreateAssetMenu(fileName = "P022", menuName = "Plot/꼬리 자르기", order = 022)]
 
 public class P022 : Plot
 {
@@ -25,7 +25,7 @@ public class P022 : Plot
 
         minHp = 50;
         hpCost = 30;
-        speedPercentDelta = 30f;
+        speedPercentDelta = 0.3f;
         duration = 30;
 
         // 텍스트 기본값
@@ -54,7 +54,7 @@ public class P022 : Plot
     {
         if (target == null) yield break;
 
-        float delta = target.MoveSpeed * (speedPercentDelta / 100f);
+        float delta = speedPercentDelta;
 
         target.ChangeSpeed(delta);
 
