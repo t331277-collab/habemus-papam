@@ -58,6 +58,17 @@ public class PlotUI : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        if (gameObject.activeSelf)
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                UpdatePlotButtonState(i);
+            }
+        }
+    }
+
     private void OnGameContextChanged(GameContext.GameContextEvent eventType)
     {
         if (eventType == GameContext.GameContextEvent.ConclaveEnd)
@@ -142,21 +153,46 @@ public class PlotUI : MonoBehaviour
                 Debug.Log($"{i}번 공작사용안됨");
                 plotPanels[i].color = new Color(1f, 1f, 1f);
 
-                // 조건 확인
-                bool isPietyEnough = performer.Piety >= currentPlot.cost;
-                bool canExecute = currentPlot.CanExecute(performer);
-
-                // 버튼 활성화 여부 설정
-                plotUseButtons[i].interactable = isPietyEnough && canExecute;
-
-                if (!isPietyEnough)
-                {
-                    buttonText.text += "<br><color=red><size=60%>경건함이 부족합니다</size></color>";
-                }
+                UpdatePlotButtonState(i);
             }
         }
     }
-    
+
+    private void UpdatePlotButtonState(int index)
+    {
+        var pm = PlotManager.Instance;
+
+        if (pm.AvailPlotSets[0].isUsed[index])
+        {
+            plotUseButtons[index].interactable = false;
+            return;
+        }
+
+        var currentPlot = pm.AvailPlotSets[0].plots[index];
+        var buttonText = plotUseButtons[index].GetComponentInChildren<TextMeshProUGUI>();
+
+        // 조건 확인
+        bool isPietyEnough = performer.Piety >= currentPlot.cost;
+        bool canExecute = currentPlot.CanExecute(performer);
+
+        // 버튼 활성화 설정
+        plotUseButtons[index].interactable = isPietyEnough && canExecute;
+
+        string finalProgressText = currentPlot.plotCostText;
+
+        if (!isPietyEnough)
+        {
+            finalProgressText += "<br><color=red><size=60%>경건함 부족</size></color>";
+        }
+
+        if (!canExecute)
+        {
+            finalProgressText += "<br><color=red><size=60%>조건 미충족</size></color>";
+        }
+
+        buttonText.text = finalProgressText;
+    }
+
     // 공작 UI 정보 리셋 함수
     public void ResetPlotUI()
     {
