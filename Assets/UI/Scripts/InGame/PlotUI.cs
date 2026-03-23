@@ -172,18 +172,18 @@ public class PlotUI : MonoBehaviour
         var buttonText = plotUseButtons[index].GetComponentInChildren<TextMeshProUGUI>();
 
         // 조건 확인
-        bool isPietyEnough = performer.Piety >= currentPlot.cost;
+        bool isPietyEnough = currentPlot.IsCostEnough(performer);
         bool canExecute = currentPlot.CanExecute(performer);
 
         // 버튼 활성화 설정
         plotUseButtons[index].interactable = isPietyEnough && canExecute;
-
+        
         string finalProgressText = currentPlot.plotCostText;
         string statusMessage = "";
 
         if (!isPietyEnough)
         {
-            statusMessage += " 경건함 부족";
+            statusMessage += " 비용 부족";
         }
 
         if (!canExecute)
@@ -210,15 +210,11 @@ public class PlotUI : MonoBehaviour
     {
         var pm = PlotManager.Instance;
 
-        pm.AvailPlotSets[0].plots[index].Execute(performer);
-        pm.AvailPlotSets[0].use(index);
+        pm.UsePlot(0, index);
 
         Debug.Log($"{index}번째 공작 사용");
 
-        if (pm.AvailPlotSets[0].isAllUsed())
-        {
-            pm.IfUseAllPlot();
-        }
+        pm.CheckIsAllUsed();
 
         OnClickClose();
     }

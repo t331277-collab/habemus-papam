@@ -27,6 +27,9 @@ public abstract class Plot : ScriptableObject
     // 조건 확인 함수, 구현은 자식 클래스에서 직접
     public abstract bool CanExecute(Cardinal performer);
 
+    // 비용 확인 함수, 구현은 자식 클래스에서 직접
+    public abstract bool IsCostEnough(Cardinal performer);
+
     // 실제 실행시 로직 함수, 구현은 자식 클래스에서 직접
     public abstract void Execute(Cardinal performer);
 }

@@ -37,7 +37,12 @@ public class P030 : Plot
 
     public override bool CanExecute(Cardinal performer)
     {
-        return performer.Hp <= minInfluence;
+        return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

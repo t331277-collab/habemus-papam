@@ -41,6 +41,8 @@ public class PlotManager : MonoBehaviour
 
     private List<Plot> usedPlots;
 
+    private Cardinal performer;
+
     public PlotSet[] AvailPlotSets => availPlotSets;
 
     void Awake()
@@ -134,10 +136,26 @@ public class PlotManager : MonoBehaviour
 
     public void InitializePlotSession(Cardinal performer)
     {
+        this.performer = performer;
+
         plotUI.ShowPlotUI(performer);
     }
 
-    public void IfUseAllPlot()
+    public void UsePlot(int plotSet, int index)
+    {
+        AvailPlotSets[0].plots[index].Execute(performer);
+        AvailPlotSets[0].use(index);
+    }
+
+    public void CheckIsAllUsed(int plotSet = 0)
+    {
+        if (AvailPlotSets[0].isAllUsed())
+        {
+            IfUseAllPlot();
+        }
+    }
+
+    public void IfUseAllPlot(int plotSet = 0)
     {
         availPlotSets[0] = null;
         availPlotSets[0] = GeneratePlotSet();
