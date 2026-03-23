@@ -71,8 +71,11 @@ public class GameBalance : ScriptableObject
 
     [Header("게임 진행 설정")]
     [Tooltip("한 콘클라베 당 자유 행동 시간")]
-    [SerializeField] private float maxConclaveTime = 60.0f;
+    [SerializeField] private float maxConclaveTime = 120.0f;
     public float MaxConclaveTime => maxConclaveTime;
+    [Tooltip("이벤트 등장 시간")]
+    [SerializeField] private float[] eventTime = {90f, 60f, 30f};
+    public float[] EventTime => eventTime;
 
     [Tooltip("초당 추기경 체력 변화량")]
     [SerializeField] private float hpDeltaPerSec = -0.5f;

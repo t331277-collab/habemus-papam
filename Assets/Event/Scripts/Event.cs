@@ -17,6 +17,7 @@ public abstract class Event : ScriptableObject
 
     [SerializeField] public string option1;
     [SerializeField] public float option1Chance;
+    [SerializeField] public string option1Requirement = "";
     [TextArea] public string option1SuccessDescription;
     [TextArea] public string option1FailDescription;
 

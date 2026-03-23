@@ -24,6 +24,9 @@ public class GameContext
     public Conclave CurrentConclave => currentConclave;
     public float RemainingTime => remainingTime;
 
+    private Event currentEvent;
+    public Event CurrentEvent => currentEvent;
+
     public void InitGameContext(int day=1, Conclave conclave=Conclave.Dawn)
     {
         currentDay = day;
@@ -71,6 +74,14 @@ public class GameContext
     {
         OnGameContextEvent?.Invoke(GameContextEvent.ConclaveStart);
     }
+    public void SetNewEvent()
+    {
+        currentEvent = InGameManager.Instance.EventManager.GetNewEvent();
+    }
+    public void SetEvent(Event evt)
+    {
+        currentEvent = evt;
+    }
 }
 
 public class InGameManager : MonoBehaviour
@@ -80,6 +91,7 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameBalance balance;
     private GameContext gameContext;
     [SerializeField] private EventManager eventManager;
+    [SerializeField] private Event CurrentEvent;
 
     [Header("UI 연결")]
     [SerializeField] private Button startButton;
@@ -333,5 +345,9 @@ public class InGameManager : MonoBehaviour
     public float GetRemainingTime()
     {
         return gameContext.RemainingTime;
+    }
+    public Event GetCurrentEvent()
+    {
+        return gameContext.CurrentEvent;
     }
 }
