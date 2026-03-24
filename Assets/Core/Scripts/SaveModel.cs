@@ -17,6 +17,17 @@ public class SaveModel
 }
 
 [Serializable]
+public class SavePreviewData
+{
+    public float playerHp;
+    public float playerInfluence;
+    public float playerPiety;
+    public int day = 1;
+    public int conclave;
+    public string conclaveName = string.Empty;
+}
+
+[Serializable]
 public class GameContextSaveData
 {
     public int day = 1;
