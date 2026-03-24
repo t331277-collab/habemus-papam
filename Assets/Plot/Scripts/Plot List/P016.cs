@@ -49,6 +49,11 @@ public class P016 : Plot
             performer.Piety >= minPiety);
     }
 
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
+    }
+
     public override void Execute(Cardinal performer)
     {
         if(!CanExecute(performer)) return;

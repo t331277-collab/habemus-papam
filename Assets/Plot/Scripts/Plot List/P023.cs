@@ -41,6 +41,11 @@ public class P023 : Plot
         return performer.Influence >= minInfluence;
     }
 
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
+    }
+
     public override void Execute(Cardinal performer)
     {
         if (!CanExecute(performer)) return;

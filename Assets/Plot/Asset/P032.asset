@@ -24,5 +24,5 @@ MonoBehaviour:
   plotWeightMultiplier: 0
   minInfluence: 70
   pietyCost: 70
-  smokeBomb: {fileID: 6142640468179665, guid: 0c16a14efaef1e14a9cf32294127d3e7, type: 3}
+  smokeBomb: {fileID: 0}
   rewardCount: 1

@@ -41,6 +41,11 @@ public class P022 : Plot
         return performer.Hp >= minHp;
     }
 
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Hp >= cost;
+    }
+
     public override void Execute(Cardinal performer)
     {
         if (!CanExecute(performer)) return;
