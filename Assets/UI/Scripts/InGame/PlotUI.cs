@@ -58,17 +58,22 @@ public class PlotUI : MonoBehaviour
         }
     }
 
-    private void Update()
+    private void OnEnable() // UI가 켜질 때 시작
     {
-        if (gameObject.activeSelf)
+        StartCoroutine(Co_UpdatePlotStates());
+    }
+
+    private IEnumerator Co_UpdatePlotStates()
+    {
+        while (gameObject.activeSelf)
         {
             for (int i = 0; i < 3; i++)
             {
                 UpdatePlotButtonState(i);
             }
+            yield return new WaitForSeconds(0.1f); // 0.1초 대기 (초당 10번만 실행)
         }
     }
-
     private void OnGameContextChanged(GameContext.GameContextEvent eventType)
     {
         if (eventType == GameContext.GameContextEvent.ConclaveEnd)
