@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[CreateAssetMenu(fileName = "P026", menuName = "Plot/주사위 굴리기(미구현)", order = 026)]
+[CreateAssetMenu(fileName = "P026", menuName = "Plot/주사위 굴리기", order = 026)]
 
 public class P026 : Plot
 {
@@ -27,7 +27,7 @@ public class P026 : Plot
         rewardCount = 2;
 
         // 텍스트 기본값
-        plotName = "주사위 굴리기(미구현)";
+        plotName = "주사위 굴리기";
         plotDescription = "주사위는 던져졌다";
         plotEffect = "일반 아이템 '주사위' 2개 획득";
         plotCondiText = $"";

@@ -15229,6 +15229,7 @@ MonoBehaviour:
   - {fileID: 5222843143466926774, guid: c8e6b8aeb982c7a48b42ea1144454482, type: 3}
   - {fileID: 7681646700759706727, guid: c379d723fc2fec64d9355792c0152785, type: 3}
   - {fileID: 1943705692862981793, guid: 9bcf795240afd7b49a4b33d9c0f2647e, type: 3}
+  - {fileID: 1943705692862981793, guid: 3b538abaa301d65488d1aa42aa95dcc4, type: 3}
   rareItemPrefabs:
   - {fileID: 6936613244970665610, guid: b09e8fc632e71a142905df4affa1a65b, type: 3}
   - {fileID: 1823777926761699432, guid: 1ab3a7a65b4f493488e8b7be849b1979, type: 3}
@@ -15304,8 +15305,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 1e4b64861ed5ccc4eb49494458532f69, type: 2}
   - {fileID: 11400000, guid: 1dce64c642abfdf4fb78d6975a4f494a, type: 2}
   - {fileID: 11400000, guid: 59e40dec1a0df584d866360ef9043650, type: 2}
+  - {fileID: 11400000, guid: 81bb3337455930d44bb9e3dcbf619c7b, type: 2}
   - {fileID: 11400000, guid: a21770bdc89e5ee4e83d8390b6eb16e6, type: 2}
   - {fileID: 11400000, guid: 031757fc79980cb44a122e6de9ea522b, type: 2}
+  - {fileID: 11400000, guid: 09a21a5d7a3c9a84abaf34ebd9b835a3, type: 2}
   - {fileID: 11400000, guid: 2b49347dd840d9340ae1627811130400, type: 2}
   - {fileID: 11400000, guid: dc881aa45d0addd49915f79610c19abb, type: 2}
   - {fileID: 11400000, guid: 6d9995e515c3f30488cf24521342510a, type: 2}
@@ -33579,8 +33582,8 @@ MonoBehaviour:
   commonSprite: {fileID: -222549919845697694, guid: ac3b23821c4eb5a41b07f967bf2467fd, type: 3}
   rareSprite: {fileID: -1766780945608371564, guid: 1bde739df2e6e4844a28363854ec5265, type: 3}
   legendSprite: {fileID: 5101671700007261310, guid: 940191dd1ef4e0b4c86229f3f46aed9e, type: 3}
-  testPlot: {fileID: 0}
-  testItem: {fileID: 0}
+  testPlot: {fileID: 11400000, guid: 09a21a5d7a3c9a84abaf34ebd9b835a3, type: 2}
+  testItem: {fileID: 1943705692862981793, guid: 3b538abaa301d65488d1aa42aa95dcc4, type: 3}
 --- !u!222 &8276581085412965682
 CanvasRenderer:
   m_ObjectHideFlags: 0

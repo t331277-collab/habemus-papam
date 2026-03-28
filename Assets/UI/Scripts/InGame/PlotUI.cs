@@ -167,6 +167,8 @@ public class PlotUI : MonoBehaviour
     {
         var pm = PlotManager.Instance;
 
+        if (pm.AvailPlotSets[0] == null) return;
+
         if (pm.AvailPlotSets[0].isUsed[index])
         {
             plotUseButtons[index].interactable = false;
@@ -218,8 +220,6 @@ public class PlotUI : MonoBehaviour
         pm.UsePlot(0, index);
 
         Debug.Log($"{index}번째 공작 사용");
-
-        pm.CheckIsAllUsed();
 
         OnClickClose();
     }

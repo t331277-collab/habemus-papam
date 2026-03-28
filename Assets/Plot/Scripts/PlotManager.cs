@@ -118,7 +118,10 @@ public class PlotManager : MonoBehaviour
         foreach(var p in candidates)
         {
             currentSum += p.GetPlotWeight();
-            if (currentSum >= randChoice) return p;
+            if (currentSum >= randChoice)
+            {
+                return p;
+            }
         }
 
         return candidates[0];
@@ -143,22 +146,23 @@ public class PlotManager : MonoBehaviour
 
     public void UsePlot(int plotSet, int index)
     {
-        AvailPlotSets[0].plots[index].Execute(performer);
-        AvailPlotSets[0].use(index);
+        AvailPlotSets[plotSet].plots[index].Execute(performer);
+        AvailPlotSets[plotSet].use(index);
+
+        CheckIsAllUsed(plotSet);
     }
 
     public void CheckIsAllUsed(int plotSet = 0)
     {
-        if (AvailPlotSets[0].isAllUsed())
+        if (AvailPlotSets[plotSet].isAllUsed())
         {
-            IfUseAllPlot();
+            RerollPlotSet(plotSet);
         }
     }
 
-    public void IfUseAllPlot(int plotSet = 0)
+    public void RerollPlotSet(int plotSet = 0)
     {
-        availPlotSets[0] = null;
-        availPlotSets[0] = GeneratePlotSet();
+        availPlotSets[plotSet] = GeneratePlotSet();
     }
 
     public Plot GetPlotById(string plotId)

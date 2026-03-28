@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -25,6 +25,7 @@ public class Cardinal : MonoBehaviour
     private List<Item> items;
     private NavMeshAgent agent;
     private bool isKnockedOut = false;
+    private bool hasMinHpOneEffect = false;
     private bool isInitialized = false;
 
     public float Hp => hp;
@@ -221,9 +222,23 @@ public class Cardinal : MonoBehaviour
         }
     }
 
+    public void SetMinHpOneEffect(bool active)
+    {
+        hasMinHpOneEffect = active;
+    }
+
     public void ChangeHp(float delta)
     {
-        hp = Mathf.Clamp(hp + delta, 0f, 100f);
+        float nextHp = hp + delta;
+
+        if (hasMinHpOneEffect && delta < 0f)
+        {
+            hp = Mathf.Clamp(nextHp, 1f, 100f);
+        }
+        else
+        {
+            hp = Mathf.Clamp(nextHp, 0f, 100f);
+        }
     }
 
     public void ChangeInfluence(float delta)
