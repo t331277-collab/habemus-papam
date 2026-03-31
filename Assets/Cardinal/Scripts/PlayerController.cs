@@ -30,8 +30,12 @@ public class PlayerController : MonoBehaviour, ICardinalController
     {
         if (gamsilManager == null)
         {
-            if (gamsilManager == null) gamsilManager = FindAnyObjectByType<Gamsil>();
-            if (lectureManager == null) lectureManager = FindAnyObjectByType<Lecture>();
+            gamsilManager = FindAnyObjectByType<Gamsil>();
+        }
+
+        if (lectureManager == null)
+        {
+            lectureManager = FindAnyObjectByType<Lecture>();
         }
     }
     

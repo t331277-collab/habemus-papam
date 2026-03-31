@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PrayerWaitingTrigger : MonoBehaviour
@@ -5,9 +6,7 @@ public class PrayerWaitingTrigger : MonoBehaviour
     [Tooltip("플레이어를 등록할 Gamsil 매니저")]
     [SerializeField] private Gamsil gamsilManager;
 
-
-    private bool isNpcInside = false;
-
+    private readonly HashSet<StateController> occupants = new HashSet<StateController>();
     private StateController incomingNPC;
 
     public void SetIncomingNPC(StateController npc)
@@ -17,14 +16,14 @@ public class PrayerWaitingTrigger : MonoBehaviour
 
     public bool TryReserveSpotForPlayer()
     {
-        if (isNpcInside)
+        if (occupants.Count > 0)
         {
             return false;
         }
 
         if (incomingNPC != null)
         {
-            incomingNPC.ChangeState(CardinalState.Idle);
+            incomingNPC.CancelApproach();
             incomingNPC = null;
         }
 
@@ -34,6 +33,12 @@ public class PrayerWaitingTrigger : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        StateController enteredController = other.GetComponent<StateController>();
+        if (enteredController != null)
+        {
+            occupants.Add(enteredController);
+        }
+
         if (other.CompareTag("Player"))
         {
             StateController playerSC = other.GetComponent<StateController>();
@@ -43,13 +48,10 @@ public class PrayerWaitingTrigger : MonoBehaviour
                 gamsilManager.RegisterPlayerToQueue(playerSC);
             }
 
-            isNpcInside = true;
         }
 
         if (other.CompareTag("NPC"))
         {
-            isNpcInside = true;
-
             StateController arrivedNPC = other.GetComponent<StateController>();
             if (incomingNPC == arrivedNPC)
             {
@@ -60,10 +62,14 @@ public class PrayerWaitingTrigger : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
+        StateController exitedController = other.GetComponent<StateController>();
+        if (exitedController != null)
+        {
+            occupants.Remove(exitedController);
+        }
+
         if (other.CompareTag("NPC"))
         {
-            isNpcInside = false;
-
             StateController exitingNPC = other.GetComponent<StateController>();
             if (incomingNPC == exitingNPC)
             {

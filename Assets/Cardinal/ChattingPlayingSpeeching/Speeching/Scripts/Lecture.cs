@@ -31,6 +31,7 @@ public class Lecture : MonoBehaviour
 
     void Update()
     {
+        CleanupQueue();
         ProcessQueue();
 
         if (speechList.Count == 0 && overflowPlayer == null)
@@ -75,6 +76,7 @@ public class Lecture : MonoBehaviour
     {
         if (speechList.Contains(playerSC) || currentSpeaker == playerSC || overflowPlayer == playerSC) return;
         if (playerSC.CurrentState != CardinalState.Idle) return;
+        if (waitingPoint == null) return;
 
         bool isMainSpotAvailable = false;
         if (waitingTrigger != null)
@@ -107,14 +109,14 @@ public class Lecture : MonoBehaviour
         for (int i = candidates.Count - 1; i >= 0; i--)
         {
             StateController sc = candidates[i];
-            if (sc.CurrentState == CardinalState.Scheme || sc.IsSchemer) continue;
-
             if (sc == null || sc.CompareTag("Player"))
             {
                 candidates.RemoveAt(i);
                 if (sc != null && npcLastCalledTime.ContainsKey(sc)) npcLastCalledTime.Remove(sc);
                 continue;
             }
+
+            if (sc.CurrentState == CardinalState.Scheme || sc.IsSchemer) continue;
 
             if (npcLastCalledTime.ContainsKey(sc))
             {
@@ -182,8 +184,10 @@ public class Lecture : MonoBehaviour
     {
         if (overflowPlayer == null) return;
 
-
-        speechList.Add(overflowPlayer);
+        if (!speechList.Contains(overflowPlayer))
+        {
+            speechList.Add(overflowPlayer);
+        }
 
         if (waitingTrigger != null)
         {
@@ -205,6 +209,21 @@ public class Lecture : MonoBehaviour
 
         currentSpeaker = null;
         return false;
+    }
+
+    private void CleanupQueue()
+    {
+        speechList.RemoveAll(sc => sc == null || !sc.IsPerformingSpeechAction);
+
+        if (overflowPlayer != null && !overflowPlayer.IsPerformingSpeechAction)
+        {
+            overflowPlayer = null;
+        }
+
+        if (currentSpeaker != null && !currentSpeaker.IsPerformingSpeechAction)
+        {
+            currentSpeaker = null;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D other)
