@@ -61,6 +61,52 @@ public class SaveManager : MonoBehaviour
         return File.Exists(SaveFilePath);
     }
 
+    public bool TryGetSavePreview(out SavePreviewData preview)
+    {
+        preview = null;
+
+        if (!TryReadSave(out SaveModel saveModel) || saveModel == null || saveModel.gameContext == null)
+        {
+            return false;
+        }
+
+        CardinalSaveData playerSave = null;
+        if (saveModel.cardinals != null)
+        {
+            foreach (var cardinalSave in saveModel.cardinals)
+            {
+                if (cardinalSave != null && cardinalSave.isPlayer)
+                {
+                    playerSave = cardinalSave;
+                    break;
+                }
+            }
+        }
+
+        if (playerSave == null)
+        {
+            Debug.LogWarning("[Save] 플레이어 저장 데이터를 찾지 못해 기본값으로 미리보기를 구성합니다.");
+        }
+
+        int conclaveIndex = Mathf.Clamp(
+            saveModel.gameContext.conclave,
+            0,
+            Enum.GetValues(typeof(GameContext.Conclave)).Length - 1);
+        GameContext.Conclave conclave = (GameContext.Conclave)conclaveIndex;
+
+        preview = new SavePreviewData
+        {
+            playerHp = playerSave != null ? playerSave.hp : 0f,
+            playerInfluence = playerSave != null ? playerSave.influence : 0f,
+            playerPiety = playerSave != null ? playerSave.piety : 0f,
+            day = Mathf.Max(1, saveModel.gameContext.day),
+            conclave = conclaveIndex,
+            conclaveName = conclave.ToString()
+        };
+
+        return true;
+    }
+
     public void StartNewGame()
     {
         pendingLoad = false;
