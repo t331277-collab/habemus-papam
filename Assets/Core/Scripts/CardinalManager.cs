@@ -43,6 +43,7 @@ public class CardinalManager : MonoBehaviour
     private List<Vector3> rightLinePositions = new List<Vector3>();
 
     [SerializeField] private StatsUI statsUI;
+    public StatsUI StatsUI => statsUI;
 
     public static CardinalManager Instance { get; private set; }
 
@@ -208,6 +209,11 @@ public class CardinalManager : MonoBehaviour
             statsUI.Initialize(cardinals);
 
             InGameManager.Instance.StartTimer();
+        }
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.AutoSave();
         }
     }
     private void ResetCardinalState(Cardinal c, Vector3 startPos)
@@ -485,5 +491,109 @@ public class CardinalManager : MonoBehaviour
     public void DrainAllCardinalHp(float delta)
     {
         foreach (var c in cardinals) if (c.gameObject.activeSelf) c.ChangeHp(delta * c.HpDrainMultiplier);
+    }
+
+    public List<CardinalSaveData> CaptureSaveData()
+    {
+        List<CardinalSaveData> saveData = new List<CardinalSaveData>();
+
+        for (int i = 0; i < cardinals.Count; i++)
+        {
+            Cardinal cardinal = cardinals[i];
+            if (cardinal == null)
+            {
+                continue;
+            }
+
+            saveData.Add(cardinal.CaptureSaveData(i));
+        }
+
+        return saveData;
+    }
+
+    public void RestoreFromSave(List<CardinalSaveData> saveDataList)
+    {
+        if (saveDataList == null)
+        {
+            return;
+        }
+
+        Dictionary<int, CardinalSaveData> saveLookup = new Dictionary<int, CardinalSaveData>();
+        foreach (var saveData in saveDataList)
+        {
+            if (saveData == null)
+            {
+                continue;
+            }
+
+            saveLookup[saveData.index] = saveData;
+        }
+
+        for (int i = 0; i < cardinals.Count; i++)
+        {
+            Cardinal cardinal = cardinals[i];
+            if (cardinal == null || !saveLookup.TryGetValue(i, out CardinalSaveData saveData))
+            {
+                continue;
+            }
+
+            RestoreCardinal(cardinal, saveData);
+        }
+    }
+
+    private void RestoreCardinal(Cardinal cardinal, CardinalSaveData saveData)
+    {
+        StateController stateController = cardinal.GetComponent<StateController>();
+        if (stateController != null)
+        {
+            stateController.PrepareForLoadedState();
+        }
+
+        cardinal.ApplySaveData(saveData);
+        RestoreCardinalTransform(cardinal, saveData.position.ToVector3(), saveData.rotationZ);
+
+        cardinal.gameObject.SetActive(saveData.isActive);
+
+        if (!saveData.isActive)
+        {
+            return;
+        }
+
+        if (stateController != null)
+        {
+            CardinalState restoredState = (CardinalState)Mathf.Clamp(
+                saveData.state,
+                0,
+                System.Enum.GetValues(typeof(CardinalState)).Length - 1);
+
+            stateController.ApplyLoadedState(restoredState, saveData.isSchemer, saveData.isConClaving);
+        }
+
+        cardinal.RestorePlayerIndicatorAfterLoad();
+    }
+
+    private void RestoreCardinalTransform(Cardinal cardinal, Vector3 position, float rotationZ)
+    {
+        NavMeshAgent agent = cardinal.GetComponent<NavMeshAgent>();
+        bool restoreAgent = agent != null && agent.enabled;
+
+        if (restoreAgent)
+        {
+            agent.enabled = false;
+        }
+
+        cardinal.transform.position = position;
+        cardinal.transform.rotation = Quaternion.Euler(0f, 0f, rotationZ);
+
+        if (restoreAgent)
+        {
+            agent.enabled = true;
+
+            if (agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+                agent.velocity = Vector3.zero;
+            }
+        }
     }
 }

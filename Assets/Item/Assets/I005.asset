@@ -19,7 +19,7 @@ MonoBehaviour:
     \uB2EC\uB2EC\uD55C \uC220"
   itemEffectDescription: "\uC774\uBC88 \uCF58\uD074\uB77C\uBCA0 \uB3D9\uC548 \uAE30\uB3C4
     \uC2DC \uCCB4\uB825 \uD68C\uBCF5\uB7C9 \uB450 \uBC30"
-  itemImage: {fileID: 21300000, guid: 52b7409211a774242b4645e1e7908995, type: 3}
+  itemImage: {fileID: 3429721155402421256, guid: a254840c2f8608243a614a4688bec54b, type: 3}
   itemGrade: 0
   itemExpirationType: 0
   usageType: 1

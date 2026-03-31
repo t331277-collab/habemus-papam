@@ -16,10 +16,6 @@ public class P012 : Plot
         // 설정 기본값
         plotID = "P012";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "푹 쉬기";
-        plotDescription = "쉬었음 추기경";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -28,11 +24,23 @@ public class P012 : Plot
         minInfluence = 40;
         pietyCost = 35;
         hpDelta = 20;
+
+        // 텍스트 기본값
+        plotName = "푹 쉬기";
+        plotDescription = "쉬었음 추기경";
+        plotEffect = "체력<sprite name=hp> 20 증가";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

@@ -15,10 +15,6 @@ public class P014 : Plot
         // 설정 기본값
         plotID = "P014";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "태양 경배 자세";
-        plotDescription = "Yoga 고수가 될 거야!";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -27,11 +23,23 @@ public class P014 : Plot
         minInfluence = 0;
         pietyCost = 0;
         pietyDelta = 30;
+
+        // 텍스트 기본값
+        plotName = "태양 경배 자세";
+        plotDescription = "Yoga 고수가 될 거야!";
+        plotEffect = "경건함<sprite name=piety> 30 증가";
+        plotCondiText = $"";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)
@@ -40,7 +48,7 @@ public class P014 : Plot
 
         performer.ChangePiety(-pietyCost);
 
-        performer.ChangeInfluence(pietyDelta);
+        performer.ChangePiety(pietyDelta);
     }
     
 }

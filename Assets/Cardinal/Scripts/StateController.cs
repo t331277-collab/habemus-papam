@@ -65,6 +65,23 @@ public class StateController : MonoBehaviour
     [Tooltip("연설 상태를 유지할 시간 (초)")]
     [SerializeField] private float speechDuration = 3.0f;
 
+    [Header("Action 이동 방어 설정")]
+    [Tooltip("기도/연설 이동이 이 시간 이상 완료되지 않으면 시퀀스를 중단합니다.")]
+    [SerializeField] private float actionMoveTimeout = 8.0f;
+
+    [Tooltip("도착 판정에 사용할 최소 속도 임계값")]
+    [SerializeField] private float actionStopVelocityThreshold = 0.05f;
+
+    [Header("Action 회피 설정")]
+    [Tooltip("기도/연설 수행을 위해 이동하는 플레이어의 회피 우선순위")]
+    [SerializeField] private int playerActionAvoidancePriority = 0;
+
+    [Tooltip("기도/연설 수행을 위해 이동하는 NPC의 회피 우선순위")]
+    [SerializeField] private int npcActionAvoidancePriority = 5;
+
+    [Tooltip("기도/연설 수행 이동 중 사용할 Obstacle Avoidance 품질")]
+    [SerializeField] private ObstacleAvoidanceType actionObstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+
     // 대기열 상태인지 확인하는 플래그
     private bool isWaitingInLine = false;
     // 진짜 기도 위치 저장용
@@ -108,11 +125,20 @@ public class StateController : MonoBehaviour
     private Coroutine praySequenceCoroutine;    //Praying
     private Coroutine speechSequenceCoroutine;  //Speeching
     private Coroutine stunCoroutine;            //Stun
+    private bool skipInitialCutScene = false;
+    private ObstacleAvoidanceType defaultObstacleAvoidanceType;
 
     // 프로퍼티
     public bool IsMoving => pathCoroutine != null;
     public CardinalState CurrentState => currentState;
     public bool ConClaving { get; set; } = false;
+    public bool IsActionMovementInProgress => IsHeadingToQueue || IsHeadingToSpeech;
+    public bool CanAcceptManualInteraction()
+    {
+        return currentState == CardinalState.Idle &&
+               !IsPerformingPrayerAction &&
+               !IsPerformingSpeechAction;
+    }
 
     void Awake()
     {
@@ -121,10 +147,20 @@ public class StateController : MonoBehaviour
         inputController = GetComponent<ICardinalController>();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
         animController = GetComponentInChildren<Animation_Controller>();
+
+        if (agent != null)
+        {
+            defaultObstacleAvoidanceType = agent.obstacleAvoidanceType;
+        }
     }
 
     void Start()
     {
+        if (skipInitialCutScene)
+        {
+            return;
+        }
+
         EnterState(CardinalState.CutScene);
     }
 
@@ -169,6 +205,50 @@ public class StateController : MonoBehaviour
         EnterState(currentState);
     }
 
+    public void PrepareForLoadedState()
+    {
+        skipInitialCutScene = true;
+        currentState = CardinalState.Idle;
+    }
+
+    public void ApplyLoadedState(CardinalState loadedState, bool isSchemer, bool isConClaving)
+    {
+        skipInitialCutScene = true;
+        StopAllActionCoroutines();
+        HideBubble();
+
+        ConClaving = isConClaving;
+        IsSchemer = false;
+
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.color = Color.white;
+        }
+
+        if (agent != null && agent.isOnNavMesh)
+        {
+            agent.isStopped = false;
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+            ApplyDefaultAvoidanceProfile();
+        }
+
+        currentState = CardinalState.CutScene;
+
+        if (loadedState == CardinalState.Stun)
+        {
+            ApplyStun(0f);
+            return;
+        }
+
+        ChangeState(loadedState);
+
+        if (isSchemer)
+        {
+            SetSchemerMode(true);
+        }
+    }
+
     private void EnterState(CardinalState state)
     {
         switch (state)
@@ -179,6 +259,7 @@ public class StateController : MonoBehaviour
                 {
                     agent.isStopped = false;
                     agent.ResetPath();
+                    ApplyDefaultAvoidanceProfile();
                 }
 
                 if (!CompareTag("Player") && aiWanderCoroutine == null)
@@ -223,7 +304,7 @@ public class StateController : MonoBehaviour
                 {
                     agent.isStopped = false; // 이동 가능하도록 설정
                     agent.ResetPath();
-                    agent.avoidancePriority = 50; // 우선순위 복구
+                    ApplyDefaultAvoidanceProfile();
                 }
 
                 if (cardinal != null)
@@ -236,8 +317,11 @@ public class StateController : MonoBehaviour
                 {
                     cardinal.SetAgentSize(0.1f, 0.1f);
                 }
-                if (agent.isOnNavMesh) agent.ResetPath(); // 기존 경로 초기화
-                agent.avoidancePriority = 0;
+                if (agent != null && agent.isOnNavMesh)
+                {
+                    agent.ResetPath(); // 기존 경로 초기화
+                    ApplyActionAvoidanceProfile();
+                }
                 break;
             case CardinalState.Praying:
                 if (cardinal != null)
@@ -250,6 +334,7 @@ public class StateController : MonoBehaviour
                     agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
+                    ApplyActionAvoidanceProfile();
                 }
 
                 ShowBubble(prayingBubblePrefab);
@@ -260,7 +345,7 @@ public class StateController : MonoBehaviour
                 if (agent != null && agent.isOnNavMesh)
                 {
                     agent.isStopped = false;
-                    agent.avoidancePriority = 50;
+                    ApplyActionAvoidanceProfile();
                 }
                 break;
 
@@ -280,7 +365,7 @@ public class StateController : MonoBehaviour
                     agent.ResetPath();
                     agent.isStopped = true;
                     agent.velocity = Vector3.zero;
-                    agent.avoidancePriority = 50;
+                    ApplyActionAvoidanceProfile();
                 }
                 ShowBubble(SpeechingBubblePrefab);
                 break;
@@ -289,6 +374,7 @@ public class StateController : MonoBehaviour
                 {
                     agent.isStopped = false;
                     agent.ResetPath();
+                    ApplyDefaultAvoidanceProfile();
                 }
                 if (aiWanderCoroutine == null)
                 {
@@ -353,7 +439,7 @@ public class StateController : MonoBehaviour
                 {
                     cardinal.SetAgentSize(0.2f, 0.2f);
                 }
-                if (agent != null) agent.avoidancePriority = 50;
+                ApplyDefaultAvoidanceProfile();
                 break;
 
             case CardinalState.Praying:
@@ -370,7 +456,7 @@ public class StateController : MonoBehaviour
 
                 if (agent != null && agent.isOnNavMesh)
                 {
-                    agent.avoidancePriority = 50;
+                    ApplyDefaultAvoidanceProfile();
                     agent.isStopped = false;
                     agent.ResetPath();
                 }
@@ -379,10 +465,7 @@ public class StateController : MonoBehaviour
                 break;
             case CardinalState.ReadyInSpeech:
                 if (cardinal != null) cardinal.SetAgentSize(0.2f, 0.2f); // 원래 크기로
-                if (agent != null && agent.isOnNavMesh)
-                {
-                    agent.avoidancePriority = 50;
-                }
+                ApplyDefaultAvoidanceProfile();
                 break;
 
             case CardinalState.InSpeech:
@@ -390,7 +473,7 @@ public class StateController : MonoBehaviour
 
                 if (agent != null && agent.isOnNavMesh)
                 {
-                    agent.avoidancePriority = 50;
+                    ApplyDefaultAvoidanceProfile();
                     agent.isStopped = false;
                     agent.ResetPath();
                 }
@@ -611,6 +694,8 @@ public class StateController : MonoBehaviour
             speechSequenceCoroutine = null;
         }
 
+        ClearActionRequestState();
+
         // 말풍선 등 정리
         HideBubble();
 
@@ -623,7 +708,7 @@ public class StateController : MonoBehaviour
             agent.isStopped = false;
             agent.ResetPath();
             agent.velocity = Vector3.zero;
-            agent.avoidancePriority = 50;
+            ApplyDefaultAvoidanceProfile();
         }
 
         // 경로 설정 및 이동 시작
@@ -668,8 +753,7 @@ public class StateController : MonoBehaviour
             );
         }
 
-        if (CompareTag("Player")) agent.avoidancePriority = 10;
-        else agent.avoidancePriority = 50;
+        ApplyDefaultAvoidanceProfile();
 
         pathCoroutine = null;
     }
@@ -872,7 +956,8 @@ public class StateController : MonoBehaviour
         finalPrayerPos = Vector3.zero;
 
         IsHeadingToQueue = true; // 이동 시작 플래그
-        if (CompareTag("NPC"))
+        ApplyActionAvoidanceProfile();
+        if (currentState != CardinalState.ReadyPraying)
         {
             ChangeState(CardinalState.ReadyPraying);
         }
@@ -897,17 +982,14 @@ public class StateController : MonoBehaviour
             StopCoroutine(speechSequenceCoroutine);
             speechSequenceCoroutine = null;
         }
-        IsHeadingToSpeech = false;
+        ClearActionRequestState();
+        ResetAgentMovementState();
 
-        // 공통 초기화
-        isWaitingInLine = false;
-
-        if (agent != null && agent.isOnNavMesh)
+        if (IsActionState(currentState))
         {
-            agent.ResetPath();
-            agent.velocity = Vector3.zero;
-            agent.isStopped = false;
+            RestoreStateAfterAction();
         }
+
         Debug.Log("이동 시퀀스 강제 중단됨.");
     }
 
@@ -925,18 +1007,31 @@ public class StateController : MonoBehaviour
     private IEnumerator ProcessApproachAndPray(Vector3 targetPos)
     {
         // 1. 이동 시작
-        if (agent.isOnNavMesh)
+        if (agent != null && agent.isOnNavMesh)
         {
             agent.SetDestination(targetPos);
             agent.isStopped = false;
         }
+        else
+        {
+            praySequenceCoroutine = null;
+            AbortActionSequence("기도 대기 위치로 이동할 수 없습니다.");
+            yield break;
+        }
 
         // 2. 도착 대기
-        yield return new WaitUntil(() =>
-            !agent.pathPending &&
-            agent.remainingDistance <= agent.stoppingDistance &&
-            agent.velocity.sqrMagnitude <= 0.1f
-        );
+        bool reachedQueuePoint = false;
+        yield return StartCoroutine(WaitForActionDestination(
+            "기도 대기 위치",
+            () => !IsHeadingToQueue,
+            result => reachedQueuePoint = result));
+
+        if (!reachedQueuePoint)
+        {
+            praySequenceCoroutine = null;
+            AbortActionSequence("기도 대기 위치 접근이 중단되었거나 실패했습니다.");
+            yield break;
+        }
 
         if (!IsHeadingToQueue) yield break;
 
@@ -967,17 +1062,33 @@ public class StateController : MonoBehaviour
 
         if (finalPrayerPos != Vector3.zero)
         {
-            if (agent.isOnNavMesh)
+            if (agent != null && agent.isOnNavMesh)
             {
+                IsHeadingToQueue = true;
                 agent.isStopped = false;
                 agent.SetDestination(finalPrayerPos);
             }
+            else
+            {
+                praySequenceCoroutine = null;
+                AbortActionSequence("기도 위치로 이동할 수 없습니다.");
+                yield break;
+            }
 
-            yield return new WaitUntil(() =>
-                !agent.pathPending &&
-                agent.remainingDistance <= agent.stoppingDistance &&
-                agent.velocity.sqrMagnitude <= 0.1f
-            );
+            bool reachedPrayerPoint = false;
+            yield return StartCoroutine(WaitForActionDestination(
+                "기도 위치",
+                () => currentState != CardinalState.ReadyPraying,
+                result => reachedPrayerPoint = result));
+
+            if (!reachedPrayerPoint)
+            {
+                praySequenceCoroutine = null;
+                AbortActionSequence("기도 위치 접근이 중단되었거나 실패했습니다.");
+                yield break;
+            }
+
+            IsHeadingToQueue = false;
         }
 
         if (currentState != CardinalState.ReadyPraying) yield break;
@@ -1028,7 +1139,8 @@ public class StateController : MonoBehaviour
         finalPrayerPos = Vector3.zero;
 
         IsHeadingToSpeech = true;
-        if (CompareTag("NPC"))
+        ApplyActionAvoidanceProfile();
+        if (currentState != CardinalState.ReadyInSpeech)
         {
             ChangeState(CardinalState.ReadyInSpeech);
         }
@@ -1049,17 +1161,30 @@ public class StateController : MonoBehaviour
     private IEnumerator ProcessApproachAndSpeech(Vector3 targetPos)
     {
         // 1. 접근 이동
-        if (agent.isOnNavMesh)
+        if (agent != null && agent.isOnNavMesh)
         {
             agent.SetDestination(targetPos);
             agent.isStopped = false;
         }
+        else
+        {
+            speechSequenceCoroutine = null;
+            AbortActionSequence("연설 대기 위치로 이동할 수 없습니다.");
+            yield break;
+        }
 
-        yield return new WaitUntil(() =>
-            !agent.pathPending &&
-            agent.remainingDistance <= agent.stoppingDistance &&
-            agent.velocity.sqrMagnitude <= 0.1f
-        );
+        bool reachedSpeechQueuePoint = false;
+        yield return StartCoroutine(WaitForActionDestination(
+            "연설 대기 위치",
+            () => !IsHeadingToSpeech,
+            result => reachedSpeechQueuePoint = result));
+
+        if (!reachedSpeechQueuePoint)
+        {
+            speechSequenceCoroutine = null;
+            AbortActionSequence("연설 대기 위치 접근이 중단되었거나 실패했습니다.");
+            yield break;
+        }
 
         // 취소 체크
         if (!IsHeadingToSpeech) yield break;
@@ -1087,12 +1212,33 @@ public class StateController : MonoBehaviour
         // 3. 진짜 연설석 이동
         if (finalPrayerPos != Vector3.zero)
         {
-            if (agent.isOnNavMesh) { agent.isStopped = false; agent.SetDestination(finalPrayerPos); }
-            yield return new WaitUntil(() =>
-                !agent.pathPending &&
-                agent.remainingDistance <= agent.stoppingDistance &&
-                agent.velocity.sqrMagnitude <= 0.1f
-            );
+            if (agent != null && agent.isOnNavMesh)
+            {
+                IsHeadingToSpeech = true;
+                agent.isStopped = false;
+                agent.SetDestination(finalPrayerPos);
+            }
+            else
+            {
+                speechSequenceCoroutine = null;
+                AbortActionSequence("연설 위치로 이동할 수 없습니다.");
+                yield break;
+            }
+
+            bool reachedSpeechPoint = false;
+            yield return StartCoroutine(WaitForActionDestination(
+                "연설 위치",
+                () => currentState != CardinalState.ReadyInSpeech,
+                result => reachedSpeechPoint = result));
+
+            if (!reachedSpeechPoint)
+            {
+                speechSequenceCoroutine = null;
+                AbortActionSequence("연설 위치 접근이 중단되었거나 실패했습니다.");
+                yield break;
+            }
+
+            IsHeadingToSpeech = false;
         }
 
         if (currentState != CardinalState.ReadyInSpeech) yield break;
@@ -1182,9 +1328,10 @@ public class StateController : MonoBehaviour
             // 2. 나(NPC)와 상대방(Player)의 Cardinal 컴포넌트를 각각 가져옵니다.
             Cardinal npc = GetComponent<Cardinal>();
             Cardinal player = other.GetComponent<Cardinal>();
+            StateController playerState = other.GetComponent<StateController>();
 
             // 3. 둘 다 정상적으로 존재할 때만 실행
-            if (player != null && npc != null)
+            if (player != null && npc != null && playerState != null && playerState.CanAcceptManualInteraction())
             {
                 player.Plot();
             }
@@ -1232,9 +1379,7 @@ public class StateController : MonoBehaviour
         if (aiWanderCoroutine != null) { StopCoroutine(aiWanderCoroutine); aiWanderCoroutine = null; }
         if (speechSequenceCoroutine != null) { StopCoroutine(speechSequenceCoroutine); speechSequenceCoroutine = null; }
 
-        IsHeadingToQueue = false;
-        IsHeadingToSpeech = false;
-        isWaitingInLine = false;
+        ClearActionRequestState();
 
         // 추가로 현재 경로가 있다면 제거
         if (agent != null && agent.isOnNavMesh) agent.ResetPath();
@@ -1278,6 +1423,131 @@ public class StateController : MonoBehaviour
             agent.isStopped = true;
             agent.velocity = Vector3.zero;
             agent.ResetPath();
+        }
+    }
+
+    private void ClearActionRequestState()
+    {
+        IsHeadingToQueue = false;
+        IsHeadingToSpeech = false;
+        isWaitingInLine = false;
+        finalPrayerPos = Vector3.zero;
+    }
+
+    private void ResetAgentMovementState()
+    {
+        if (agent == null || !agent.isOnNavMesh)
+        {
+            return;
+        }
+
+        agent.ResetPath();
+        agent.velocity = Vector3.zero;
+        agent.isStopped = false;
+        ApplyDefaultAvoidanceProfile();
+    }
+
+    private bool IsActionState(CardinalState state)
+    {
+        return state == CardinalState.ReadyPraying ||
+               state == CardinalState.Praying ||
+               state == CardinalState.ReadyInSpeech ||
+               state == CardinalState.InSpeech;
+    }
+
+    private int GetDefaultAvoidancePriority()
+    {
+        return CompareTag("Player") ? 10 : 50;
+    }
+
+    private void ApplyDefaultAvoidanceProfile()
+    {
+        if (agent == null)
+        {
+            return;
+        }
+
+        agent.avoidancePriority = GetDefaultAvoidancePriority();
+        agent.obstacleAvoidanceType = defaultObstacleAvoidanceType;
+    }
+
+    private void ApplyActionAvoidanceProfile()
+    {
+        if (agent == null)
+        {
+            return;
+        }
+
+        agent.avoidancePriority = CompareTag("Player")
+            ? playerActionAvoidancePriority
+            : npcActionAvoidancePriority;
+        agent.obstacleAvoidanceType = actionObstacleAvoidanceType;
+    }
+
+    private IEnumerator WaitForActionDestination(string context, System.Func<bool> shouldAbort, System.Action<bool> onComplete)
+    {
+        if (agent == null || !agent.isOnNavMesh)
+        {
+            onComplete(false);
+            yield break;
+        }
+
+        float elapsed = 0f;
+        float stopVelocityThresholdSqr = actionStopVelocityThreshold * actionStopVelocityThreshold;
+
+        while (true)
+        {
+            if (shouldAbort != null && shouldAbort())
+            {
+                onComplete(false);
+                yield break;
+            }
+
+            if (agent == null || !agent.isOnNavMesh)
+            {
+                onComplete(false);
+                yield break;
+            }
+
+            if (!agent.pathPending && agent.pathStatus == NavMeshPathStatus.PathInvalid)
+            {
+                Debug.LogWarning($"[{name}] {context} 경로가 유효하지 않아 시퀀스를 중단합니다.");
+                onComplete(false);
+                yield break;
+            }
+
+            bool hasReachedDestination =
+                !agent.pathPending &&
+                agent.remainingDistance <= Mathf.Max(agent.stoppingDistance, 0.05f) &&
+                (!agent.hasPath || agent.velocity.sqrMagnitude <= stopVelocityThresholdSqr);
+
+            if (hasReachedDestination)
+            {
+                onComplete(true);
+                yield break;
+            }
+
+            elapsed += Time.deltaTime;
+            if (elapsed >= actionMoveTimeout)
+            {
+                Debug.LogWarning($"[{name}] {context} 이동이 {actionMoveTimeout:F1}초 안에 끝나지 않아 시퀀스를 중단합니다.");
+                onComplete(false);
+                yield break;
+            }
+
+            yield return null;
+        }
+    }
+
+    private void AbortActionSequence(string reason)
+    {
+        Debug.LogWarning($"[{name}] {reason}");
+        ClearActionRequestState();
+        ResetAgentMovementState();
+
+        if (IsActionState(currentState))
+        {
+            RestoreStateAfterAction();
         }
     }
 }

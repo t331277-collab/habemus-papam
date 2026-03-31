@@ -41,6 +41,8 @@ public class PlotManager : MonoBehaviour
 
     private List<Plot> usedPlots;
 
+    private Cardinal performer;
+
     public PlotSet[] AvailPlotSets => availPlotSets;
 
     void Awake()
@@ -116,7 +118,10 @@ public class PlotManager : MonoBehaviour
         foreach(var p in candidates)
         {
             currentSum += p.GetPlotWeight();
-            if (currentSum >= randChoice) return p;
+            if (currentSum >= randChoice)
+            {
+                return p;
+            }
         }
 
         return candidates[0];
@@ -134,12 +139,123 @@ public class PlotManager : MonoBehaviour
 
     public void InitializePlotSession(Cardinal performer)
     {
+        this.performer = performer;
+
         plotUI.ShowPlotUI(performer);
     }
 
-    public void IfUseAllPlot()
+    public void UsePlot(int plotSet, int index)
     {
-        availPlotSets[0] = null;
-        availPlotSets[0] = GeneratePlotSet();
+        AvailPlotSets[plotSet].plots[index].Execute(performer);
+        performer?.OnPlotExecuted();
+        AvailPlotSets[plotSet].use(index);
+
+        CheckIsAllUsed(plotSet);
+    }
+
+    public void CheckIsAllUsed(int plotSet = 0)
+    {
+        if (AvailPlotSets[plotSet].isAllUsed())
+        {
+            RerollPlotSet(plotSet);
+        }
+    }
+
+    public void RerollPlotSet(int plotSet = 0)
+    {
+        availPlotSets[plotSet] = GeneratePlotSet();
+    }
+
+    public Plot GetPlotById(string plotId)
+    {
+        if (string.IsNullOrWhiteSpace(plotId))
+        {
+            return null;
+        }
+
+        return plots.Find(plot => plot != null && plot.plotID == plotId);
+    }
+
+    public PlotManagerSaveData CaptureSaveData()
+    {
+        PlotManagerSaveData saveData = new PlotManagerSaveData();
+
+        for (int i = 0; i < availPlotSets.Length; i++)
+        {
+            PlotSetSaveData setSave = new PlotSetSaveData();
+            PlotSet currentSet = availPlotSets[i];
+
+            for (int slot = 0; slot < 3; slot++)
+            {
+                string plotId = string.Empty;
+                bool used = false;
+
+                if (currentSet != null)
+                {
+                    Plot currentPlot = currentSet.plots[slot];
+                    plotId = currentPlot != null ? currentPlot.plotID : string.Empty;
+                    used = currentSet.isUsed[slot];
+                }
+
+                setSave.plotIds.Add(plotId);
+                setSave.usedSlots.Add(used);
+            }
+
+            saveData.plotSets.Add(setSave);
+        }
+
+        return saveData;
+    }
+
+    public void RestoreFromSave(PlotManagerSaveData saveData)
+    {
+        usedPlots.Clear();
+        availPlotSets = new PlotSet[2];
+
+        if (saveData == null || saveData.plotSets == null)
+        {
+            return;
+        }
+
+        for (int i = 0; i < availPlotSets.Length && i < saveData.plotSets.Count; i++)
+        {
+            PlotSetSaveData setSave = saveData.plotSets[i];
+            if (setSave == null || setSave.plotIds == null || setSave.plotIds.Count < 3)
+            {
+                continue;
+            }
+
+            Plot[] restoredPlots = new Plot[3];
+            bool canRestore = true;
+
+            for (int slot = 0; slot < 3; slot++)
+            {
+                restoredPlots[slot] = GetPlotById(setSave.plotIds[slot]);
+                if (restoredPlots[slot] == null)
+                {
+                    canRestore = false;
+                    break;
+                }
+            }
+
+            if (!canRestore)
+            {
+                Debug.LogWarning($"[Save] {i}번 공작 세트를 완전히 복원하지 못했습니다.");
+                continue;
+            }
+
+            availPlotSets[i] = new PlotSet(restoredPlots);
+
+            if (setSave.usedSlots != null)
+            {
+                for (int slot = 0; slot < 3 && slot < setSave.usedSlots.Count; slot++)
+                {
+                    if (setSave.usedSlots[slot])
+                    {
+                        availPlotSets[i].use(slot);
+                    }
+                }
+            }
+        }
     }
 }

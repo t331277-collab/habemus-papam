@@ -17,10 +17,6 @@ public class P004 : Plot
         // 설정 기본값
         plotID = "P004";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "광대 놀음";
-        plotDescription = "상갓집 개 노릇";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -29,11 +25,24 @@ public class P004 : Plot
         minInfluence = 60;
         pietyCost = 30;
         influenceDelta = -10;
+
+        // 텍스트 기본값
+        plotName = "광대 놀음";
+        plotDescription = "상갓집 개 노릇";
+        plotEffect = "정치력<sprite name=influence> 10 감소";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

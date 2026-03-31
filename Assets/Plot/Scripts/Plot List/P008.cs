@@ -21,10 +21,6 @@ public class P008 : Plot
         // 설정 기본값
         plotID = "P008";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "삼위일체";
-        plotDescription = "트포다 트포";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -37,6 +33,13 @@ public class P008 : Plot
         hpDelta = 33;
         influenceDelta = 3;
         pietyDelta = 3;
+
+        // 텍스트 기본값
+        plotName = "삼위일체";
+        plotDescription = "트포다 트포";
+        plotEffect = "체력<sprite name=hp> 33 증가\n정치력<sprite name=influence>, 경건함<sprite name=piety> 3 증가";
+        plotCondiText = $"<sprite name=hp>{minHp}<sprite name=hp> <sprite name=influence>{minInfluence}<sprite name=up> <sprite name=piety>{minPiety}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
@@ -44,6 +47,11 @@ public class P008 : Plot
         return (performer.Influence >= minInfluence && 
             performer.Hp >= minHp &&
             performer.Piety >= minPiety);
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

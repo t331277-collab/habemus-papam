@@ -15,10 +15,6 @@ public class P027 : Plot
         // 설정 기본값
         plotID = "P027";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "젠체하기";
-        plotDescription = "큰 망신을 당할 수도...";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -26,11 +22,23 @@ public class P027 : Plot
 
         minInfluence = 50;
         pietyCost = 70;
+
+        // 텍스트 기본값
+        plotName = "젠체하기";
+        plotDescription = "큰 망신을 당할 수도...";
+        plotEffect = "그러나 아무 일도 일어나지 않았다";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

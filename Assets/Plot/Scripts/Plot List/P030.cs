@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections;
+using UnityEngine;
 using static UnityEngine.GraphicsBuffer;
 
-[CreateAssetMenu(fileName = "P030", menuName = "Plot/결코 다시 전쟁!(미구현)", order = 030)]
+[CreateAssetMenu(fileName = "P030", menuName = "Plot/결코 다시 전쟁!", order = 030)]
 
 public class P030 : Plot
 {
@@ -17,10 +19,6 @@ public class P030 : Plot
         // 설정 기본값
         plotID = "P030";
         plotGrade = PlotGrade.Legendary;
-        
-        // 텍스트 기본값
-        plotName = "결코 다시 전쟁!(미구현)";
-        plotDescription = "성전이다, 우매한 이단들아!";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -29,11 +27,24 @@ public class P030 : Plot
         minInfluence = 55;
         pietyCost = 0;
         influenceDelta = 20;
+
+        // 텍스트 기본값
+        plotName = "결코 다시 전쟁!";
+        plotDescription = "성전이다, 우매한 이단들아!";
+        plotEffect = "모든 후보 정치력<sprite name=influence> 40 증가\n이번 콘클라베 동안 자신의 체력<sprite name=hp> 최소 1 유지";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)
     {
-        return performer.Hp <= minInfluence;
+        return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)
@@ -51,9 +62,43 @@ public class P030 : Plot
             cm.Cardinals[i].ChangeInfluence(influenceDelta);
         }
 
-        /*
-         * 이번 콘클라베 동안 모든 후보 체력 최소 1 유지
-         */
+        performer.StartCoroutine(Co_ApplyMinHpOneUntilConclaveEnd(performer));
     }
 
+    private IEnumerator Co_ApplyMinHpOneUntilConclaveEnd(Cardinal performer)
+    {
+        if (performer == null || InGameManager.Instance == null || InGameManager.Instance.Context == null)
+        {
+            yield break;
+        }
+
+        GameContext context = InGameManager.Instance.Context;
+        bool isEnded = false;
+
+        void OnContextEvent(GameContext.GameContextEvent eventType)
+        {
+            if (eventType == GameContext.GameContextEvent.ConclaveEnd)
+            {
+                isEnded = true;
+            }
+        }
+
+        performer.SetMinHpOneEffect(true);
+        Debug.Log("최소 체력 1 ON");
+        context.OnGameContextEvent += OnContextEvent;
+
+        yield return new WaitUntil(() => isEnded || performer == null);
+
+        if (performer != null)
+        {
+            performer.SetMinHpOneEffect(false);
+            Debug.Log("최소 체력 1 OFF");
+        }
+
+        if (context != null)
+        {
+            context.OnGameContextEvent -= OnContextEvent;
+        }
+    }
 }
+

@@ -16,10 +16,6 @@ public class P019 : Plot
         // 설정 기본값
         plotID = "P019";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "목 좀 축이세요";
-        plotDescription = "푸룬 주스가 뭘까...?";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -28,11 +24,24 @@ public class P019 : Plot
         maxInfluence = 45;
         pietyCost = 45;
         stunTime = 45f;
+
+        // 텍스트 기본값
+        plotName = "목 좀 축이세요";
+        plotDescription = "푸룬 주스가 뭘까...?";
+        plotEffect = "가장 체력이 높은 상대 후보 행동 불가 45초";
+        plotCondiText = $"<sprite name=influence>{maxInfluence}<sprite name=down>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence <= maxInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

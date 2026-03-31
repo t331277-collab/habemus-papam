@@ -132,4 +132,54 @@ public class EventManager : MonoBehaviour
         appeared.Clear();
         appearedCnt.Clear();
     }
+
+    public EventManagerSaveData CaptureSaveData()
+    {
+        EventManagerSaveData saveData = new EventManagerSaveData();
+
+        foreach (var pair in appearedCnt)
+        {
+            if (pair.Key == null)
+            {
+                continue;
+            }
+
+            saveData.records.Add(new EventRecordSaveData
+            {
+                eventId = pair.Key.eventID,
+                appearCount = pair.Value
+            });
+        }
+
+        return saveData;
+    }
+
+    public void RestoreFromSave(EventManagerSaveData saveData)
+    {
+        appeared.Clear();
+        appearedCnt.Clear();
+
+        if (saveData == null || saveData.records == null)
+        {
+            return;
+        }
+
+        foreach (var record in saveData.records)
+        {
+            if (record == null || string.IsNullOrWhiteSpace(record.eventId))
+            {
+                continue;
+            }
+
+            Event restoredEvent = GetEventById(record.eventId);
+            if (restoredEvent == null)
+            {
+                Debug.LogWarning($"[Save] 이벤트 '{record.eventId}'를 찾지 못해 복원을 건너뜁니다.");
+                continue;
+            }
+
+            appeared.Add(restoredEvent);
+            appearedCnt[restoredEvent] = Mathf.Max(0, record.appearCount);
+        }
+    }
 }

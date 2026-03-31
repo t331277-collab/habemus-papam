@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 572a3153d81a9d340a0f6f85b8751cf3, type: 3}
+  m_Name: P033
+  m_EditorClassIdentifier: Assembly-CSharp::P033
+  plotID: P033
+  plotName: "\uB098\uB294 \uC6A9\uC11C\uD558\uB9C8"
+  plotDescription: "\uD558\uC9C0\uB9CC \uC774 \uB140\uC11D\uC774 \uC6A9\uC11C\uD560\uAE4C?"
+  plotEffect: "\uB2E4\uC74C \uCF58\uD074\uB77C\uBCA0 \uB54C, \uC774\uBC88 \uCF58\uD074\uB77C\uBCA0
+    \uB3D9\uC548 \uAC10\uC18C\uD55C \uCCB4\uB825<sprite name=hp>\uB9CC\uD07C \uBAA8\uB4E0
+    \uC0C1\uB300 \uD6C4\uBCF4\uC758 \uCCB4\uB825<sprite name=hp> \uAC10\uC18C"
+  plotCondiText: <sprite name=influence>60<sprite name=up>
+  plotCostText: <sprite name=piety>  60
+  plotImage: {fileID: 0}
+  plotGrade: 2
+  plotWeightBase: 15
+  plotWeightMultiplier: 0
+  minInfluence: 60
+  pietyCost: 60

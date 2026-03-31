@@ -17,10 +17,6 @@ public class P018 : Plot
         // 설정 기본값
         plotID = "P018";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "스몰 토크";
-        plotDescription = "제가 LA에 갔을 때 말이죠...";
 
         // 수치 기본값
         plotWeightBase = 20;
@@ -30,11 +26,23 @@ public class P018 : Plot
         pietyCost = 35;
         hpDelta = -15;
         influenceDelta = 20;
+
+        // 텍스트 기본값
+        plotName = "스몰 토크";
+        plotDescription = "제가 LA에 갔을 때 말이죠...";
+        plotEffect = "정치력<sprite name=influence> 20 증가\n모든 상대 후보 체력<sprite name=hp> 15 감소";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

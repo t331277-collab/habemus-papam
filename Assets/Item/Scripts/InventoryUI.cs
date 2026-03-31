@@ -5,34 +5,77 @@ using UnityEngine.UI;
 
 public class InventoryUI : MonoBehaviour
 {
-    [Header("슬롯 설정 (하단 바)")]
-    [SerializeField] private ItemSlotUI[] slots; 
+    [Header("슬롯 설정")]
+    [SerializeField] private ItemSlotUI[] slots;
 
-    [Header("상세 정보창 (팝업)")]
+    [Header("상세 정보창")]
     [SerializeField] private GameObject detailPanel;
     [SerializeField] private Image detailImage;
     [SerializeField] private TextMeshProUGUI titleText;
-    [SerializeField] private TextMeshProUGUI typeText; // [자동] or [수동]
+    [SerializeField] private TextMeshProUGUI typeText;
     [SerializeField] private TextMeshProUGUI descText;
     [SerializeField] private TextMeshProUGUI effectText;
-    [SerializeField] private Button useButton;   // 사용하기 버튼
-    [SerializeField] private Button closeButton; // 닫기 버튼
-    [SerializeField] private Button dropButton;  // 버리기(삭제)
+    [SerializeField] private Button useButton;
+    [SerializeField] private Button closeButton;
+    [SerializeField] private Button dropButton;
 
-    private Item currentDetailItem; // 현재 보고 있는 아이템
+    private Item currentDetailItem;
+    private bool isInitialized = false;
+
+    void Awake()
+    {
+        InitializeSlots();
+    }
 
     void Start()
     {
+        InitializeSlots();
+        RefreshFromInventoryManager();
+        CloseDetailPanel();
+    }
+
+    void OnEnable()
+    {
+        InitializeSlots();
+        RefreshFromInventoryManager();
+    }
+
+    private void InitializeSlots()
+    {
+        if (isInitialized)
+        {
+            return;
+        }
+
         foreach (var slot in slots)
         {
             slot.Setup(this);
         }
 
-        if (useButton != null) useButton.onClick.AddListener(OnUseButtonClicked);
-        if (dropButton != null) dropButton.onClick.AddListener(OnDropButtonClicked);
-        if (closeButton != null) closeButton.onClick.AddListener(CloseDetailPanel);
+        if (useButton != null)
+        {
+            useButton.onClick.AddListener(OnUseButtonClicked);
+        }
 
-        CloseDetailPanel();
+        if (dropButton != null)
+        {
+            dropButton.onClick.AddListener(OnDropButtonClicked);
+        }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.AddListener(CloseDetailPanel);
+        }
+
+        isInitialized = true;
+    }
+
+    private void RefreshFromInventoryManager()
+    {
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.RefreshUI();
+        }
     }
 
     public void UpdateSlotUI(List<Item> items)
@@ -52,7 +95,10 @@ public class InventoryUI : MonoBehaviour
 
     public void ShowDetailPanel(Item item)
     {
-        if (item == null) return;
+        if (item == null)
+        {
+            return;
+        }
 
         currentDetailItem = item;
         detailPanel.SetActive(true);
@@ -61,14 +107,17 @@ public class InventoryUI : MonoBehaviour
         titleText.text = item.itemName;
 
         if (effectText != null)
+        {
             effectText.text = item.itemEffectDescription;
+        }
 
-        // 설정 설명 (예: 이 잔은...)
         if (descText != null)
+        {
             descText.text = item.itemDescription;
+        }
 
         string gradeStr = item.GetColoredGrade();
-        string typeStr = (item.usageType == ItemUsageType.Active)
+        string typeStr = item.usageType == ItemUsageType.Active
             ? "<color=green>[수동 사용]</color>"
             : "<color=yellow>[자동 적용]</color>";
 
@@ -77,18 +126,28 @@ public class InventoryUI : MonoBehaviour
         if (item.usageType == ItemUsageType.Active)
         {
             typeText.text = $"{gradeStr} <color=green>[수동 사용]</color>";
-            if (useButton) useButton.gameObject.SetActive(true);
+            if (useButton != null)
+            {
+                useButton.gameObject.SetActive(true);
+            }
         }
         else
         {
             typeText.text = $"{gradeStr} <color=yellow>[자동 적용]</color>";
-            if (useButton) useButton.gameObject.SetActive(false);
+            if (useButton != null)
+            {
+                useButton.gameObject.SetActive(false);
+            }
         }
     }
 
     public void CloseDetailPanel()
     {
-        detailPanel.SetActive(false);
+        if (detailPanel != null)
+        {
+            detailPanel.SetActive(false);
+        }
+
         currentDetailItem = null;
     }
 
@@ -97,7 +156,6 @@ public class InventoryUI : MonoBehaviour
         if (currentDetailItem != null && currentDetailItem.usageType == ItemUsageType.Active)
         {
             InventoryManager.Instance.UseItem(currentDetailItem);
-
             CloseDetailPanel();
         }
     }

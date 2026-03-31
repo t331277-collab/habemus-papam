@@ -16,10 +16,6 @@ public class P013 : Plot
         // 설정 기본값
         plotID = "P013";
         plotGrade = PlotGrade.Rare;
-        
-        // 텍스트 기본값
-        plotName = "심도 있는 논의";
-        plotDescription = "파인애플 피자는 이단인가?";
 
         // 수치 기본값
         plotWeightBase = 10;
@@ -28,11 +24,24 @@ public class P013 : Plot
         minInfluence = 0;
         pietyCost = 15;
         influenceDelta = 15;
+
+        // 텍스트 기본값
+        plotName = "심도 있는 논의";
+        plotDescription = "파인애플 피자는 이단인가?";
+        plotEffect = "정치력<sprite name=influence> 15 증가";
+        plotCondiText = $"";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)

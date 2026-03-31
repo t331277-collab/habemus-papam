@@ -44,6 +44,8 @@ public class ElectionManager : MonoBehaviour
     private Cardinal currentWinnerCandidate;
     private Coroutine jackpotCoroutine;
 
+    public Cardinal CurrentWinnerCandidate => currentWinnerCandidate;
+
     void Awake()
     {
         if (Instance != null && Instance != this)

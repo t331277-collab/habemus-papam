@@ -4,6 +4,12 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "I001", menuName = "Items/아령")]
 public class I001 : Item
 {
+    [System.Serializable]
+    private class RuntimeState
+    {
+        public float currentReductionLevel;
+    }
+
     [Header("아령 설정")]
     [SerializeField] private float initialReduction = 0.3f;
     [SerializeField] private float reductionPerTick = 0.01f;
@@ -78,24 +84,24 @@ public class I001 : Item
                 target.StopCoroutine(heavyRoutine);
                 heavyRoutine = null;
             }
-            target.RestoreMoveSpeed();
+            target.ChangeSpeed(currentReductionLevel);
         }
     }
 
     private IEnumerator BecomeHeavierRoutine(Cardinal target)
     {
+        target.ChangeSpeed(-currentReductionLevel);
+
         while (true)
         {
-            float speedMultiplier = 1.0f - currentReductionLevel;
-            if (speedMultiplier < 0.01f) speedMultiplier = 0.01f;
-
-            target.ChangeSpeed(speedMultiplier);
-
             yield return new WaitForSeconds(tickInterval);
 
-            currentReductionLevel += reductionPerTick;
+            if (currentReductionLevel < 0.99f)
+            {
+                target.ChangeSpeed(-reductionPerTick);
 
-            if (currentReductionLevel > 0.99f) currentReductionLevel = 0.99f;
+                currentReductionLevel += reductionPerTick;
+            }
         }
     }
 
@@ -103,5 +109,37 @@ public class I001 : Item
     {
         if (InventoryManager.Instance != null) return InventoryManager.Instance.Player;
         return null;
+    }
+
+    public override void ResetRuntimeState()
+    {
+        heavyRoutine = null;
+        currentReductionLevel = initialReduction;
+    }
+
+    public override string CaptureRuntimeState()
+    {
+        RuntimeState state = new RuntimeState
+        {
+            currentReductionLevel = currentReductionLevel
+        };
+
+        return JsonUtility.ToJson(state);
+    }
+
+    public override void RestoreRuntimeState(string runtimeStateJson)
+    {
+        ResetRuntimeState();
+
+        if (string.IsNullOrWhiteSpace(runtimeStateJson))
+        {
+            return;
+        }
+
+        RuntimeState state = JsonUtility.FromJson<RuntimeState>(runtimeStateJson);
+        if (state != null)
+        {
+            currentReductionLevel = state.currentReductionLevel;
+        }
     }
 }

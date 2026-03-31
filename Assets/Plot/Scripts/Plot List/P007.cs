@@ -2,7 +2,7 @@
 using UnityEngine;
 using System.Collections;
 
-[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트(버그 픽스 중)", order = 007)]
+[CreateAssetMenu(fileName = "P007", menuName = "Plot/드랍 더 비트", order = 007)]
 
 public class P007 : Plot
 {
@@ -19,10 +19,6 @@ public class P007 : Plot
         // 설정 기본값
         plotID = "P007";
         plotGrade = PlotGrade.Common;
-        
-        // 텍스트 기본값
-        plotName = "드랍 더 비트";
-        plotDescription = "새긴다! 태양의 비트!";
 
         // 수치 기본값
         plotWeightBase = 15;
@@ -30,13 +26,26 @@ public class P007 : Plot
 
         minInfluence = 20;
         pietyCost = 15;
-        speedPercentDelta = 10f;
+        speedPercentDelta = 0.1f;
         duration = 20;
+
+        // 텍스트 기본값
+        plotName = "드랍 더 비트";
+        plotDescription = "새긴다! 태양의 비트!";
+        plotEffect = "모든 후보 이동속도 10% 증가 20초";
+        plotCondiText = $"<sprite name=influence>{minInfluence}<sprite name=up>";
+        plotCostText = $"<sprite name=piety>  {cost}";
+
     }
 
     public override bool CanExecute(Cardinal performer)
     {
         return performer.Influence >= minInfluence;
+    }
+
+    public override bool IsCostEnough(Cardinal performer)
+    {
+        return performer.Piety >= cost;
     }
 
     public override void Execute(Cardinal performer)
@@ -60,7 +69,7 @@ public class P007 : Plot
     {
         if (target == null) yield break;
 
-        float delta = target.MoveSpeed * (speedPercentDelta / 100f);
+        float delta = speedPercentDelta;
 
         target.ChangeSpeed(delta);
 

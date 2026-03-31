@@ -42,6 +42,7 @@ public class Gamsil : MonoBehaviour
 
     void Update()
     {
+        CleanupQueue();
         ProcessQueue();
 
         if (prayerList.Count == 0 && overflowPlayer == null)
@@ -86,7 +87,16 @@ public class Gamsil : MonoBehaviour
     public void RegisterPlayerToQueue(StateController playerSC)
     {
         if (prayerList.Contains(playerSC) || currentPrayerNPC == playerSC || overflowPlayer == playerSC) return;
-        if (playerSC.CurrentState != CardinalState.Idle) return;
+        if (playerSC == null || !playerSC.CanAcceptManualInteraction()) return;
+
+        if (CanPlayerGoDirectlyToPrayer(playerSC))
+        {
+            currentPrayerNPC = playerSC;
+            playerSC.OrderToPray(prayTargetPoint.position, false);
+            return;
+        }
+
+        if (waitingPoint == null) return;
 
         bool isMainSpotAvailable = false;
         if (waitingTrigger != null)
@@ -120,14 +130,14 @@ public class Gamsil : MonoBehaviour
         for (int i = candidates.Count - 1; i >= 0; i--)
         {
             StateController sc = candidates[i];
-            if (sc.CurrentState == CardinalState.Scheme || sc.IsSchemer) continue;
-
             if (sc == null || sc.CompareTag("Player"))
             {
                 candidates.RemoveAt(i);
                 if (sc != null && npcLastCalledTime.ContainsKey(sc)) npcLastCalledTime.Remove(sc);
                 continue;
             }
+
+            if (sc.CurrentState == CardinalState.Scheme || sc.IsSchemer) continue;
 
             if (npcLastCalledTime.ContainsKey(sc))
             {
@@ -196,7 +206,10 @@ public class Gamsil : MonoBehaviour
     {
         if (overflowPlayer == null) return;
 
-        prayerList.Add(overflowPlayer); 
+        if (!prayerList.Contains(overflowPlayer))
+        {
+            prayerList.Add(overflowPlayer);
+        }
 
         if (waitingTrigger != null)
         {
@@ -220,6 +233,42 @@ public class Gamsil : MonoBehaviour
         currentPrayerNPC = null;
         return false;
     }
+
+    private void CleanupQueue()
+    {
+        prayerList.RemoveAll(sc => sc == null || !sc.IsPerformingPrayerAction);
+
+        if (overflowPlayer != null && !overflowPlayer.IsPerformingPrayerAction)
+        {
+            overflowPlayer = null;
+        }
+
+        if (currentPrayerNPC != null && !currentPrayerNPC.IsPerformingPrayerAction)
+        {
+            currentPrayerNPC = null;
+        }
+    }
+
+    private bool CanPlayerGoDirectlyToPrayer(StateController playerSC)
+    {
+        if (playerSC == null || !playerSC.CompareTag("Player"))
+        {
+            return false;
+        }
+
+        if (prayTargetPoint == null)
+        {
+            return false;
+        }
+
+        if (overflowPlayer != null || prayerList.Count > 0)
+        {
+            return false;
+        }
+
+        return !IsPrayerSpotOccupied();
+    }
+
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.CompareTag("NPC"))
