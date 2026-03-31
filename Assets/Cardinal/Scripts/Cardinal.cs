@@ -365,6 +365,14 @@ public class Cardinal : MonoBehaviour
         }
     }
 
+    public void OnPlotExecuted()
+    {
+        foreach (var item in items)
+        {
+            item?.OnPlot(this);
+        }
+    }
+
     public void Plot()
     {
         PlotManager.Instance.InitializePlotSession(this);

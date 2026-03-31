@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d0d76641c7cb94943b1277f7783800cc, type: 3}
   m_Name: I003
   m_EditorClassIdentifier: Assembly-CSharp::I003
-  itemID: I004
+  itemID: I003
   itemName: "\uC740\uC73C\uB85C \uB9CC\uB4E0 \uC131\uBC30"
   itemDescription: "\uC774 \uC794\uC5D0 \uBBF8\uC0AC\uB97C \uD560 \uB54C\uB9C8\uB2E4
     \uD0DC\uC591\uC8FC\uB97C \uD55C \uC794\uC529 \uB9C8\uC2E4 \uC218 \uC788\uB2E4.

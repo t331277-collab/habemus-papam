@@ -11,7 +11,7 @@ public class I006 : Item
 
     void Reset()
     {
-        itemID = "I005";
+        itemID = "I006";
         itemGrade = ItemGrade.Rare; 
 
         itemExpirationType = ItemExpirationType.Day;
