@@ -27,6 +27,7 @@ public class Cardinal : MonoBehaviour
     private bool isKnockedOut = false;
     private bool hasMinHpOneEffect = false;
     private bool isInitialized = false;
+    private Coroutine indicatorRestoreCoroutine;
 
     public float Hp => hp;
     public float HpDrainMultiplier => hpDrainMultiplier;
@@ -192,6 +193,39 @@ public class Cardinal : MonoBehaviour
         }
 
         RegisterPlayerIfNeeded();
+    }
+
+    public void RestorePlayerIndicatorAfterLoad()
+    {
+        if (!CompareTag("Player") || !gameObject.activeInHierarchy)
+        {
+            return;
+        }
+
+        Animation_Controller animCtrl = GetComponentInChildren<Animation_Controller>(true);
+        if (animCtrl == null)
+        {
+            return;
+        }
+
+        if (indicatorRestoreCoroutine != null)
+        {
+            StopCoroutine(indicatorRestoreCoroutine);
+        }
+
+        indicatorRestoreCoroutine = StartCoroutine(ApplyPlayerIndicatorAfterLoad(animCtrl));
+    }
+
+    private System.Collections.IEnumerator ApplyPlayerIndicatorAfterLoad(Animation_Controller animCtrl)
+    {
+        yield return null;
+
+        if (animCtrl != null)
+        {
+            animCtrl.SetIndicatorActive(true);
+        }
+
+        indicatorRestoreCoroutine = null;
     }
 
     public void ChangeSpeed(float delta)

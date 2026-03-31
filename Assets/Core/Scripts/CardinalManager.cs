@@ -568,6 +568,8 @@ public class CardinalManager : MonoBehaviour
 
             stateController.ApplyLoadedState(restoredState, saveData.isSchemer, saveData.isConClaving);
         }
+
+        cardinal.RestorePlayerIndicatorAfterLoad();
     }
 
     private void RestoreCardinalTransform(Cardinal cardinal, Vector3 position, float rotationZ)
