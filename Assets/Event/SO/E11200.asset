@@ -29,13 +29,18 @@ MonoBehaviour:
   conflictEvents: []
   option1: "\uAFB8\uC900\uD788 \uAE30\uB3C4\uD574\uC11C \uCCB4\uB825\uC744 \uCC44\uC6B0\uC790!"
   option1Chance: 1
-  option1SuccessDescription: "\"\uAE30\uB3C4\uB97C \uD558\uBA74 \uC77C\uC815 \uD655\uB960\uB85C
+  option1Requirement: 
+  option1SuccessDescription: "\uAE30\uB3C4\uB97C \uD558\uBA74 \uC77C\uC815 \uD655\uB960\uB85C
     \uCCB4\uB825\uACFC \uACBD\uAC74\uD568\uC774 \uD68C\uBCF5\uB429\uB2C8\uB2E4.\n\uACBD\uAC74\uD568\uC740
     \uACF5\uC791\uC744 \uC0AC\uC6A9\uD560 \uB54C \uC18C\uBAA8\uB418\uB294 \uC911\uC694\uD55C
     \uC790\uC6D0\uC785\uB2C8\uB2E4.\n\uB108\uBB34 \uB192\uB2E4\uBA74 \uAD50\uD669
-    \uC120\uCD9C \uD655\uB960\uC774 \uB192\uC544\uC9C0\uB2C8 \uC870\uC2EC\uD558\uC138\uC694!\""
+    \uC120\uCD9C \uD655\uB960\uC774 \uB192\uC544\uC9C0\uB2C8 \uC870\uC2EC\uD558\uC138\uC694!"
+  option1SuccessResult: 
   option1FailDescription: 
+  option1FailResult: 
   option2: 
   option2Chance: 1
   option2SuccessDescription: 
+  option2SuccessResult: 
   option2FailDescription: 
+  option2FailResult: 

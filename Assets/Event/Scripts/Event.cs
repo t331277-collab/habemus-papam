@@ -19,12 +19,16 @@ public abstract class Event : ScriptableObject
     [SerializeField] public float option1Chance;
     [SerializeField] public string option1Requirement = "";
     [TextArea] public string option1SuccessDescription;
+    [TextArea] public string option1SuccessResult;
     [TextArea] public string option1FailDescription;
+    [TextArea] public string option1FailResult;
 
     [SerializeField] public string option2;
     [SerializeField] public float option2Chance;
     [TextArea] public string option2SuccessDescription;
+    [TextArea] public string option2SuccessResult;
     [TextArea] public string option2FailDescription;
+    [TextArea] public string option2FailResult;
 
     public float GetEventWeight()
     {

@@ -26,12 +26,19 @@ void Awake()
         {
             instance=this;
         }
-        else Destroy(gameObject);
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     public static UIManager Instance
     {
-        get; private set;
+        get
+        {
+            if (instance==null) return null;
+            return instance;
+        }
     }
 
 //외부 게임매니저에서 게임 전환시 UI를 일괄 조작.

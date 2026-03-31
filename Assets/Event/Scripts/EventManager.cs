@@ -55,9 +55,10 @@ public class EventManager : MonoBehaviour
             if(!ConflictEventSatisfied(pickedEvent)) continue;
 
             MarkEventAppeared(pickedEvent);
+            Debug.Log($"이벤트 \"{pickedEvent}\" 선택");
             return pickedEvent;
         }
-
+        Debug.Log($"이벤트 선택 실패, currentEvent = \"{pickedEvent}\"");
         return pickedEvent;
     }
 

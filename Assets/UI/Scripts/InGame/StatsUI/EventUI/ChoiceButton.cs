@@ -6,22 +6,24 @@ class ChoiceButton : MonoBehaviour
 {
     [SerializeField] Sprite ButtonWithReq;
     [SerializeField] Sprite ButtonWithoutReq;
-    Button ButtonKoraji;
-    [TextArea] TextMeshProUGUI text;
+    [SerializeField] Button ButtonKoraji;
+    [SerializeField] TextMeshProUGUI text;
     [SerializeField] private TextMeshProUGUI req;
 
     public void SetButton(string desc, string req = "")
     {
         if(req != "")
         {
-            ButtonKoraji.image.sprite = ButtonWithoutReq;
+            ButtonKoraji.image.sprite = ButtonWithReq;
             SetReq(req);
             SetText(desc);
-            return;
         }
-        ButtonKoraji.image.sprite = ButtonWithReq;
+        else
+        {
+            ButtonKoraji.image.sprite = ButtonWithoutReq;
         SetReq("");
         SetText(desc);
+        }
     }
     public void DisableButton()
     {
@@ -43,7 +45,13 @@ class ChoiceButton : MonoBehaviour
     }
     public void Clear()
     {
-        ButtonKoraji = null;
-        text.text = req.text = "";
+        if (ButtonKoraji != null)
+        {
+            ButtonKoraji.interactable = true;
+            ButtonKoraji.image.color = Color.white;
+        }
+
+        if (text != null) text.text = "";
+        if (req != null) req.text = "";
     }
 }

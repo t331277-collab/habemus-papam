@@ -7,9 +7,6 @@ class EventWindow : MonoBehaviour
     [SerializeField] TextMeshProUGUI text;
     [SerializeField] ChoiceButton ChoiceButton1;
     [SerializeField] ChoiceButton ChoiceButton2;
-    [SerializeField] TextMeshProUGUI ChoiceButton1Text;
-    [SerializeField] TextMeshProUGUI ChoiceButton1Req;
-    [SerializeField] TextMeshProUGUI ChoiceButtonText2;
     private Event CurrentEvent;
     public void ShowEvent(Event evt)
     {

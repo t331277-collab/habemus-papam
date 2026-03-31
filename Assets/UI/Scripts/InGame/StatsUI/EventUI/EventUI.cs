@@ -18,55 +18,73 @@ public class EventUI : MonoBehaviour
         RESULT2
     }
     private EventUIState currentState = EventUIState.NONE;
+    private void Start()
+    {
+        SetState(EventUIState.NONE);
+    }
     public void SetState(EventUIState state)
     {
         currentState = state;
-
-        //일단 패널을 껐다가
-        window.gameObject.SetActive(false);
-        result.gameObject.SetActive(false);
 
         switch (state)
         {
             case EventUIState.NONE:
                 Time.timeScale = 1f;
-                break;
-            case EventUIState.TUTORIAL:
-                Time.timeScale = 0f;
-                window.gameObject.SetActive(true);
-                window.ShowEvent("11100");
+                window.gameObject.SetActive(false);
                 result.gameObject.SetActive(false);
                 break;
-            case EventUIState.CHOICE:
+            case EventUIState.TUTORIAL:
+                window.gameObject.SetActive(true);
+                result.gameObject.SetActive(false);
                 Time.timeScale = 0f;
+                break;
+            case EventUIState.CHOICE:
                 window.gameObject.SetActive(true);
                 window.ShowEvent(InGameManager.Instance.GetCurrentEvent());
                 result.gameObject.SetActive(false);
+                Time.timeScale = 0f;
                 break;
             case EventUIState.RESULT1:
                 window.Clear();
-                Time.timeScale = 0f;
                 window.gameObject.SetActive(false);
                 result.gameObject.SetActive(true);
                 result.ShowEvent(InGameManager.Instance.GetCurrentEvent(), 1);
+                Time.timeScale = 0f;
                 break;
             case EventUIState.RESULT2:
                 window.Clear();
-                Time.timeScale = 0f;
                 window.gameObject.SetActive(false);
                 result.gameObject.SetActive(true);
                 result.ShowEvent(InGameManager.Instance.GetCurrentEvent(), 2);
+                Time.timeScale=0f;
                 break;
         }
         
     }
     
-    public void UISetEvent(Event evt)
+    public void UISetEvent()
     {
-        window.ShowEvent(evt);
+        SetState(EventUIState.CHOICE);
+        Debug.Log("EventUI Set to" + InGameManager.Instance.GetCurrentEvent());
     }
-    public void UISetEvent(string eventID)
+    public void UISetEvent(string eventID = "11100")
     {
+        SetState(EventUIState.TUTORIAL);
         window.ShowEvent(eventID);
+    }
+    public void ShowResult1()
+    {
+        SetState(EventUIState.RESULT1);
+        Debug.Log($"EventUI {InGameManager.Instance.GetCurrentEvent()} Result 1 Showing");
+    }
+    public void ShowResult2()
+    {
+        SetState(EventUIState.RESULT2);
+        Debug.Log($"EventUI Result 2 {InGameManager.Instance.GetCurrentEvent()} Showing");
+    }
+    public void Close()
+    {
+        Debug.Log("EventUI.Close");
+        SetState(EventUIState.NONE);
     }
 }

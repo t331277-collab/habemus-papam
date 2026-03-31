@@ -1,11 +1,13 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 class EventResult : MonoBehaviour
 {
     [SerializeField] TextMeshProUGUI title;
     [SerializeField] TextMeshProUGUI text;
+    [SerializeField] TextMeshProUGUI result;
     [SerializeField] Button button;
     [SerializeField] TextMeshProUGUI ButtonText;
     private Event currentEvent;
@@ -18,13 +20,29 @@ class EventResult : MonoBehaviour
 
         if(result == 1)
         {
-            text.text = evt.OnChoiceOption1(UIManager.Instance.Ingame.Stats.LinkedCardinals[0])?
-            evt.option1SuccessDescription : evt.option1FailDescription;
+            if(evt.OnChoiceOption1(UIManager.Instance.Ingame.Stats.LinkedCardinals[0]) == true)
+            {
+                text.text = evt.option1SuccessDescription;
+                this.result.text = evt.option1SuccessResult;
+            }
+            else
+            {
+                text.text = evt.option1FailDescription;
+                this.result.text = evt.option1FailResult;
+            }
         }
         else if(result == 2)
         {
-            text.text = evt.OnChoiceOption2(UIManager.Instance.Ingame.Stats.LinkedCardinals[0])?
-            evt.option2SuccessDescription : evt.option2FailDescription;
+            if(evt.OnChoiceOption2(UIManager.Instance.Ingame.Stats.LinkedCardinals[0]) == true)
+            {
+                text.text = evt.option2SuccessDescription;
+                this.result.text = evt.option2SuccessResult;
+            }
+            else
+            {
+                text.text = evt.option2FailDescription;
+                this.result.text = evt.option2FailResult;
+            }
         }
     }
 }

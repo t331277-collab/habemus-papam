@@ -18,6 +18,7 @@ public class GameContext
     int currentDay;
     Conclave currentConclave;
     float remainingTime;
+    bool[] triggeredEventTimes;
 
     public event Action<GameContextEvent> OnGameContextEvent;
     public int CurrentDay => currentDay;
@@ -31,7 +32,9 @@ public class GameContext
     {
         currentDay = day;
         currentConclave = conclave;
+        currentEvent = ScriptableObject.CreateInstance<E11100>();
         remainingTime = InGameManager.Instance.Balance.MaxConclaveTime;
+        ResetEventTimeTriggers();
     }
 
     public void AdvanceConclave()
@@ -47,6 +50,7 @@ public class GameContext
         }
 
         remainingTime = InGameManager.Instance.Balance.MaxConclaveTime;
+        ResetEventTimeTriggers();
 
         OnGameContextEvent?.Invoke(GameContextEvent.ConclaveStart);
     }
@@ -60,14 +64,18 @@ public class GameContext
     {
         if (remainingTime > 0)
         {
+            float previousRemainingTime = remainingTime;
             remainingTime -= deltaTime;
             if (remainingTime < 0) remainingTime = 0;
+            CheckEventTimeThresholds(previousRemainingTime);
         }
     }
 
     public void ChangeRemainingTime(float deltaTime)
     {
+        float previousRemainingTime = remainingTime;
         remainingTime = Mathf.Clamp(remainingTime + deltaTime, 0f, InGameManager.Instance.Balance.MaxConclaveTime);
+        CheckEventTimeThresholds(previousRemainingTime);
     }
 
     public void StartGame()
@@ -81,6 +89,37 @@ public class GameContext
     public void SetEvent(Event evt)
     {
         currentEvent = evt;
+    }
+
+    void ResetEventTimeTriggers() //AI Slop
+    {
+        float[] eventTimes = InGameManager.Instance.Balance.EventTime;
+        triggeredEventTimes = eventTimes == null ? Array.Empty<bool>() : new bool[eventTimes.Length];
+    }
+
+    void CheckEventTimeThresholds(float previousRemainingTime)
+    {
+        float[] eventTimes = InGameManager.Instance.Balance.EventTime;
+        if (eventTimes == null || eventTimes.Length == 0) return;
+        if (triggeredEventTimes == null || triggeredEventTimes.Length != eventTimes.Length)
+        {
+            ResetEventTimeTriggers();
+        }
+
+        for (int i = 0; i < eventTimes.Length; i++)
+        {
+            if (triggeredEventTimes[i]) continue;
+
+            float threshold = eventTimes[i];
+            if (previousRemainingTime > threshold && remainingTime <= threshold)
+            {
+                triggeredEventTimes[i] = true;
+                Debug.Log(i + "번째 이벤트 발생");
+                SetNewEvent();
+
+                UIManager.Instance.Ingame.Event.UISetEvent();
+            }
+        }
     }
 }
 
@@ -149,7 +188,6 @@ public class InGameManager : MonoBehaviour
     void Start()
     {
         InitGame();
-
     }
 
     public void StartConclaveCycle()
@@ -233,7 +271,6 @@ public class InGameManager : MonoBehaviour
 
         gameContext.InitGameContext();
         if (inventoryUIPanel != null) inventoryUIPanel.SetActive(false);
-
     }
 
     void HandleGameContextEvent(GameContext.GameContextEvent eventType)
