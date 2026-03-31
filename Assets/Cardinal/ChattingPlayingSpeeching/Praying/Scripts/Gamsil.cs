@@ -87,7 +87,15 @@ public class Gamsil : MonoBehaviour
     public void RegisterPlayerToQueue(StateController playerSC)
     {
         if (prayerList.Contains(playerSC) || currentPrayerNPC == playerSC || overflowPlayer == playerSC) return;
-        if (playerSC.CurrentState != CardinalState.Idle) return;
+        if (playerSC == null || !playerSC.CanAcceptManualInteraction()) return;
+
+        if (CanPlayerGoDirectlyToPrayer(playerSC))
+        {
+            currentPrayerNPC = playerSC;
+            playerSC.OrderToPray(prayTargetPoint.position, false);
+            return;
+        }
+
         if (waitingPoint == null) return;
 
         bool isMainSpotAvailable = false;
@@ -239,6 +247,26 @@ public class Gamsil : MonoBehaviour
         {
             currentPrayerNPC = null;
         }
+    }
+
+    private bool CanPlayerGoDirectlyToPrayer(StateController playerSC)
+    {
+        if (playerSC == null || !playerSC.CompareTag("Player"))
+        {
+            return false;
+        }
+
+        if (prayTargetPoint == null)
+        {
+            return false;
+        }
+
+        if (overflowPlayer != null || prayerList.Count > 0)
+        {
+            return false;
+        }
+
+        return !IsPrayerSpotOccupied();
     }
 
     private void OnTriggerEnter2D(Collider2D other)

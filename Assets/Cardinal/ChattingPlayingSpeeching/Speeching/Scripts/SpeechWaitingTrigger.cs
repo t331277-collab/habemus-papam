@@ -42,7 +42,7 @@ public class SpeechWaitingTrigger : MonoBehaviour
             StateController playerSC = other.GetComponent<StateController>();
             PlayerController playerCtrl = other.GetComponent<PlayerController>();
 
-            if (playerSC != null && playerSC.CurrentState == CardinalState.Idle)
+            if (playerSC != null && playerSC.CanAcceptManualInteraction())
             {
                 if (playerCtrl != null)
                 {

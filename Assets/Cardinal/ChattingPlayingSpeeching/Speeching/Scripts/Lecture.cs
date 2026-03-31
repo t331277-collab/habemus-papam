@@ -75,7 +75,15 @@ public class Lecture : MonoBehaviour
     public void RegisterPlayerToQueue(StateController playerSC)
     {
         if (speechList.Contains(playerSC) || currentSpeaker == playerSC || overflowPlayer == playerSC) return;
-        if (playerSC.CurrentState != CardinalState.Idle) return;
+        if (playerSC == null || !playerSC.CanAcceptManualInteraction()) return;
+
+        if (CanPlayerGoDirectlyToSpeech(playerSC))
+        {
+            currentSpeaker = playerSC;
+            playerSC.OrderToSpeech(speechTargetPoint.position, false);
+            return;
+        }
+
         if (waitingPoint == null) return;
 
         bool isMainSpotAvailable = false;
@@ -224,6 +232,26 @@ public class Lecture : MonoBehaviour
         {
             currentSpeaker = null;
         }
+    }
+
+    private bool CanPlayerGoDirectlyToSpeech(StateController playerSC)
+    {
+        if (playerSC == null || !playerSC.CompareTag("Player"))
+        {
+            return false;
+        }
+
+        if (speechTargetPoint == null)
+        {
+            return false;
+        }
+
+        if (overflowPlayer != null || speechList.Count > 0)
+        {
+            return false;
+        }
+
+        return !IsSpeechSpotOccupied();
     }
 
     private void OnTriggerEnter2D(Collider2D other)

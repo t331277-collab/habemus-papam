@@ -43,7 +43,7 @@ public class PrayerWaitingTrigger : MonoBehaviour
         {
             StateController playerSC = other.GetComponent<StateController>();
 
-            if (playerSC != null && playerSC.CurrentState == CardinalState.Idle)
+            if (playerSC != null && playerSC.CanAcceptManualInteraction())
             {
                 gamsilManager.RegisterPlayerToQueue(playerSC);
             }
