@@ -1,28 +1,79 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public class SettingsUI : MonoBehaviour
 {
-    private SettingsWindow settingsWindow;
-    private UIManager.UIState prevState;
-    void OnEnable()
+    [SerializeField] private GameObject settingsPanel;
+
+    //private UIManager.UIState prevState;
+
+    private void Start()
     {
-        prevState = UIManager.Instance.State;
-        UIManager.Instance.SetUIState(UIManager.UIState.SETTINGS);
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
     }
 
-    void EnableWindow()
+    void OnEnable()
     {
-        settingsWindow.gameObject.SetActive(true);
-    }
-    void DisableWindow()
-    {
-        settingsWindow.gameObject.SetActive(false);
+        //prevState = UIManager.Instance.State;
+        //UIManager.Instance.SetUIState(UIManager.UIState.SETTINGS);
     }
 
     void OnDisable()
     {
-        UIManager.Instance.SetUIState(prevState);
+        //UIManager.Instance.SetUIState(prevState);
     }
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            ToggleSettingsPanel();
+        }
+
+        /*
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            if (isCredit) CloseCredits();
+            else if (isHelp) CloseHelp();
+        }
+        */
+    }
+
+    public void ToggleSettingsPanel()
+    {
+        if (settingsPanel == null)
+        {
+            Debug.LogWarning("Settings Panel이 연결되지 않았습니다.");
+            return;
+        }
+
+        settingsPanel.SetActive(!settingsPanel.activeSelf);
+    }
+
+    public void OpenSettingsPanel()
+    {
+        if (settingsPanel == null)
+        {
+            Debug.LogWarning("Settings Panel이 연결되지 않았습니다.");
+            return;
+        }
+
+        settingsPanel.SetActive(true);
+    }
+
+    public void CloseSettingsPanel()
+    {
+        if (settingsPanel == null)
+        {
+            Debug.LogWarning("Settings Panel이 연결되지 않았습니다.");
+            return;
+        }
+
+        settingsPanel.SetActive(false);
+    }
+    
     bool isCredit = false;
     bool isHelp = false;
     void OpenCredits()
@@ -43,13 +94,4 @@ public class SettingsUI : MonoBehaviour
     }
 
     // 어떤 방식으로 credits와 help를 열지는 나중에 결정
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            if(isCredit) CloseCredits();
-            else if(isHelp) CloseHelp();
-        }
-    }
 }
