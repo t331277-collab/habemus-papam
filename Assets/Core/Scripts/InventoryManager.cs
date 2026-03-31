@@ -135,12 +135,18 @@ public class InventoryManager : MonoBehaviour
             return false;
         }
 
-        inventoryItems.Add(newItem);
-        newItem.OnAcquire();
-
-        if (playerCardinal != null && newItem.usageType == ItemUsageType.Passive)
+        Item runtimeItem = CreateRuntimeItemInstance(newItem);
+        if (runtimeItem == null)
         {
-            playerCardinal.AddPassiveItem(newItem);
+            return false;
+        }
+
+        inventoryItems.Add(runtimeItem);
+        runtimeItem.OnAcquire();
+
+        if (playerCardinal != null && runtimeItem.usageType == ItemUsageType.Passive)
+        {
+            playerCardinal.AddPassiveItem(runtimeItem);
         }
 
         RefreshUI();
@@ -285,9 +291,29 @@ public class InventoryManager : MonoBehaviour
                 continue;
             }
 
-            item.RestoreRuntimeState(itemSave.runtimeStateJson);
-            target.Add(item);
+            Item runtimeItem = CreateRuntimeItemInstance(item);
+            if (runtimeItem == null)
+            {
+                continue;
+            }
+
+            runtimeItem.RestoreRuntimeState(itemSave.runtimeStateJson);
+            target.Add(runtimeItem);
         }
+    }
+
+    private Item CreateRuntimeItemInstance(Item sourceItem)
+    {
+        if (sourceItem == null)
+        {
+            Debug.LogWarning("[Inventory] Tried to create an item instance from a null source.");
+            return null;
+        }
+
+        Item runtimeItem = Instantiate(sourceItem);
+        runtimeItem.name = sourceItem.name;
+        runtimeItem.ResetRuntimeState();
+        return runtimeItem;
     }
 
     private void ReapplyItemsAfterLoad()

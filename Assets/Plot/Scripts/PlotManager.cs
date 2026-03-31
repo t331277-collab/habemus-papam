@@ -147,6 +147,7 @@ public class PlotManager : MonoBehaviour
     public void UsePlot(int plotSet, int index)
     {
         AvailPlotSets[plotSet].plots[index].Execute(performer);
+        performer?.OnPlotExecuted();
         AvailPlotSets[plotSet].use(index);
 
         CheckIsAllUsed(plotSet);

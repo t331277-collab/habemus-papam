@@ -29,6 +29,7 @@ public abstract class Item : ScriptableObject
     public virtual void OnUse() { }
     public virtual void OnPray(Cardinal owner) { }
     public virtual void OnSpeech(Cardinal owner) { }
+    public virtual void OnPlot(Cardinal owner) { }
     public virtual void OnReapply(Cardinal owner) { }
     public virtual bool OnHpReachedZero(Cardinal owner) { return false; }
     public virtual void ResetRuntimeState() { }
