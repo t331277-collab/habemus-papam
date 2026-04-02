@@ -116,6 +116,16 @@ public class SettingsManager : MonoBehaviour
         speechKeyLabel = NormalizeHotKeyLabel(label);
     }
 
+    public void ResetHotKeysToDefault()
+    {
+        upKeyLabel = DefaultUpKey;
+        downKeyLabel = DefaultDownKey;
+        rightKeyLabel = DefaultRightKey;
+        leftKeyLabel = DefaultLeftKey;
+        prayKeyLabel = DefaultPrayKey;
+        speechKeyLabel = DefaultSpeechKey;
+    }
+
     private void ApplySettings()
     {
         float finalMasterVolume = isMasterMuted ? 0f : masterVolume / 100f;

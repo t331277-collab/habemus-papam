@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
@@ -28,6 +28,7 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button leftKey;
     [SerializeField] private Button prayHotKey;
     [SerializeField] private Button speechHotKey;
+    [SerializeField] private Button resetHotKeysButton;
 
     private HotKeyTarget waitingHotKeyTarget = HotKeyTarget.None;
 
@@ -178,6 +179,11 @@ public class SettingsUI : MonoBehaviour
         {
             speechHotKey.onClick.AddListener(OnClickSpeechHotKey);
         }
+
+        if (resetHotKeysButton != null)
+        {
+            resetHotKeysButton.onClick.AddListener(OnClickResetHotKeys);
+        }
     }
 
     private void UnregisterEvents()
@@ -228,6 +234,11 @@ public class SettingsUI : MonoBehaviour
         if (speechHotKey != null)
         {
             speechHotKey.onClick.RemoveListener(OnClickSpeechHotKey);
+        }
+
+        if (resetHotKeysButton != null)
+        {
+            resetHotKeysButton.onClick.RemoveListener(OnClickResetHotKeys);
         }
     }
 
@@ -368,6 +379,19 @@ public class SettingsUI : MonoBehaviour
     {
         waitingHotKeyTarget = HotKeyTarget.Speech;
         SetWaitingText(speechHotKey);
+    }
+
+    public void OnClickResetHotKeys()
+    {
+        waitingHotKeyTarget = HotKeyTarget.None;
+
+        if (SettingsManager.Instance == null)
+        {
+            return;
+        }
+
+        SettingsManager.Instance.ResetHotKeysToDefault();
+        SyncHotKeyButtonsFromManager();
     }
 
     private void SetWaitingText(Button targetButton)
