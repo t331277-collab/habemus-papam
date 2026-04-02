@@ -15,8 +15,8 @@ MonoBehaviour:
   ScriptURL: https://script.google.com/macros/s/AKfycby6B7LmsfUj4KY12H8Kcfvl5h4NitL19I5U_7oOyw1N1FRJLuWEBv0NNVa1DttjgSh6/exec
   ScriptPassword: papam
   GoogleFolderID: 1bm_cAy2zB0qEiDjuzdHfYTRy5gDYk5sX
-  GenerateCodePath: Assets/UGS.Generated/Scripts/
-  DataPath: Assets/UGS.Generated/Resources/
+  GenerateCodePath: Assets/Google Database/UGS.Generated/Resources
+  DataPath: Assets/Google Database/UGS.Generated/Resources
   RuntimeDataPath: UGS/UGS.Data/
   CDN_URL: 
   base64: 0

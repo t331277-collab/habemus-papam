@@ -1,16 +1,68 @@
 using UnityEngine;
+using NameData;
+using System.Collections.Generic;
 
 public class NameDB : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    //싱글톤
+    private static NameDB instance = null;
+
+    private Dictionary<string, int> PopeList = new();
+    int weightSum = 0;
+    void Awake()
     {
-        
+        if(instance == null) instance = this;
+        else Destroy(this.gameObject);
+        RefreshDB();
     }
 
-    // Update is called once per frame
-    void Update()
+    public static NameDB Instance
     {
-        
+        get
+        {
+            if (instance == null) return null;
+            return instance;
+        }
     }
+    void Start()
+    {
+        Debug.Log($"UGS Database 내 교주 이름 {PopeName.PopeNameList.Count}개 로딩됨!");
+    }
+
+    void RefreshDB()
+    {
+        PopeList.Clear();
+        PopeName.Load();
+
+        foreach(var v in PopeName.PopeNameList)
+        {
+            weightSum+=v.weight;
+        }
+
+        foreach(var v in PopeName.PopeNameList)
+        {
+            PopeList.Add(v.popeName, v.weight);
+        }
+    }
+
+    public string GetRandomName()
+    {
+        float randNum = UnityEngine.Random.Range(0, weightSum);
+        int pivot = 0;
+        foreach(var v in PopeList)
+        {
+            pivot += v.Value;
+            if (pivot > (float)(randNum%weightSum) && v.Value != 0)
+            {
+                return v.Key;
+            }
+        }
+        return null;
+    }
+    /*
+    randNum이 0이라면? 첫 0이 아닌 가중치를 더하고 반환
+    randNum이 weightSum이라면? 모든 가중치를 다 더하고 반환
+    weight이 0인 것들이 있다면? 반환안하고 다음 0이 아닌 가중치에서 반환
+    굿
+    */
 }
