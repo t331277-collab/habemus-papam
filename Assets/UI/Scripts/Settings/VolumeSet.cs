@@ -6,6 +6,9 @@ using TMPro;
 
 public class VolumeSet : MonoBehaviour
 {
+    private const float DisabledAlpha = 0.8f;
+    private const float EnabledAlpha = 1f;
+
     [SerializeField] private TMP_Text valueText;
     [SerializeField] private Slider volumeSlider;
     [SerializeField] private Toggle muteToggle;
@@ -40,6 +43,8 @@ public class VolumeSet : MonoBehaviour
         {
             muteToggle.SetIsOnWithoutNotify(isMuted);
         }
+
+        ApplyMutedVisual(isMuted);
     }
 
     public float GetValue()
@@ -58,5 +63,38 @@ public class VolumeSet : MonoBehaviour
         {
             valueText.text = Mathf.RoundToInt(volumeSlider.value).ToString();
         }
+    }
+
+    public void ApplyMutedVisual(bool isMuted)
+    {
+        if (volumeSlider != null)
+        {
+            volumeSlider.interactable = !isMuted;
+            SetCanvasGroupState(volumeSlider.gameObject, isMuted);
+        }
+
+        if (valueText != null)
+        {
+            SetCanvasGroupState(valueText.gameObject, isMuted);
+        }
+    }
+
+    private void SetCanvasGroupState(GameObject target, bool isMuted)
+    {
+        CanvasGroup canvasGroup = GetOrAddCanvasGroup(target);
+        canvasGroup.alpha = isMuted ? DisabledAlpha : EnabledAlpha;
+        canvasGroup.interactable = !isMuted;
+        canvasGroup.blocksRaycasts = !isMuted;
+    }
+
+    private CanvasGroup GetOrAddCanvasGroup(GameObject target)
+    {
+        CanvasGroup canvasGroup = target.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = target.AddComponent<CanvasGroup>();
+        }
+
+        return canvasGroup;
     }
 }
