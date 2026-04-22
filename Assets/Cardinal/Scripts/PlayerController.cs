@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class PlayerController : MonoBehaviour, ICardinalController
@@ -54,6 +54,12 @@ public class PlayerController : MonoBehaviour, ICardinalController
         bool canCancelActionMovement = myStateController.IsActionMovementInProgress;
         bool shouldCaptureMoveInput = canAcceptManualInteraction || canCancelActionMovement;
         bool isMovingInput = false;
+        Key moveUpKey = GetConfiguredHotKey(HotKeyAction.MoveUp, Key.W);
+        Key moveDownKey = GetConfiguredHotKey(HotKeyAction.MoveDown, Key.S);
+        Key moveRightKey = GetConfiguredHotKey(HotKeyAction.MoveRight, Key.D);
+        Key moveLeftKey = GetConfiguredHotKey(HotKeyAction.MoveLeft, Key.A);
+        Key prayInputKey = GetConfiguredHotKey(HotKeyAction.Pray, interactKey);
+        Key speechInputKey = GetConfiguredHotKey(HotKeyAction.Speech, speechKey);
 
         if (mouse.leftButton.wasPressedThisFrame && shouldCaptureMoveInput)
         {
@@ -65,7 +71,8 @@ public class PlayerController : MonoBehaviour, ICardinalController
         }
 
         if (shouldCaptureMoveInput &&
-            (keyboard.wKey.isPressed || keyboard.sKey.isPressed || keyboard.aKey.isPressed || keyboard.dKey.isPressed ||
+            (IsKeyPressed(keyboard, moveUpKey) || IsKeyPressed(keyboard, moveDownKey) ||
+             IsKeyPressed(keyboard, moveRightKey) || IsKeyPressed(keyboard, moveLeftKey) ||
              keyboard.upArrowKey.isPressed || keyboard.downArrowKey.isPressed ||
              keyboard.leftArrowKey.isPressed || keyboard.rightArrowKey.isPressed))
         {
@@ -91,7 +98,7 @@ public class PlayerController : MonoBehaviour, ICardinalController
             return;
         }
 
-        if (keyboard[interactKey].wasPressedThisFrame)
+        if (WasKeyPressedThisFrame(keyboard, prayInputKey))
         {
             if (!myStateController.IsHeadingToQueue)
             {
@@ -106,7 +113,7 @@ public class PlayerController : MonoBehaviour, ICardinalController
             }
         }
 
-        if (keyboard[speechKey].wasPressedThisFrame)
+        if (WasKeyPressedThisFrame(keyboard, speechInputKey))
         {
             if (!myStateController.IsHeadingToQueue && !myStateController.IsHeadingToSpeech)
             {
@@ -139,13 +146,39 @@ public class PlayerController : MonoBehaviour, ICardinalController
         if (keyboard != null)
         {
             Vector2 moveDir = Vector2.zero;
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) moveDir.y += 1;
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) moveDir.y -= 1;
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) moveDir.x -= 1;
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) moveDir.x += 1;
+            Key moveUpKey = GetConfiguredHotKey(HotKeyAction.MoveUp, Key.W);
+            Key moveDownKey = GetConfiguredHotKey(HotKeyAction.MoveDown, Key.S);
+            Key moveRightKey = GetConfiguredHotKey(HotKeyAction.MoveRight, Key.D);
+            Key moveLeftKey = GetConfiguredHotKey(HotKeyAction.MoveLeft, Key.A);
+
+            if (IsKeyPressed(keyboard, moveUpKey) || keyboard.upArrowKey.isPressed) moveDir.y += 1;
+            if (IsKeyPressed(keyboard, moveDownKey) || keyboard.downArrowKey.isPressed) moveDir.y -= 1;
+            if (IsKeyPressed(keyboard, moveLeftKey) || keyboard.leftArrowKey.isPressed) moveDir.x -= 1;
+            if (IsKeyPressed(keyboard, moveRightKey) || keyboard.rightArrowKey.isPressed) moveDir.x += 1;
 
             inputData.moveDirection = moveDir.normalized;
         }
         return inputData;
+    }
+
+    private static Key GetConfiguredHotKey(HotKeyAction action, Key fallbackKey)
+    {
+        if (SettingsManager.Instance == null)
+        {
+            return fallbackKey;
+        }
+
+        Key key = SettingsManager.Instance.GetHotKey(action);
+        return key != Key.None ? key : fallbackKey;
+    }
+
+    private static bool IsKeyPressed(Keyboard keyboard, Key key)
+    {
+        return key != Key.None && keyboard[key].isPressed;
+    }
+
+    private static bool WasKeyPressedThisFrame(Keyboard keyboard, Key key)
+    {
+        return key != Key.None && keyboard[key].wasPressedThisFrame;
     }
 }
