@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using TMPro;
@@ -16,16 +17,17 @@ public class MainScene : MonoBehaviour
     [SerializeField] private Component loadDayText;
     [SerializeField] private Component loadConclaveText;
     [SerializeField] private GameObject popeListPopup;
-    [SerializeField] private Image popeListMiddleFrame;
-    [SerializeField] private Image popeListLeftFrame;
+    [SerializeField] private Image popeListCreditImage;
     [SerializeField] private GameObject popeListCreditObject;
+    [SerializeField] private List<Sprite> popeListCreditSprites = new();
+    [SerializeField] private List<Button> popeListFrameButtons = new();
     [SerializeField] private Button popeListLeftArrowButton;
     [SerializeField] private Button popeListRightArrowButton;
     [SerializeField] private Button popeListBackButton;
     [SerializeField] private List<Selectable> popeListBlockedSelectables = new();
-    [SerializeField] private int popeListInitialFrame = 1;
-    [SerializeField] private int popeListMaxFrame = 100;
-    [SerializeField] private string popeListFrameLabelFormat = "{0}frame";
+    [SerializeField] private Camera mainCamera;
+    [SerializeField] private Camera subCamera;
+    [SerializeField] private float popeListCameraTransitionDuration = 0.6f;
     [SerializeField] private List<Button> navigationButtons = new();
     [SerializeField] private Color selectedOutlineColor = Color.black;
     [SerializeField] private Vector2 selectedOutlineDistance = new Vector2(8f, -8f);
@@ -39,12 +41,25 @@ public class MainScene : MonoBehaviour
     private Outline highlightedOutline;
     private readonly Dictionary<Button, Outline> buttonOutlines = new();
     private readonly Dictionary<Selectable, bool> popeListSelectableInteractableStates = new();
-    private Image popeListRightFrame;
-    private int currentPopeFrame = 1;
-    private bool popeListVisualsInitialized;
+    private readonly List<Sprite> resolvedPopeListCreditSprites = new();
+    private int currentPopeCreditIndex;
+    private bool popeListRuntimeBindingsInitialized;
+    private bool popeListFrameButtonListenersRegistered;
+    private bool isViewingSubCamera;
+    private bool hasCameraInitialStates;
+    private CameraState mainCameraInitialState;
+    private CameraState subCameraInitialState;
+    private Coroutine cameraTransitionCoroutine;
+    private RectTransform popeListPopupRect;
+    private RectTransform popeListCanvasRect;
+    private Vector2 popeListPopupInitialAnchoredPosition;
+    private Vector3 popeListPopupInitialScale;
+    private bool hasPopeListPopupInitialTransform;
+    private Coroutine popeListZoomTransitionCoroutine;
 
     private void Awake()
     {
+        InitializePopeListRuntimeBindings();
         SetStartGameWarningPopup(false);
         SetLoadWarningPopup(false);
         SetLoadPopup(false);
@@ -53,6 +68,7 @@ public class MainScene : MonoBehaviour
 
     private void Start()
     {
+        InitializePopeListRuntimeBindings();
         EnsureEventSystemNavigationDisabled();
         RefreshNavigation(true);
     }
@@ -61,6 +77,7 @@ public class MainScene : MonoBehaviour
     {
         EnsureEventSystemNavigationDisabled();
         RefreshNavigation(false);
+        HandlePopeListPopupInput();
         HandleNavigationInput();
     }
 
@@ -68,6 +85,7 @@ public class MainScene : MonoBehaviour
     {
         ClearSelectionHighlight();
         ApplyPopeListMouseOnlyMode(false);
+        SwitchToMainCameraImmediate();
         RestoreEventSystemNavigation();
     }
 
@@ -160,12 +178,17 @@ public class MainScene : MonoBehaviour
 
     public void OnClickPopeListLeftArrow()
     {
-        MovePopeFrame(-1);
+        MovePopeCredit(-1);
     }
 
     public void OnClickPopeListRightArrow()
     {
-        MovePopeFrame(1);
+        MovePopeCredit(1);
+    }
+
+    public void OnClickPopeListFrame()
+    {
+        TransitionToSubCamera();
     }
 
     private void SetStartGameWarningPopup(bool isActive)
@@ -202,14 +225,15 @@ public class MainScene : MonoBehaviour
     {
         if (isActive)
         {
-            InitializePopeListVisuals();
-            currentPopeFrame = Mathf.Clamp(popeListInitialFrame, 1, Mathf.Max(1, popeListMaxFrame));
+            InitializePopeListRuntimeBindings();
+            currentPopeCreditIndex = 0;
+            RefreshPopeCreditSprite();
             ApplyPopeListMouseOnlyMode(true);
         }
         else
         {
             ApplyPopeListMouseOnlyMode(false);
-            HidePopeListVisuals();
+            SwitchToMainCameraImmediate();
         }
 
         if (popeListPopup != null)
@@ -217,11 +241,17 @@ public class MainScene : MonoBehaviour
             popeListPopup.SetActive(isActive);
         }
 
-        if (isActive)
+        if (popeListCreditObject != null)
         {
-            RefreshPopeListVisuals();
+            popeListCreditObject.SetActive(isActive);
         }
 
+        if (isActive)
+        {
+            ConfigurePopeListRaycasts();
+        }
+
+        UpdatePopeListArrowState();
         RefreshNavigation(false);
     }
 
@@ -311,6 +341,29 @@ public class MainScene : MonoBehaviour
         if (WasSubmitPressed())
         {
             ActivateCurrentButton();
+        }
+    }
+
+    private void HandlePopeListPopupInput()
+    {
+        if (isViewingSubCamera && WasCancelPressed())
+        {
+            TransitionToMainCamera();
+            return;
+        }
+
+        if (!IsPopupOpen(popeListPopup))
+        {
+            return;
+        }
+
+        if (WasMoveLeftPressed())
+        {
+            MovePopeCredit(-1);
+        }
+        else if (WasMoveRightPressed())
+        {
+            MovePopeCredit(1);
         }
     }
 
@@ -546,148 +599,169 @@ public class MainScene : MonoBehaviour
         return button.GetComponent<Graphic>();
     }
 
-    private void MovePopeFrame(int direction)
+    private void InitializePopeListRuntimeBindings()
+    {
+        ResolvePopeListReferences();
+        RefreshPopeListCreditSpriteSources();
+        RegisterPopeListFrameButtonListeners();
+        CacheCameraInitialStates();
+        CachePopeListPopupTransform();
+        ConfigurePopeListRaycasts();
+
+        if (!popeListRuntimeBindingsInitialized)
+        {
+            SetCameraView(false);
+            popeListRuntimeBindingsInitialized = true;
+        }
+    }
+
+    private void ResolvePopeListReferences()
+    {
+        if (popeListPopup == null)
+        {
+            popeListPopup = GameObject.Find("PopeListPopUp");
+        }
+
+        if (popeListCreditObject == null && popeListPopup != null)
+        {
+            Transform creditTransform = FindDeepChild(popeListPopup.transform, "Credit");
+            if (creditTransform != null)
+            {
+                popeListCreditObject = creditTransform.gameObject;
+            }
+        }
+
+        if (popeListCreditImage == null && popeListCreditObject != null)
+        {
+            popeListCreditImage = popeListCreditObject.GetComponent<Image>();
+        }
+
+        if (popeListCreditImage != null)
+        {
+            popeListCreditImage.raycastTarget = false;
+            popeListCreditImage.transform.SetAsFirstSibling();
+        }
+
+        if ((popeListFrameButtons == null || popeListFrameButtons.Count == 0) && popeListPopup != null)
+        {
+            popeListFrameButtons = new List<Button>();
+            for (int i = 1; i <= 5; i++)
+            {
+                Transform frameTransform = FindDeepChild(popeListPopup.transform, $"Frame{i}");
+                Button frameButton = frameTransform != null ? frameTransform.GetComponent<Button>() : null;
+                AddUniqueButton(popeListFrameButtons, frameButton);
+            }
+        }
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main != null ? Camera.main : FindCameraByName("Main Camera");
+        }
+
+        if (subCamera == null)
+        {
+            subCamera = FindCameraByName("SubCamera");
+        }
+    }
+
+    private void ConfigurePopeListRaycasts()
+    {
+        if (popeListPopup == null)
+        {
+            return;
+        }
+
+        foreach (Graphic graphic in popeListPopup.GetComponentsInChildren<Graphic>(true))
+        {
+            Button ownerButton = graphic.GetComponentInParent<Button>();
+            graphic.raycastTarget = ownerButton != null && ownerButton.targetGraphic == graphic;
+        }
+    }
+
+    private void RefreshPopeListCreditSpriteSources()
+    {
+        resolvedPopeListCreditSprites.Clear();
+        AddSprites(resolvedPopeListCreditSprites, popeListCreditSprites);
+
+        if (resolvedPopeListCreditSprites.Count == 0 && popeListFrameButtons != null)
+        {
+            foreach (Button frameButton in popeListFrameButtons)
+            {
+                Image frameImage = frameButton != null ? frameButton.GetComponent<Image>() : null;
+                AddSprite(resolvedPopeListCreditSprites, frameImage != null ? frameImage.sprite : null);
+            }
+        }
+
+        if (resolvedPopeListCreditSprites.Count == 0 && popeListCreditImage != null)
+        {
+            AddSprite(resolvedPopeListCreditSprites, popeListCreditImage.sprite);
+        }
+    }
+
+    private void RegisterPopeListFrameButtonListeners()
+    {
+        if (popeListFrameButtonListenersRegistered || popeListFrameButtons == null)
+        {
+            return;
+        }
+
+        foreach (Button frameButton in popeListFrameButtons)
+        {
+            if (frameButton != null)
+            {
+                frameButton.onClick.AddListener(OnClickPopeListFrame);
+            }
+        }
+
+        popeListFrameButtonListenersRegistered = true;
+    }
+
+    private void MovePopeCredit(int direction)
     {
         if (direction == 0 || !IsPopupOpen(popeListPopup))
         {
             return;
         }
 
-        int maxFrame = Mathf.Max(1, popeListMaxFrame);
-        int nextFrame = Mathf.Clamp(currentPopeFrame + direction, 1, maxFrame);
-        if (nextFrame == currentPopeFrame)
+        InitializePopeListRuntimeBindings();
+        if (resolvedPopeListCreditSprites.Count == 0)
         {
             return;
         }
 
-        currentPopeFrame = nextFrame;
-        RefreshPopeListVisuals();
+        currentPopeCreditIndex = WrapIndex(
+            currentPopeCreditIndex + direction,
+            resolvedPopeListCreditSprites.Count);
+        RefreshPopeCreditSprite();
     }
 
-    private void InitializePopeListVisuals()
+    private void RefreshPopeCreditSprite()
     {
-        if (popeListVisualsInitialized)
+        InitializePopeListRuntimeBindings();
+        if (popeListCreditImage == null || resolvedPopeListCreditSprites.Count == 0)
         {
+            UpdatePopeListArrowState();
             return;
         }
 
-        if (popeListLeftFrame != null && popeListCreditObject != null)
-        {
-            Transform creditTransform = popeListCreditObject.transform;
-            GameObject rightFrameObject = Instantiate(
-                popeListLeftFrame.gameObject,
-                creditTransform.parent);
-            rightFrameObject.name = $"{popeListLeftFrame.gameObject.name}_RightRuntime";
-
-            RectTransform sourceRect = popeListCreditObject.transform as RectTransform;
-            RectTransform targetRect = rightFrameObject.transform as RectTransform;
-            if (sourceRect != null && targetRect != null)
-            {
-                CopyRectTransform(sourceRect, targetRect);
-            }
-
-            rightFrameObject.transform.SetSiblingIndex(creditTransform.GetSiblingIndex());
-            popeListRightFrame = rightFrameObject.GetComponent<Image>();
-            if (popeListRightFrame != null)
-            {
-                popeListRightFrame.gameObject.SetActive(false);
-            }
-        }
-
-        popeListVisualsInitialized = true;
-    }
-
-    private void RefreshPopeListVisuals()
-    {
-        int maxFrame = Mathf.Max(1, popeListMaxFrame);
-        currentPopeFrame = Mathf.Clamp(currentPopeFrame, 1, maxFrame);
-
-        SetFrameSlot(popeListMiddleFrame, currentPopeFrame, true);
-        SetFrameSlot(
-            popeListLeftFrame,
-            currentPopeFrame + 1,
-            currentPopeFrame < maxFrame);
-
-        bool showCredit = currentPopeFrame <= 1;
-        if (popeListCreditObject != null)
-        {
-            popeListCreditObject.SetActive(showCredit);
-        }
-
-        SetFrameSlot(
-            popeListRightFrame,
-            currentPopeFrame - 1,
-            !showCredit);
-
+        currentPopeCreditIndex = WrapIndex(currentPopeCreditIndex, resolvedPopeListCreditSprites.Count);
+        popeListCreditImage.sprite = resolvedPopeListCreditSprites[currentPopeCreditIndex];
+        popeListCreditImage.enabled = popeListCreditImage.sprite != null;
         UpdatePopeListArrowState();
-    }
-
-    private void HidePopeListVisuals()
-    {
-        SetFrameSlot(popeListMiddleFrame, currentPopeFrame, false);
-        SetFrameSlot(popeListLeftFrame, currentPopeFrame + 1, false);
-        SetFrameSlot(popeListRightFrame, currentPopeFrame - 1, false);
-
-        if (popeListCreditObject != null)
-        {
-            popeListCreditObject.SetActive(false);
-        }
-    }
-
-    private void SetFrameSlot(Image frameImage, int frameNumber, bool isVisible)
-    {
-        if (frameImage == null)
-        {
-            return;
-        }
-
-        frameImage.gameObject.SetActive(isVisible);
-        if (!isVisible)
-        {
-            return;
-        }
-
-        SetFrameLabel(frameImage.transform, frameNumber);
-    }
-
-    private void SetFrameLabel(Transform frameRoot, int frameNumber)
-    {
-        if (frameRoot == null)
-        {
-            return;
-        }
-
-        string format = string.IsNullOrWhiteSpace(popeListFrameLabelFormat)
-            ? "{0}"
-            : popeListFrameLabelFormat;
-        string label = string.Format(format, frameNumber);
-
-        TMP_Text tmpText = frameRoot.GetComponentInChildren<TMP_Text>(true);
-        if (tmpText != null)
-        {
-            tmpText.text = label;
-            return;
-        }
-
-        Text legacyText = frameRoot.GetComponentInChildren<Text>(true);
-        if (legacyText != null)
-        {
-            legacyText.text = label;
-        }
     }
 
     private void UpdatePopeListArrowState()
     {
-        int maxFrame = Mathf.Max(1, popeListMaxFrame);
+        bool canSwitchCredit = resolvedPopeListCreditSprites.Count > 1;
 
         if (popeListLeftArrowButton != null)
         {
-            popeListLeftArrowButton.interactable = currentPopeFrame > 1;
+            popeListLeftArrowButton.interactable = canSwitchCredit;
         }
 
         if (popeListRightArrowButton != null)
         {
-            popeListRightArrowButton.interactable = currentPopeFrame < maxFrame;
+            popeListRightArrowButton.interactable = canSwitchCredit;
         }
 
         if (popeListBackButton != null)
@@ -748,6 +822,13 @@ public class MainScene : MonoBehaviour
         results.Remove(popeListLeftArrowButton);
         results.Remove(popeListRightArrowButton);
         results.Remove(popeListBackButton);
+        if (popeListFrameButtons != null)
+        {
+            foreach (Button frameButton in popeListFrameButtons)
+            {
+                results.Remove(frameButton);
+            }
+        }
 
         return results;
     }
@@ -775,20 +856,370 @@ public class MainScene : MonoBehaviour
         targets.Add(selectable);
     }
 
-    private static void CopyRectTransform(RectTransform source, RectTransform destination)
+    private static void AddUniqueButton(List<Button> targets, Button button)
     {
-        if (source == null || destination == null)
+        if (targets == null || button == null || targets.Contains(button))
         {
             return;
         }
 
-        destination.anchorMin = source.anchorMin;
-        destination.anchorMax = source.anchorMax;
-        destination.anchoredPosition = source.anchoredPosition;
-        destination.sizeDelta = source.sizeDelta;
-        destination.pivot = source.pivot;
-        destination.localRotation = source.localRotation;
-        destination.localScale = source.localScale;
+        targets.Add(button);
+    }
+
+    private static void AddSprites(List<Sprite> targets, IEnumerable<Sprite> source)
+    {
+        if (targets == null || source == null)
+        {
+            return;
+        }
+
+        foreach (Sprite sprite in source)
+        {
+            AddSprite(targets, sprite);
+        }
+    }
+
+    private static void AddSprite(List<Sprite> targets, Sprite sprite)
+    {
+        if (targets == null || sprite == null)
+        {
+            return;
+        }
+
+        targets.Add(sprite);
+    }
+
+    private void TransitionToSubCamera()
+    {
+        BeginPopeListViewTransition(true);
+    }
+
+    private void TransitionToMainCamera()
+    {
+        BeginPopeListViewTransition(false);
+    }
+
+    private void BeginPopeListViewTransition(bool useSubCamera)
+    {
+        InitializePopeListRuntimeBindings();
+        isViewingSubCamera = useSubCamera;
+        BeginPopeListZoomTransition(useSubCamera);
+        BeginCameraTransition(useSubCamera);
+    }
+
+    private void BeginCameraTransition(bool useSubCamera)
+    {
+        InitializePopeListRuntimeBindings();
+        if (mainCamera == null || subCamera == null || mainCamera == subCamera)
+        {
+            return;
+        }
+
+        if (cameraTransitionCoroutine != null)
+        {
+            StopCoroutine(cameraTransitionCoroutine);
+        }
+
+        cameraTransitionCoroutine = StartCoroutine(SmoothCameraTransition(useSubCamera));
+    }
+
+    private void BeginPopeListZoomTransition(bool useSubCamera)
+    {
+        CachePopeListPopupTransform();
+        if (popeListPopupRect == null)
+        {
+            return;
+        }
+
+        if (popeListZoomTransitionCoroutine != null)
+        {
+            StopCoroutine(popeListZoomTransitionCoroutine);
+        }
+
+        popeListZoomTransitionCoroutine = StartCoroutine(SmoothPopeListZoomTransition(useSubCamera));
+    }
+
+    private IEnumerator SmoothCameraTransition(bool useSubCamera)
+    {
+        Camera sourceCamera = GetCurrentlyEnabledCamera();
+        Camera targetCamera = useSubCamera ? subCamera : mainCamera;
+        if (sourceCamera == null)
+        {
+            sourceCamera = useSubCamera ? mainCamera : subCamera;
+        }
+
+        if (sourceCamera == null || targetCamera == null)
+        {
+            cameraTransitionCoroutine = null;
+            yield break;
+        }
+
+        CameraState startState = CameraState.From(sourceCamera);
+        CameraState targetState = CameraState.From(targetCamera);
+
+        sourceCamera.enabled = true;
+        if (targetCamera != sourceCamera)
+        {
+            targetCamera.enabled = false;
+        }
+
+        SetCameraAudio(sourceCamera, true);
+        if (targetCamera != sourceCamera)
+        {
+            SetCameraAudio(targetCamera, false);
+        }
+
+        float duration = Mathf.Max(0f, popeListCameraTransitionDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = duration <= 0f ? 1f : Mathf.Clamp01(elapsed / duration);
+            float easedT = t * t * (3f - 2f * t);
+            CameraState.Lerp(startState, targetState, easedT).ApplyTo(sourceCamera);
+            yield return null;
+        }
+
+        targetState.ApplyTo(targetCamera);
+        targetCamera.enabled = true;
+        SetCameraAudio(targetCamera, true);
+
+        Camera inactiveCamera = useSubCamera ? mainCamera : subCamera;
+        if (inactiveCamera != null && inactiveCamera != targetCamera)
+        {
+            startState.ApplyTo(inactiveCamera);
+            inactiveCamera.enabled = false;
+            SetCameraAudio(inactiveCamera, false);
+        }
+
+        isViewingSubCamera = useSubCamera;
+        cameraTransitionCoroutine = null;
+    }
+
+    private IEnumerator SmoothPopeListZoomTransition(bool useSubCamera)
+    {
+        Vector2 startPosition = popeListPopupRect.anchoredPosition;
+        Vector3 startScale = popeListPopupRect.localScale;
+        Vector2 targetPosition = popeListPopupInitialAnchoredPosition;
+        Vector3 targetScale = popeListPopupInitialScale;
+
+        if (useSubCamera)
+        {
+            GetPopeListSubCameraTarget(out targetPosition, out targetScale);
+        }
+
+        float duration = Mathf.Max(0f, popeListCameraTransitionDuration);
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = duration <= 0f ? 1f : Mathf.Clamp01(elapsed / duration);
+            float easedT = t * t * (3f - 2f * t);
+            popeListPopupRect.anchoredPosition = Vector2.LerpUnclamped(startPosition, targetPosition, easedT);
+            popeListPopupRect.localScale = Vector3.LerpUnclamped(startScale, targetScale, easedT);
+            yield return null;
+        }
+
+        popeListPopupRect.anchoredPosition = targetPosition;
+        popeListPopupRect.localScale = targetScale;
+        popeListZoomTransitionCoroutine = null;
+    }
+
+    private void SwitchToMainCameraImmediate()
+    {
+        if (cameraTransitionCoroutine != null)
+        {
+            StopCoroutine(cameraTransitionCoroutine);
+            cameraTransitionCoroutine = null;
+        }
+
+        if (popeListZoomTransitionCoroutine != null)
+        {
+            StopCoroutine(popeListZoomTransitionCoroutine);
+            popeListZoomTransitionCoroutine = null;
+        }
+
+        CacheCameraInitialStates();
+        RestoreCameraInitialState(mainCamera);
+        RestoreCameraInitialState(subCamera);
+        SetCameraView(false);
+        RestorePopeListPopupTransform();
+        isViewingSubCamera = false;
+    }
+
+    private void CachePopeListPopupTransform()
+    {
+        if (popeListPopupRect == null && popeListPopup != null)
+        {
+            popeListPopupRect = popeListPopup.GetComponent<RectTransform>();
+        }
+
+        if (popeListCanvasRect == null && popeListPopupRect != null)
+        {
+            Canvas canvas = popeListPopupRect.GetComponentInParent<Canvas>();
+            popeListCanvasRect = canvas != null ? canvas.rootCanvas.GetComponent<RectTransform>() : null;
+        }
+
+        if (hasPopeListPopupInitialTransform || popeListPopupRect == null)
+        {
+            return;
+        }
+
+        popeListPopupInitialAnchoredPosition = popeListPopupRect.anchoredPosition;
+        popeListPopupInitialScale = popeListPopupRect.localScale;
+        hasPopeListPopupInitialTransform = true;
+    }
+
+    private void RestorePopeListPopupTransform()
+    {
+        if (!hasPopeListPopupInitialTransform || popeListPopupRect == null)
+        {
+            return;
+        }
+
+        popeListPopupRect.anchoredPosition = popeListPopupInitialAnchoredPosition;
+        popeListPopupRect.localScale = popeListPopupInitialScale;
+    }
+
+    private void GetPopeListSubCameraTarget(out Vector2 targetPosition, out Vector3 targetScale)
+    {
+        targetPosition = popeListPopupInitialAnchoredPosition;
+        targetScale = popeListPopupInitialScale;
+
+        if (subCamera == null || popeListCanvasRect == null)
+        {
+            return;
+        }
+
+        float zoomScale = 1f;
+        if (subCamera.orthographic && subCamera.orthographicSize > 0f)
+        {
+            zoomScale = popeListCanvasRect.rect.height / (subCamera.orthographicSize * 2f);
+        }
+
+        zoomScale = Mathf.Max(0.01f, zoomScale);
+        Vector2 subCameraCanvasPosition = popeListCanvasRect.InverseTransformPoint(subCamera.transform.position);
+        targetScale = popeListPopupInitialScale * zoomScale;
+        targetPosition = popeListPopupInitialAnchoredPosition - subCameraCanvasPosition * zoomScale;
+    }
+
+    private void CacheCameraInitialStates()
+    {
+        if (hasCameraInitialStates || mainCamera == null || subCamera == null)
+        {
+            return;
+        }
+
+        mainCameraInitialState = CameraState.From(mainCamera);
+        subCameraInitialState = CameraState.From(subCamera);
+        hasCameraInitialStates = true;
+    }
+
+    private void RestoreCameraInitialState(Camera targetCamera)
+    {
+        if (!hasCameraInitialStates || targetCamera == null)
+        {
+            return;
+        }
+
+        if (targetCamera == mainCamera)
+        {
+            mainCameraInitialState.ApplyTo(targetCamera);
+        }
+        else if (targetCamera == subCamera)
+        {
+            subCameraInitialState.ApplyTo(targetCamera);
+        }
+    }
+
+    private void SetCameraView(bool useSubCamera)
+    {
+        if (mainCamera != null)
+        {
+            mainCamera.enabled = !useSubCamera;
+            SetCameraAudio(mainCamera, !useSubCamera);
+        }
+
+        if (subCamera != null)
+        {
+            subCamera.enabled = useSubCamera;
+            SetCameraAudio(subCamera, useSubCamera);
+        }
+    }
+
+    private Camera GetCurrentlyEnabledCamera()
+    {
+        if (mainCamera != null && mainCamera.enabled)
+        {
+            return mainCamera;
+        }
+
+        if (subCamera != null && subCamera.enabled)
+        {
+            return subCamera;
+        }
+
+        return isViewingSubCamera ? subCamera : mainCamera;
+    }
+
+    private static void SetCameraAudio(Camera targetCamera, bool isEnabled)
+    {
+        if (targetCamera == null)
+        {
+            return;
+        }
+
+        AudioListener audioListener = targetCamera.GetComponent<AudioListener>();
+        if (audioListener != null)
+        {
+            audioListener.enabled = isEnabled;
+        }
+    }
+
+    private static Camera FindCameraByName(string cameraName)
+    {
+        if (string.IsNullOrWhiteSpace(cameraName))
+        {
+            return null;
+        }
+
+        foreach (Camera camera in FindObjectsByType<Camera>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None))
+        {
+            if (camera != null && camera.name == cameraName)
+            {
+                return camera;
+            }
+        }
+
+        return null;
+    }
+
+    private static Transform FindDeepChild(Transform parent, string childName)
+    {
+        if (parent == null || string.IsNullOrWhiteSpace(childName))
+        {
+            return null;
+        }
+
+        foreach (Transform child in parent)
+        {
+            if (child.name == childName)
+            {
+                return child;
+            }
+
+            Transform result = FindDeepChild(child, childName);
+            if (result != null)
+            {
+                return result;
+            }
+        }
+
+        return null;
     }
 
     private void EnsureEventSystemNavigationDisabled()
@@ -838,5 +1269,68 @@ public class MainScene : MonoBehaviour
     private static bool WasSubmitPressed()
     {
         return Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter);
+    }
+
+    private static bool WasCancelPressed()
+    {
+        return Input.GetKeyDown(KeyCode.Escape);
+    }
+
+    private struct CameraState
+    {
+        private readonly Vector3 position;
+        private readonly Quaternion rotation;
+        private readonly bool orthographic;
+        private readonly float orthographicSize;
+        private readonly float fieldOfView;
+        private readonly bool isValid;
+
+        private CameraState(
+            Vector3 position,
+            Quaternion rotation,
+            bool orthographic,
+            float orthographicSize,
+            float fieldOfView)
+        {
+            this.position = position;
+            this.rotation = rotation;
+            this.orthographic = orthographic;
+            this.orthographicSize = orthographicSize;
+            this.fieldOfView = fieldOfView;
+            isValid = true;
+        }
+
+        public static CameraState From(Camera camera)
+        {
+            return new CameraState(
+                camera.transform.position,
+                camera.transform.rotation,
+                camera.orthographic,
+                camera.orthographicSize,
+                camera.fieldOfView);
+        }
+
+        public static CameraState Lerp(CameraState from, CameraState to, float t)
+        {
+            return new CameraState(
+                Vector3.LerpUnclamped(from.position, to.position, t),
+                Quaternion.SlerpUnclamped(from.rotation, to.rotation, t),
+                t < 1f ? from.orthographic : to.orthographic,
+                Mathf.LerpUnclamped(from.orthographicSize, to.orthographicSize, t),
+                Mathf.LerpUnclamped(from.fieldOfView, to.fieldOfView, t));
+        }
+
+        public void ApplyTo(Camera camera)
+        {
+            if (!isValid || camera == null)
+            {
+                return;
+            }
+
+            camera.transform.SetPositionAndRotation(position, rotation);
+            camera.orthographic = orthographic;
+            camera.orthographicSize = orthographicSize;
+            camera.fieldOfView = fieldOfView;
+        }
     }
 }
