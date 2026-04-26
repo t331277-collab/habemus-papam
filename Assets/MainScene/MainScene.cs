@@ -28,6 +28,10 @@ public class MainScene : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Camera subCamera;
     [SerializeField] private float popeListCameraTransitionDuration = 0.6f;
+    [SerializeField] private List<Graphic> popeListSpotlightGraphics = new();
+    [SerializeField] private Color popeListFocusedTintColor = new Color32(0xB3, 0xB3, 0xB3, 0xFF);
+    [SerializeField] private float popeListSpotlightFlickerAlphaStep = 10f / 255f;
+    [SerializeField] private float popeListSpotlightFocusedAlphaStep = 40f / 255f;
     [SerializeField] private List<Button> navigationButtons = new();
     [SerializeField] private Color selectedOutlineColor = Color.black;
     [SerializeField] private Vector2 selectedOutlineDistance = new Vector2(8f, -8f);
@@ -56,6 +60,9 @@ public class MainScene : MonoBehaviour
     private Vector3 popeListPopupInitialScale;
     private bool hasPopeListPopupInitialTransform;
     private Coroutine popeListZoomTransitionCoroutine;
+    private readonly List<Graphic> popeListTintGraphics = new();
+    private readonly Dictionary<Graphic, Color> popeListInitialGraphicColors = new();
+    private bool hasPopeListInitialGraphicColors;
 
     private void Awake()
     {
@@ -606,6 +613,8 @@ public class MainScene : MonoBehaviour
         RegisterPopeListFrameButtonListeners();
         CacheCameraInitialStates();
         CachePopeListPopupTransform();
+        ResolvePopeListEffectGraphics();
+        CachePopeListInitialGraphicColors();
         ConfigurePopeListRaycasts();
 
         if (!popeListRuntimeBindingsInitialized)
@@ -664,6 +673,46 @@ public class MainScene : MonoBehaviour
         }
     }
 
+    private void ResolvePopeListEffectGraphics()
+    {
+        if (popeListPopup == null)
+        {
+            return;
+        }
+
+        popeListTintGraphics.Clear();
+        AddUniqueGraphic(popeListTintGraphics, popeListPopup.GetComponent<Graphic>());
+
+        if (popeListFrameButtons != null)
+        {
+            foreach (Button frameButton in popeListFrameButtons)
+            {
+                AddUniqueGraphic(popeListTintGraphics, GetButtonGraphic(frameButton));
+            }
+        }
+
+        if (popeListSpotlightGraphics == null)
+        {
+            popeListSpotlightGraphics = new List<Graphic>();
+        }
+
+        foreach (Graphic graphic in popeListPopup.GetComponentsInChildren<Graphic>(true))
+        {
+            if (graphic == null)
+            {
+                continue;
+            }
+
+            string normalizedName = graphic.gameObject.name.Trim();
+            if (normalizedName == "PopeListSpotlight_L" || normalizedName == "PopeListSpotlight_R")
+            {
+                AddUniqueGraphic(popeListSpotlightGraphics, graphic);
+                graphic.raycastTarget = false;
+                graphic.transform.SetAsLastSibling();
+            }
+        }
+    }
+
     private void ConfigurePopeListRaycasts()
     {
         if (popeListPopup == null)
@@ -676,6 +725,16 @@ public class MainScene : MonoBehaviour
             Button ownerButton = graphic.GetComponentInParent<Button>();
             graphic.raycastTarget = ownerButton != null && ownerButton.targetGraphic == graphic;
         }
+    }
+
+    private static void AddUniqueGraphic(List<Graphic> targets, Graphic graphic)
+    {
+        if (targets == null || graphic == null || targets.Contains(graphic))
+        {
+            return;
+        }
+
+        targets.Add(graphic);
     }
 
     private void RefreshPopeListCreditSpriteSources()
@@ -999,6 +1058,8 @@ public class MainScene : MonoBehaviour
 
     private IEnumerator SmoothPopeListZoomTransition(bool useSubCamera)
     {
+        ResolvePopeListEffectGraphics();
+        CachePopeListInitialGraphicColors();
         Vector2 startPosition = popeListPopupRect.anchoredPosition;
         Vector3 startScale = popeListPopupRect.localScale;
         Vector2 targetPosition = popeListPopupInitialAnchoredPosition;
@@ -1009,8 +1070,12 @@ public class MainScene : MonoBehaviour
             GetPopeListSubCameraTarget(out targetPosition, out targetScale);
         }
 
+        yield return FlickerPopeListSpotlights();
+
         float duration = Mathf.Max(0f, popeListCameraTransitionDuration);
         float elapsed = 0f;
+        Dictionary<Graphic, Color> startColors = GetPopeListCurrentGraphicColors();
+        Dictionary<Graphic, Color> targetColors = GetPopeListTargetGraphicColors(useSubCamera, true);
 
         while (elapsed < duration)
         {
@@ -1019,11 +1084,23 @@ public class MainScene : MonoBehaviour
             float easedT = t * t * (3f - 2f * t);
             popeListPopupRect.anchoredPosition = Vector2.LerpUnclamped(startPosition, targetPosition, easedT);
             popeListPopupRect.localScale = Vector3.LerpUnclamped(startScale, targetScale, easedT);
+            ApplyPopeListGraphicColors(startColors, targetColors, easedT);
             yield return null;
         }
 
         popeListPopupRect.anchoredPosition = targetPosition;
         popeListPopupRect.localScale = targetScale;
+        ApplyPopeListGraphicColors(targetColors);
+
+        if (useSubCamera)
+        {
+            yield return SmoothPopeListSpotlightsToFocusedAlpha();
+        }
+        else
+        {
+            ApplyPopeListGraphicColors(GetPopeListTargetGraphicColors(false, true));
+        }
+
         popeListZoomTransitionCoroutine = null;
     }
 
@@ -1046,7 +1123,217 @@ public class MainScene : MonoBehaviour
         RestoreCameraInitialState(subCamera);
         SetCameraView(false);
         RestorePopeListPopupTransform();
+        RestorePopeListEffectColors();
         isViewingSubCamera = false;
+    }
+
+    private void CachePopeListInitialGraphicColors()
+    {
+        ResolvePopeListEffectGraphics();
+
+        if (hasPopeListInitialGraphicColors)
+        {
+            CacheGraphicColors(popeListInitialGraphicColors, popeListTintGraphics);
+            CacheGraphicColors(popeListInitialGraphicColors, popeListSpotlightGraphics);
+            return;
+        }
+
+        popeListInitialGraphicColors.Clear();
+        CacheGraphicColors(popeListInitialGraphicColors, popeListTintGraphics);
+        CacheGraphicColors(popeListInitialGraphicColors, popeListSpotlightGraphics);
+        hasPopeListInitialGraphicColors = popeListInitialGraphicColors.Count > 0;
+    }
+
+    private static void CacheGraphicColors(Dictionary<Graphic, Color> target, IEnumerable<Graphic> graphics)
+    {
+        if (target == null || graphics == null)
+        {
+            return;
+        }
+
+        foreach (Graphic graphic in graphics)
+        {
+            if (graphic != null && !target.ContainsKey(graphic))
+            {
+                target[graphic] = graphic.color;
+            }
+        }
+    }
+
+    private Dictionary<Graphic, Color> GetPopeListCurrentGraphicColors()
+    {
+        Dictionary<Graphic, Color> colors = new();
+        CacheGraphicColors(colors, popeListTintGraphics);
+        CacheGraphicColors(colors, popeListSpotlightGraphics);
+        return colors;
+    }
+
+    private Dictionary<Graphic, Color> GetPopeListTargetGraphicColors(bool useSubCamera, bool restoreSpotlights)
+    {
+        Dictionary<Graphic, Color> colors = new();
+
+        foreach (Graphic graphic in popeListTintGraphics)
+        {
+            if (graphic == null || !popeListInitialGraphicColors.TryGetValue(graphic, out Color initialColor))
+            {
+                continue;
+            }
+
+            Color targetColor = useSubCamera ? popeListFocusedTintColor : initialColor;
+            targetColor.a = initialColor.a;
+            colors[graphic] = targetColor;
+        }
+
+        foreach (Graphic graphic in popeListSpotlightGraphics)
+        {
+            if (graphic == null || !popeListInitialGraphicColors.TryGetValue(graphic, out Color initialColor))
+            {
+                continue;
+            }
+
+            Color targetColor = initialColor;
+            if (useSubCamera && !restoreSpotlights)
+            {
+                targetColor.a = Mathf.Clamp01(initialColor.a + popeListSpotlightFocusedAlphaStep);
+            }
+
+            colors[graphic] = targetColor;
+        }
+
+        return colors;
+    }
+
+    private IEnumerator FlickerPopeListSpotlights()
+    {
+        if (popeListSpotlightGraphics == null || popeListSpotlightGraphics.Count == 0)
+        {
+            yield break;
+        }
+
+        Dictionary<Graphic, Color> baseColors = GetPopeListCurrentSpotlightColors();
+        ApplySpotlightAlphaOffset(baseColors, popeListSpotlightFlickerAlphaStep);
+        yield return WaitUnscaledSeconds(0.06f);
+        ApplySpotlightAlphaOffset(baseColors, -popeListSpotlightFlickerAlphaStep);
+        yield return WaitUnscaledSeconds(0.06f);
+        ApplyPopeListGraphicColors(baseColors);
+        yield return WaitUnscaledSeconds(0.04f);
+    }
+
+    private IEnumerator SmoothPopeListSpotlightsToFocusedAlpha()
+    {
+        Dictionary<Graphic, Color> startColors = GetPopeListCurrentSpotlightColors();
+        Dictionary<Graphic, Color> targetColors = new();
+
+        foreach (Graphic graphic in popeListSpotlightGraphics)
+        {
+            if (graphic == null || !popeListInitialGraphicColors.TryGetValue(graphic, out Color initialColor))
+            {
+                continue;
+            }
+
+            Color targetColor = initialColor;
+            targetColor.a = Mathf.Clamp01(initialColor.a + popeListSpotlightFocusedAlphaStep);
+            targetColors[graphic] = targetColor;
+        }
+
+        float duration = 0.16f;
+        float elapsed = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.Clamp01(elapsed / duration);
+            float easedT = t * t * (3f - 2f * t);
+            ApplyPopeListGraphicColors(startColors, targetColors, easedT);
+            yield return null;
+        }
+
+        ApplyPopeListGraphicColors(targetColors);
+    }
+
+    private Dictionary<Graphic, Color> GetPopeListCurrentSpotlightColors()
+    {
+        Dictionary<Graphic, Color> colors = new();
+        CacheGraphicColors(colors, popeListSpotlightGraphics);
+        return colors;
+    }
+
+    private void ApplySpotlightAlphaOffset(Dictionary<Graphic, Color> baseColors, float alphaOffset)
+    {
+        if (baseColors == null)
+        {
+            return;
+        }
+
+        foreach (KeyValuePair<Graphic, Color> entry in baseColors)
+        {
+            if (entry.Key == null)
+            {
+                continue;
+            }
+
+            Color color = entry.Value;
+            color.a = Mathf.Clamp01(color.a + alphaOffset);
+            entry.Key.color = color;
+        }
+    }
+
+    private IEnumerator WaitUnscaledSeconds(float seconds)
+    {
+        float elapsed = 0f;
+        while (elapsed < seconds)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+    }
+
+    private void ApplyPopeListGraphicColors(Dictionary<Graphic, Color> colors)
+    {
+        if (colors == null)
+        {
+            return;
+        }
+
+        foreach (KeyValuePair<Graphic, Color> entry in colors)
+        {
+            if (entry.Key != null)
+            {
+                entry.Key.color = entry.Value;
+            }
+        }
+    }
+
+    private void ApplyPopeListGraphicColors(
+        Dictionary<Graphic, Color> startColors,
+        Dictionary<Graphic, Color> targetColors,
+        float t)
+    {
+        if (startColors == null || targetColors == null)
+        {
+            return;
+        }
+
+        foreach (KeyValuePair<Graphic, Color> entry in targetColors)
+        {
+            if (entry.Key == null)
+            {
+                continue;
+            }
+
+            Color startColor = startColors.TryGetValue(entry.Key, out Color color) ? color : entry.Key.color;
+            entry.Key.color = Color.LerpUnclamped(startColor, entry.Value, t);
+        }
+    }
+
+    private void RestorePopeListEffectColors()
+    {
+        if (!hasPopeListInitialGraphicColors)
+        {
+            return;
+        }
+
+        ApplyPopeListGraphicColors(popeListInitialGraphicColors);
     }
 
     private void CachePopeListPopupTransform()
