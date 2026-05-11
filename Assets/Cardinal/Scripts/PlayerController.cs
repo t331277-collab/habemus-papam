@@ -168,8 +168,7 @@ public class PlayerController : MonoBehaviour, ICardinalController
             return fallbackKey;
         }
 
-        Key key = SettingsManager.Instance.GetHotKey(action);
-        return key != Key.None ? key : fallbackKey;
+        return SettingsManager.Instance.GetHotKey(action);
     }
 
     private static bool IsKeyPressed(Keyboard keyboard, Key key)
