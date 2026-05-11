@@ -11,15 +11,20 @@ public class SaveManager : MonoBehaviour
     private const string GameSceneName = "GameScene";
     private const string SaveFolderName = "Json";
     private const string SaveFileName = "autosave.json";
+    private const string CompletedPlayerNamesFileName = "completed_player_names.json";
+    private const string DefaultPlayerName = "Player";
 
     public static SaveManager Instance { get; private set; }
 
     private bool pendingLoad = false;
     private bool pendingNewGame = false;
     private bool isApplyingLoad = false;
+    private GameNameSaveData currentGameNames = new GameNameSaveData();
 
     public string SaveDirectoryPath => Path.Combine(Application.persistentDataPath, SaveFolderName);
     public string SaveFilePath => Path.Combine(SaveDirectoryPath, SaveFileName);
+    public string CompletedPlayerNamesFilePath => Path.Combine(SaveDirectoryPath, CompletedPlayerNamesFileName);
+    public GameNameSaveData CurrentGameNames => currentGameNames;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Bootstrap()
@@ -96,6 +101,7 @@ public class SaveManager : MonoBehaviour
 
         preview = new SavePreviewData
         {
+            playerName = saveModel.names != null ? saveModel.names.playerName : string.Empty,
             playerHp = playerSave != null ? playerSave.hp : 0f,
             playerInfluence = playerSave != null ? playerSave.influence : 0f,
             playerPiety = playerSave != null ? playerSave.piety : 0f,
@@ -113,8 +119,16 @@ public class SaveManager : MonoBehaviour
         pendingNewGame = true;
         Time.timeScale = 1f;
 
+        EnsureCurrentPlayerName();
+        currentGameNames.npcNames.Clear();
         DeleteSave();
         SceneManager.LoadScene(GameSceneName);
+    }
+
+    public void StartNewGame(string playerName)
+    {
+        SetNewGamePlayerName(playerName);
+        StartNewGame();
     }
 
     public void LoadGame()
@@ -146,6 +160,24 @@ public class SaveManager : MonoBehaviour
         pendingLoad = false;
         pendingNewGame = false;
         DeleteSave();
+    }
+
+    public void CompleteCurrentGame()
+    {
+        pendingLoad = false;
+        pendingNewGame = false;
+        RegisterCompletedPlayerName(currentGameNames.playerName);
+        DeleteSave();
+        currentGameNames = new GameNameSaveData();
+    }
+
+    public void SetNewGamePlayerName(string playerName)
+    {
+        currentGameNames = new GameNameSaveData
+        {
+            playerName = SanitizeName(playerName),
+            npcNames = new List<string>()
+        };
     }
 
     public void AutoSave()
@@ -185,6 +217,7 @@ public class SaveManager : MonoBehaviour
 
         Dictionary<string, Item> itemCatalog = BuildItemCatalog();
         ResetAllItemRuntimeStates(itemCatalog);
+        SyncCompletedPlayerNamesToNameDB();
 
         if (pendingLoad)
         {
@@ -201,6 +234,8 @@ public class SaveManager : MonoBehaviour
 
         if (pendingNewGame)
         {
+            EnsureCurrentPlayerName();
+            EnsureNpcNames();
             AutoSave();
             pendingNewGame = false;
         }
@@ -230,7 +265,8 @@ public class SaveManager : MonoBehaviour
             inventory = InventoryManager.Instance != null ? InventoryManager.Instance.CaptureSaveData() : new InventorySaveData(),
             events = InGameManager.Instance.EventManager != null ? InGameManager.Instance.EventManager.CaptureSaveData() : new EventManagerSaveData(),
             plots = PlotManager.Instance != null ? PlotManager.Instance.CaptureSaveData() : new PlotManagerSaveData(),
-            fieldItems = InGameManager.Instance.CaptureFieldItemSaveData()
+            fieldItems = InGameManager.Instance.CaptureFieldItemSaveData(),
+            names = CloneNames(currentGameNames)
         };
 
         return saveModel;
@@ -244,6 +280,9 @@ public class SaveManager : MonoBehaviour
         }
 
         Time.timeScale = 1f;
+        currentGameNames = CloneNames(saveModel.names);
+        EnsureCurrentPlayerName();
+        EnsureNpcNames();
 
         InGameManager.Instance.StopTimer();
         InGameManager.Instance.ClearFieldItems();
@@ -297,6 +336,108 @@ public class SaveManager : MonoBehaviour
         if (hasActiveCardinals && CardinalManager.Instance != null && CardinalManager.Instance.StatsUI != null)
         {
             CardinalManager.Instance.StatsUI.Initialize(CardinalManager.Instance.Cardinals);
+        }
+    }
+
+    private void EnsureCurrentPlayerName()
+    {
+        currentGameNames.playerName = SanitizeName(currentGameNames.playerName);
+    }
+
+    private void EnsureNpcNames()
+    {
+        if (currentGameNames.npcNames == null)
+        {
+            currentGameNames.npcNames = new List<string>();
+        }
+
+        while (currentGameNames.npcNames.Count < 3)
+        {
+            string npcName = NameDB.Instance != null ? NameDB.Instance.GetRandomName() : null;
+            if (string.IsNullOrWhiteSpace(npcName))
+            {
+                npcName = $"NPC{currentGameNames.npcNames.Count + 1}";
+            }
+
+            currentGameNames.npcNames.Add(npcName);
+        }
+
+        if (currentGameNames.npcNames.Count > 3)
+        {
+            currentGameNames.npcNames.RemoveRange(3, currentGameNames.npcNames.Count - 3);
+        }
+    }
+
+    private static string SanitizeName(string playerName)
+    {
+        string sanitized = string.IsNullOrWhiteSpace(playerName) ? DefaultPlayerName : playerName.Trim();
+        return sanitized.Length > 10 ? sanitized.Substring(0, 10) : sanitized;
+    }
+
+    private static GameNameSaveData CloneNames(GameNameSaveData source)
+    {
+        GameNameSaveData clone = new GameNameSaveData();
+        if (source == null)
+        {
+            return clone;
+        }
+
+        clone.playerName = source.playerName;
+        clone.npcNames = source.npcNames != null ? new List<string>(source.npcNames) : new List<string>();
+        return clone;
+    }
+
+    private void RegisterCompletedPlayerName(string playerName)
+    {
+        string sanitized = SanitizeName(playerName);
+        CompletedPlayerNameSaveData data = ReadCompletedPlayerNames();
+        if (!data.playerInputNames.Contains(sanitized))
+        {
+            data.playerInputNames.Add(sanitized);
+            WriteCompletedPlayerNames(data);
+        }
+
+        NameDB.AddCompletedPlayerInputName(sanitized);
+    }
+
+    private void SyncCompletedPlayerNamesToNameDB()
+    {
+        if (NameDB.Instance != null)
+        {
+            NameDB.SetPlayerInputNames(ReadCompletedPlayerNames().playerInputNames);
+        }
+    }
+
+    private CompletedPlayerNameSaveData ReadCompletedPlayerNames()
+    {
+        if (!File.Exists(CompletedPlayerNamesFilePath))
+        {
+            return new CompletedPlayerNameSaveData();
+        }
+
+        try
+        {
+            string json = File.ReadAllText(CompletedPlayerNamesFilePath);
+            CompletedPlayerNameSaveData data = JsonUtility.FromJson<CompletedPlayerNameSaveData>(json);
+            return data ?? new CompletedPlayerNameSaveData();
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[Save] Completed player name load failed: {exception}");
+            return new CompletedPlayerNameSaveData();
+        }
+    }
+
+    private void WriteCompletedPlayerNames(CompletedPlayerNameSaveData data)
+    {
+        try
+        {
+            Directory.CreateDirectory(SaveDirectoryPath);
+            File.WriteAllText(CompletedPlayerNamesFilePath, JsonUtility.ToJson(data, true));
+        }
+        catch (Exception exception)
+        {
+            Debug.LogError($"[Save] Completed player name save failed: {exception}");
         }
     }
 

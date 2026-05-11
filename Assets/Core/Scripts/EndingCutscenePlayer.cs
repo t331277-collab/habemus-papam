@@ -203,7 +203,7 @@ public class EndingCutscenePlayer : MonoBehaviour
 
         if (SaveManager.Instance != null)
         {
-            SaveManager.Instance.DeleteCompletedGameSave();
+            SaveManager.Instance.CompleteCurrentGame();
         }
 
         if (!string.IsNullOrWhiteSpace(mainMenuSceneName))
