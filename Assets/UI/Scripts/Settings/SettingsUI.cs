@@ -3,7 +3,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
-using System.Linq.Expressions;
 
 public enum PopupType
 {
@@ -31,6 +30,12 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button speechHotKey;
     [SerializeField] private Button resetHotKeysButton;
 
+    [Header("플레이 방법 설정")]
+    [SerializeField] private GameObject howToPlayPanel;
+    [SerializeField] private Button howToPlayButton;
+    [SerializeField] private Button closeHowToPlayButton;
+    [SerializeField] private ScrollRect howToPlayScrollRect;
+
     [Header("팝업창 설정")]
     [SerializeField] private GameObject confirmPopup;
     [SerializeField] private TMP_Text popupText;
@@ -53,6 +58,7 @@ public class SettingsUI : MonoBehaviour
             settingsPanel.SetActive(false);
         }
 
+        CloseHowToPlayPanel();
         CacheHotKeyButtons();
         RegisterEvents();
         SyncHotKeyButtonsFromManager();
@@ -88,6 +94,12 @@ public class SettingsUI : MonoBehaviour
         Keyboard keyboard = Keyboard.current;
         if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
         {
+            if (IsHowToPlayPanelOpen())
+            {
+                CloseHowToPlayPanel();
+                return;
+            }
+
             ToggleSettingsPanel();
         }
 
@@ -119,6 +131,7 @@ public class SettingsUI : MonoBehaviour
         else
         {
             settingsPanel.SetActive(true);
+            CloseHowToPlayPanel();
             CloseConfirmPopup();
             ResetScrollToTop();
         }
@@ -133,6 +146,7 @@ public class SettingsUI : MonoBehaviour
         }
 
         settingsPanel.SetActive(true);
+        CloseHowToPlayPanel();
         CloseConfirmPopup();
         ResetScrollToTop();
     }
@@ -204,6 +218,16 @@ public class SettingsUI : MonoBehaviour
         {
             resetHotKeysButton.onClick.AddListener(OnClickResetHotKeys);
         }
+
+        if (howToPlayButton != null)
+        {
+            howToPlayButton.onClick.AddListener(OnClickHowToPlay);
+        }
+
+        if (closeHowToPlayButton != null)
+        {
+            closeHowToPlayButton.onClick.AddListener(OnClickCloseHowToPlay);
+        }
     }
 
     private void UnregisterEvents()
@@ -259,6 +283,16 @@ public class SettingsUI : MonoBehaviour
         if (resetHotKeysButton != null)
         {
             resetHotKeysButton.onClick.RemoveListener(OnClickResetHotKeys);
+        }
+
+        if (howToPlayButton != null)
+        {
+            howToPlayButton.onClick.RemoveListener(OnClickHowToPlay);
+        }
+
+        if (closeHowToPlayButton != null)
+        {
+            closeHowToPlayButton.onClick.RemoveListener(OnClickCloseHowToPlay);
         }
     }
 
@@ -524,28 +558,6 @@ public class SettingsUI : MonoBehaviour
         sm.SetHotKey(action, key);
     }
 
-    // =========================================================
-    // 새 게임 시작 설정
-    // =========================================================
-
-    public void OnClickNewGame()
-    {
-        ShowConfirmPopup(PopupType.NewGame);
-    }
-
-    private bool TryCloseSettingsPanel()
-    {
-        if (HasEmptyHotKeys())
-        {
-            ShowConfirmPopup(PopupType.EmptyHotKey);
-            return false;
-        }
-
-        CloseConfirmPopup();
-        settingsPanel.SetActive(false);
-        return true;
-    }
-
     private bool HasEmptyHotKeys()
     {
         SettingsManager sm = SettingsManager.Instance;
@@ -563,6 +575,81 @@ public class SettingsUI : MonoBehaviour
         }
 
         return false;
+    }
+
+    // =========================================================
+    // 새 게임 시작 설정
+    // =========================================================
+
+    public void OnClickNewGame()
+    {
+        ShowConfirmPopup(PopupType.NewGame);
+    }
+
+    // =========================================================
+    // 플레이 방법 설정
+    // =========================================================
+
+    public void OnClickHowToPlay()
+    {
+        OpenHowToPlayPanel();
+    }
+
+    public void OnClickCloseHowToPlay()
+    {
+        CloseHowToPlayPanel();
+    }
+
+    private void OpenHowToPlayPanel()
+    {
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(true);
+        }
+
+        ResetHowToPlayScrollToTop();
+    }
+
+    private void CloseHowToPlayPanel()
+    {
+        ResetHowToPlayScrollToTop();
+
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(false);
+        }
+    }
+
+    private bool IsHowToPlayPanelOpen()
+    {
+        return howToPlayPanel != null && howToPlayPanel.activeSelf;
+    }
+
+    private void ResetHowToPlayScrollToTop()
+    {
+        if (howToPlayScrollRect == null)
+        {
+            return;
+        }
+
+        Canvas.ForceUpdateCanvases();
+        howToPlayScrollRect.StopMovement();
+        howToPlayScrollRect.verticalNormalizedPosition = 1f;
+        howToPlayScrollRect.horizontalNormalizedPosition = 0f;
+    }
+
+    private bool TryCloseSettingsPanel()
+    {
+        if (HasEmptyHotKeys())
+        {
+            ShowConfirmPopup(PopupType.EmptyHotKey);
+            return false;
+        }
+
+        CloseConfirmPopup();
+        CloseHowToPlayPanel();
+        settingsPanel.SetActive(false);
+        return true;
     }
 
     private void ShowConfirmPopup(PopupType popupType)
