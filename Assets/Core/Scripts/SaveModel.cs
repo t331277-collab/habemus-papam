@@ -14,17 +14,32 @@ public class SaveModel
     public EventManagerSaveData events = new EventManagerSaveData();
     public PlotManagerSaveData plots = new PlotManagerSaveData();
     public List<FieldItemSaveData> fieldItems = new List<FieldItemSaveData>();
+    public GameNameSaveData names = new GameNameSaveData();
 }
 
 [Serializable]
 public class SavePreviewData
 {
+    public string playerName = string.Empty;
     public float playerHp;
     public float playerInfluence;
     public float playerPiety;
     public int day = 1;
     public int conclave;
     public string conclaveName = string.Empty;
+}
+
+[Serializable]
+public class GameNameSaveData
+{
+    public string playerName = string.Empty;
+    public List<string> npcNames = new List<string>();
+}
+
+[Serializable]
+public class CompletedPlayerNameSaveData
+{
+    public List<string> playerInputNames = new List<string>();
 }
 
 [Serializable]

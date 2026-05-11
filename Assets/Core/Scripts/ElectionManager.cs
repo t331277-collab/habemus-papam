@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class ElectionManager : MonoBehaviour
 {
@@ -23,6 +24,8 @@ public class ElectionManager : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
     [Tooltip("NPC 당선 시 (게임 클리어)")]
     [SerializeField] private GameObject gameClearPanel;
+    [Tooltip("당선 확정 후 이동할 엔딩 씬 이름")]
+    [SerializeField] private string endingSceneName = "EndingScene";
 
     [Tooltip("아무도 당선되지 않았을 때(부결) 띄울 창")]
     [SerializeField] private GameObject electionFailedPanel;
@@ -45,6 +48,30 @@ public class ElectionManager : MonoBehaviour
     private Coroutine jackpotCoroutine;
 
     public Cardinal CurrentWinnerCandidate => currentWinnerCandidate;
+
+    public void DebugElectPlayer()
+    {
+        Cardinal playerCandidate = FindPlayerCandidate();
+        if (playerCandidate == null)
+        {
+            Debug.LogWarning("[Election Debug] Player candidate was not found.");
+            return;
+        }
+
+        ForceElectCandidate(playerCandidate, EndingType.Bad);
+    }
+
+    public void DebugElectNpc()
+    {
+        Cardinal npcCandidate = FindNpcCandidate();
+        if (npcCandidate == null)
+        {
+            Debug.LogWarning("[Election Debug] NPC candidate was not found.");
+            return;
+        }
+
+        ForceElectCandidate(npcCandidate, EndingType.Normal);
+    }
 
     void Awake()
     {
@@ -192,15 +219,14 @@ public class ElectionManager : MonoBehaviour
 
             if (currentWinnerCandidate.CompareTag("Player"))
             {
-                if (gameOverPanel != null) gameOverPanel.SetActive(true);
+                Debug.Log($"[Election] Player elected: {currentWinnerCandidate.name}");
+                LoadEndingScene(EndingType.Bad);
             }
             else
             {
-                if (gameClearPanel != null) gameClearPanel.SetActive(true);
+                Debug.Log($"[Election] NPC elected: {currentWinnerCandidate.name}");
+                LoadEndingScene(EndingType.Normal);
             }
-
-            Time.timeScale = 0f;
-            if (judgmentPanel != null) judgmentPanel.SetActive(false);
         }
         else
         {
@@ -236,5 +262,80 @@ public class ElectionManager : MonoBehaviour
         float winProbability = (progress * scoreDivisor) + (candidateScore * progressDivisor) + baseProbability;
 
         return Mathf.Clamp(winProbability, 0.1f, 200f);
+    }
+
+    private Cardinal FindPlayerCandidate()
+    {
+        Cardinal[] candidates = GetCandidatePool();
+        foreach (Cardinal candidate in candidates)
+        {
+            if (candidate != null && IsPlayerCandidate(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private Cardinal FindNpcCandidate()
+    {
+        Cardinal[] candidates = GetCandidatePool();
+        foreach (Cardinal candidate in candidates)
+        {
+            if (candidate != null && !IsPlayerCandidate(candidate))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
+    }
+
+    private Cardinal[] GetCandidatePool()
+    {
+        if (statsUI != null && statsUI.LinkedCardinals != null)
+        {
+            foreach (Cardinal candidate in statsUI.LinkedCardinals)
+            {
+                if (candidate != null)
+                {
+                    return statsUI.LinkedCardinals;
+                }
+            }
+        }
+
+        return FindObjectsByType<Cardinal>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None);
+    }
+
+    private bool IsPlayerCandidate(Cardinal candidate)
+    {
+        if (candidate == null)
+        {
+            return false;
+        }
+
+        return candidate.CompareTag("Player") ||
+               candidate.gameObject.name.Contains("Player");
+    }
+
+    private void ForceElectCandidate(Cardinal candidate, EndingType endingType)
+    {
+        currentWinnerCandidate = candidate;
+        Debug.Log($"[Election Debug] {candidate.name} elected. Ending: {endingType}");
+        LoadEndingScene(endingType);
+    }
+
+    private void LoadEndingScene(EndingType endingType)
+    {
+        if (judgmentPanel != null) judgmentPanel.SetActive(false);
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (gameClearPanel != null) gameClearPanel.SetActive(false);
+
+        EndingResult.Set(endingType);
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(endingSceneName);
     }
 }

@@ -11,6 +11,10 @@ public class MainScene : MonoBehaviour
     [SerializeField] private GameObject startGameWarningPopup;
     [SerializeField] private GameObject loadWarningPopup;
     [SerializeField] private GameObject loadPopup;
+    [SerializeField] private GameObject selectNamePopup;
+    [SerializeField] private TMP_InputField playerNameInputField;
+    [SerializeField] private Button startNameButton;
+    [SerializeField] private Component loadUserNameText;
     [SerializeField] private Component loadPlayerHpText;
     [SerializeField] private Component loadPlayerInfluenceText;
     [SerializeField] private Component loadPlayerPietyText;
@@ -66,10 +70,12 @@ public class MainScene : MonoBehaviour
 
     private void Awake()
     {
+        ResolveNameSelectionReferences();
         InitializePopeListRuntimeBindings();
         SetStartGameWarningPopup(false);
         SetLoadWarningPopup(false);
         SetLoadPopup(false);
+        SetSelectNamePopup(false);
         SetPopeListPopup(false);
     }
 
@@ -109,22 +115,30 @@ public class MainScene : MonoBehaviour
             return;
         }
 
-        SaveManager.Instance.StartNewGame();
+        OpenNameSelectionPopup();
     }
 
     public void OnClickConfirmStartGame()
     {
         SetStartGameWarningPopup(false);
-
-        if (SaveManager.Instance != null)
-        {
-            SaveManager.Instance.StartNewGame();
-        }
+        OpenNameSelectionPopup();
     }
 
     public void OnClickCancelStartGame()
     {
         SetStartGameWarningPopup(false);
+    }
+
+    public void OnClickStartNamedGame()
+    {
+        if (SaveManager.Instance == null)
+        {
+            return;
+        }
+
+        string playerName = GetPlayerInputName();
+        SetSelectNamePopup(false);
+        SaveManager.Instance.StartNewGame(playerName);
     }
 
     public void OnClickLoad()
@@ -269,6 +283,7 @@ public class MainScene : MonoBehaviour
             return;
         }
 
+        SetText(loadUserNameText, preview.playerName);
         SetText(loadPlayerHpText, FormatStatValue(preview.playerHp));
         SetText(loadPlayerInfluenceText, FormatStatValue(preview.playerInfluence));
         SetText(loadPlayerPietyText, FormatStatValue(preview.playerPiety));
@@ -541,12 +556,80 @@ public class MainScene : MonoBehaviour
         return IsPopupOpen(startGameWarningPopup)
             || IsPopupOpen(loadWarningPopup)
             || IsPopupOpen(loadPopup)
+            || IsPopupOpen(selectNamePopup)
             || IsPopupOpen(popeListPopup);
     }
 
     private static bool IsPopupOpen(GameObject popup)
     {
         return popup != null && popup.activeInHierarchy;
+    }
+
+    private void ResolveNameSelectionReferences()
+    {
+        if (selectNamePopup == null)
+        {
+            selectNamePopup = GameObject.Find("SelectNamePopup");
+        }
+
+        if (playerNameInputField == null && selectNamePopup != null)
+        {
+            playerNameInputField = selectNamePopup.GetComponentInChildren<TMP_InputField>(true);
+        }
+
+        if (startNameButton == null && selectNamePopup != null)
+        {
+            Transform startButtonTransform = FindDeepChild(selectNamePopup.transform, "StagtBtn");
+            startNameButton = startButtonTransform != null ? startButtonTransform.GetComponent<Button>() : null;
+        }
+
+        if (loadUserNameText == null && loadPopup != null)
+        {
+            Transform userNameTransform = FindDeepChild(loadPopup.transform, "UserName");
+            loadUserNameText = userNameTransform != null ? ResolveTextComponent(userNameTransform) : null;
+        }
+
+        if (playerNameInputField != null)
+        {
+            playerNameInputField.characterLimit = 10;
+        }
+
+        if (startNameButton != null)
+        {
+            startNameButton.onClick.RemoveListener(OnClickStartNamedGame);
+            startNameButton.onClick.AddListener(OnClickStartNamedGame);
+        }
+    }
+
+    private void OpenNameSelectionPopup()
+    {
+        ResolveNameSelectionReferences();
+        SetSelectNamePopup(true);
+
+        if (playerNameInputField != null)
+        {
+            playerNameInputField.text = string.Empty;
+            playerNameInputField.characterLimit = 10;
+            playerNameInputField.Select();
+            playerNameInputField.ActivateInputField();
+        }
+    }
+
+    private void SetSelectNamePopup(bool isActive)
+    {
+        if (selectNamePopup != null)
+        {
+            selectNamePopup.SetActive(isActive);
+        }
+
+        RefreshNavigation(false);
+    }
+
+    private string GetPlayerInputName()
+    {
+        string inputName = playerNameInputField != null ? playerNameInputField.text : string.Empty;
+        inputName = string.IsNullOrWhiteSpace(inputName) ? "Player" : inputName.Trim();
+        return inputName.Length > 10 ? inputName.Substring(0, 10) : inputName;
     }
 
     private Outline GetOrCreateOutline(Button button)

@@ -6,8 +6,10 @@ public class NameDB : MonoBehaviour
 {
     //싱글톤
     private static NameDB instance = null;
+    private static readonly List<string> playerInputNameStore = new();
 
     private Dictionary<string, int> PopeList = new();
+    public List<string> PlayerInputName => playerInputNameStore;
     int weightSum = 0;
     void Awake()
     {
@@ -32,6 +34,7 @@ public class NameDB : MonoBehaviour
     void RefreshDB()
     {
         PopeList.Clear();
+        weightSum = 0;
         PopeName.Load();
 
         foreach(var v in PopeName.PopeNameList)
@@ -42,6 +45,44 @@ public class NameDB : MonoBehaviour
         foreach(var v in PopeName.PopeNameList)
         {
             PopeList.Add(v.popeName, v.weight);
+        }
+    }
+
+    public void SetCompletedPlayerInputNames(IEnumerable<string> names)
+    {
+        SetPlayerInputNames(names);
+    }
+
+    public static void SetPlayerInputNames(IEnumerable<string> names)
+    {
+        playerInputNameStore.Clear();
+
+        if (names == null)
+        {
+            return;
+        }
+
+        foreach (string name in names)
+        {
+            AddCompletedPlayerInputName(name);
+        }
+    }
+
+    public void AddPlayerInputName(string playerName)
+    {
+        AddCompletedPlayerInputName(playerName);
+    }
+
+    public static void AddCompletedPlayerInputName(string playerName)
+    {
+        if (string.IsNullOrWhiteSpace(playerName))
+        {
+            return;
+        }
+
+        if (!playerInputNameStore.Contains(playerName))
+        {
+            playerInputNameStore.Add(playerName);
         }
     }
 

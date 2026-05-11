@@ -68,8 +68,42 @@ public class StatsUI : MonoBehaviour
         }
 
         HideCloseup();
+        ApplySavedNames();
 
         isInitialized = true;
+    }
+
+    public void ApplySavedNames()
+    {
+        if (SaveManager.Instance == null || StatsList == null)
+        {
+            return;
+        }
+
+        GameNameSaveData names = SaveManager.Instance.CurrentGameNames;
+        if (names == null)
+        {
+            return;
+        }
+
+        if (StatsList.Length > 0 && StatsList[0] != null)
+        {
+            StatsList[0].SetName(names.playerName);
+        }
+
+        if (names.npcNames == null)
+        {
+            return;
+        }
+
+        for (int i = 1; i < StatsList.Length; i++)
+        {
+            int npcIndex = i - 1;
+            if (StatsList[i] != null && npcIndex < names.npcNames.Count)
+            {
+                StatsList[i].SetName(names.npcNames[npcIndex]);
+            }
+        }
     }
     void Update()
     {
