@@ -52,6 +52,8 @@ public class SettingsUI : MonoBehaviour
         new System.Collections.Generic.Dictionary<HotKeyAction, Button>();
     private HotKeyAction waitingHotKeyAction;
     private bool isWaitingHotKeyInput = false;
+    private float previousTimeScale = 1f;
+    private bool isSettingsPausingGame = false;
 
     //private UIManager.UIState prevState;
 
@@ -79,6 +81,7 @@ public class SettingsUI : MonoBehaviour
 
     void OnDisable()
     {
+        ResumeGameFromSettings();
         //UIManager.Instance.SetUIState(prevState);
     }
 
@@ -135,6 +138,7 @@ public class SettingsUI : MonoBehaviour
         else
         {
             settingsPanel.SetActive(true);
+            PauseGameForSettings();
             CloseHowToPlayPanel();
             CloseConfirmPopup();
             ResetScrollToTop();
@@ -150,6 +154,7 @@ public class SettingsUI : MonoBehaviour
         }
 
         settingsPanel.SetActive(true);
+        PauseGameForSettings();
         CloseHowToPlayPanel();
         CloseConfirmPopup();
         ResetScrollToTop();
@@ -672,7 +677,31 @@ public class SettingsUI : MonoBehaviour
         CloseConfirmPopup();
         CloseHowToPlayPanel();
         settingsPanel.SetActive(false);
+        ResumeGameFromSettings();
         return true;
+    }
+
+    private void PauseGameForSettings()
+    {
+        if (isSettingsPausingGame)
+        {
+            return;
+        }
+
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        isSettingsPausingGame = true;
+    }
+
+    private void ResumeGameFromSettings()
+    {
+        if (!isSettingsPausingGame)
+        {
+            return;
+        }
+
+        Time.timeScale = previousTimeScale;
+        isSettingsPausingGame = false;
     }
 
     private void ShowConfirmPopup(PopupType popupType)
@@ -744,9 +773,11 @@ public class SettingsUI : MonoBehaviour
             case PopupType.EmptyHotKey:
                 CloseConfirmPopup();
                 settingsPanel.SetActive(false);
+                ResumeGameFromSettings();
                 break;
             case PopupType.NewGame:
                 CloseConfirmPopup();
+                ResumeGameFromSettings();
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance.StartNewGame();
@@ -754,6 +785,7 @@ public class SettingsUI : MonoBehaviour
                 break;
             case PopupType.QuitGame:
                 CloseConfirmPopup();
+                ResumeGameFromSettings();
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance.GoToMainMenu();
