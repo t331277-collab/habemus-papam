@@ -3463,7 +3463,7 @@ RectTransform:
   m_Father: {fileID: 1234882367}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -5501,7 +5501,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 4454636058813568163}
         m_TargetAssemblyTypeName: SettingsUI, Assembly-CSharp
-        m_MethodName: OnClickHowToPlay
+        m_MethodName: OnClickCloseHowToPlay
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -8847,9 +8847,9 @@ RectTransform:
   m_Father: {fileID: 1548025199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 20}
+  m_SizeDelta: {x: -17, y: 20}
   m_Pivot: {x: 0, y: 0}
 --- !u!114 &550836061
 MonoBehaviour:
@@ -18034,7 +18034,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1138164641
 RectTransform:
   m_ObjectHideFlags: 0
@@ -21275,9 +21275,9 @@ RectTransform:
   m_Father: {fileID: 1548025199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 20, y: 0}
+  m_SizeDelta: {x: 20, y: -17}
   m_Pivot: {x: 1, y: 1}
 --- !u!114 &1393076287
 MonoBehaviour:
@@ -21537,9 +21537,9 @@ RectTransform:
   m_Father: {fileID: 1548025199}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: -17, y: -17}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &1411602304
 MonoBehaviour:
@@ -31919,7 +31919,7 @@ RectTransform:
   m_Father: {fileID: 844853170}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 20, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -39873,16 +39873,21 @@ MonoBehaviour:
   prayHotKey: {fileID: 4608831836999348603}
   speechHotKey: {fileID: 3610143685027507604}
   resetHotKeysButton: {fileID: 5243493171377262257}
-  howToPlayPanel: {fileID: 0}
+  howToPlayPanel: {fileID: 1138164640}
   howToPlayButton: {fileID: 8932876824362006774}
-  closeHowToPlayButton: {fileID: 0}
+  closeHowToPlayButton: {fileID: 324627171}
+  howToPlayScrollRect: {fileID: 1548025200}
+  quitGameButton: {fileID: 6337411688436235047}
   confirmPopup: {fileID: 1739262568}
   popupText: {fileID: 66710223}
   confirmButtonText: {fileID: 2077170915}
   hotKeyWarningMessage: "\uBE44\uC5B4 \uC788\uB294 \uB2E8\uCD95\uD0A4\uAC00 \uC788\uC2B5\uB2C8\uB2E4.\\n
     \uC124\uC815\uCC3D\uC744 \uB2EB\uC73C\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
-  newGameWarningMessage: "\uC0C8 \uAC8C\uC784\uC744 \uC2DC\uC791\uD558\uBA74 \uD604\uC7AC
+  newGameWarningMessage: "\uC0C8 \uAC8C\uC784\uC744 \uC2DC\uC791\uD558\uBA74\\n\uD604\uC7AC
     \uC800\uC7A5\uB41C \uC9C4\uD589 \uC0C1\uD669\uC774 \uC0AD\uC81C\uB429\uB2C8\uB2E4.\n\uACC4\uC18D\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+  quitGameWarningMessage: "\uBA54\uC778 \uD654\uBA74\uC73C\uB85C \uB3CC\uC544\uAC00\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?\n\uD604\uC7AC
+    \uCF58\uD074\uB77C\uBCA0 \uC9C4\uD589 \uC0C1\uD669\uC740 \uC800\uC7A5\uB418\uC9C0
+    \uC54A\uC2B5\uB2C8\uB2E4."
 --- !u!224 &4476954785877969242
 RectTransform:
   m_ObjectHideFlags: 0

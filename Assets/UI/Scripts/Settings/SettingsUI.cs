@@ -36,12 +36,16 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button closeHowToPlayButton;
     [SerializeField] private ScrollRect howToPlayScrollRect;
 
+    [Header("메인 화면 이동 설정")]
+    [SerializeField] private Button quitGameButton;
+
     [Header("팝업창 설정")]
     [SerializeField] private GameObject confirmPopup;
     [SerializeField] private TMP_Text popupText;
     [SerializeField] private TMP_Text confirmButtonText;
     [SerializeField] private string hotKeyWarningMessage = "비어 있는 단축키가 있습니다.\n 설정창을 닫으시겠습니까?";
     [SerializeField] private string newGameWarningMessage = "새 게임을 시작하면 현재 저장된 진행 상황이 삭제됩니다.\n계속하시겠습니까?";
+    [SerializeField] private string quitGameWarningMessage = "메인 화면으로 돌아가시겠습니까?\n현재 콘클라베 진행 상황은 저장되지 않습니다.";
     private PopupType currentPopupType;
 
     private readonly System.Collections.Generic.Dictionary<HotKeyAction, Button> hotKeyButtons =
@@ -228,6 +232,11 @@ public class SettingsUI : MonoBehaviour
         {
             closeHowToPlayButton.onClick.AddListener(OnClickCloseHowToPlay);
         }
+
+        if (quitGameButton != null)
+        {
+            quitGameButton.onClick.AddListener(OnClickQuitGame);
+        }
     }
 
     private void UnregisterEvents()
@@ -293,6 +302,11 @@ public class SettingsUI : MonoBehaviour
         if (closeHowToPlayButton != null)
         {
             closeHowToPlayButton.onClick.RemoveListener(OnClickCloseHowToPlay);
+        }
+
+        if (quitGameButton != null)
+        {
+            quitGameButton.onClick.RemoveListener(OnClickQuitGame);
         }
     }
 
@@ -587,6 +601,15 @@ public class SettingsUI : MonoBehaviour
     }
 
     // =========================================================
+    // 메인 화면 이동 설정
+    // =========================================================
+
+    public void OnClickQuitGame()
+    {
+        ShowConfirmPopup(PopupType.QuitGame);
+    }
+
+    // =========================================================
     // 플레이 방법 설정
     // =========================================================
 
@@ -666,6 +689,9 @@ public class SettingsUI : MonoBehaviour
                 case PopupType.NewGame:
                     popupText.text = newGameWarningMessage;
                     break;
+                case PopupType.QuitGame:
+                    popupText.text = quitGameWarningMessage;
+                    break;
             }
         }
 
@@ -679,6 +705,10 @@ public class SettingsUI : MonoBehaviour
 
                 case PopupType.NewGame:
                     confirmButtonText.text = "새 게임 시작";
+                    break;
+
+                case PopupType.QuitGame:
+                    confirmButtonText.text = "메인 화면";
                     break;
             }
         }
@@ -717,7 +747,17 @@ public class SettingsUI : MonoBehaviour
                 break;
             case PopupType.NewGame:
                 CloseConfirmPopup();
-                SaveManager.Instance.StartNewGame();
+                if (SaveManager.Instance != null)
+                {
+                    SaveManager.Instance.StartNewGame();
+                }
+                break;
+            case PopupType.QuitGame:
+                CloseConfirmPopup();
+                if (SaveManager.Instance != null)
+                {
+                    SaveManager.Instance.GoToMainMenu();
+                }
                 break;
             default:
                 CloseConfirmPopup();
