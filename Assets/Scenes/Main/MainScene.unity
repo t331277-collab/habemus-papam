@@ -4198,6 +4198,10 @@ MonoBehaviour:
   mainCamera: {fileID: 1116738397}
   subCamera: {fileID: 72592333}
   popeListCameraTransitionDuration: 0.6
+  popeListSpotlightGraphics: []
+  popeListFocusedTintColor: {r: 0.7019608, g: 0.7019608, b: 0.7019608, a: 1}
+  popeListSpotlightFlickerAlphaStep: 0.039215688
+  popeListSpotlightFocusedAlphaStep: 0.15686275
   navigationButtons:
   - {fileID: 2086165326}
   - {fileID: 656352999}

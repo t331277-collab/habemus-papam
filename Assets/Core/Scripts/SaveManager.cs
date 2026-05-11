@@ -141,6 +141,13 @@ public class SaveManager : MonoBehaviour
         SceneManager.LoadScene(MainSceneName);
     }
 
+    public void DeleteCompletedGameSave()
+    {
+        pendingLoad = false;
+        pendingNewGame = false;
+        DeleteSave();
+    }
+
     public void AutoSave()
     {
         if (isApplyingLoad || SceneManager.GetActiveScene().name != GameSceneName)
