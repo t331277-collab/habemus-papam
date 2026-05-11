@@ -162,6 +162,13 @@ public class SaveManager : MonoBehaviour
         DeleteSave();
     }
 
+    public void DiscardCurrentGameSave()
+    {
+        pendingLoad = false;
+        pendingNewGame = false;
+        DeleteSave();
+    }
+
     public void CompleteCurrentGame()
     {
         pendingLoad = false;

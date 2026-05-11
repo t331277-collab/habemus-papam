@@ -4,6 +4,7 @@ using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class MainScene : MonoBehaviour
@@ -121,6 +122,12 @@ public class MainScene : MonoBehaviour
     public void OnClickConfirmStartGame()
     {
         SetStartGameWarningPopup(false);
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.DiscardCurrentGameSave();
+        }
+
         OpenNameSelectionPopup();
     }
 
@@ -569,7 +576,12 @@ public class MainScene : MonoBehaviour
     {
         if (selectNamePopup == null)
         {
-            selectNamePopup = GameObject.Find("SelectNamePopup");
+            selectNamePopup = FindSceneObjectByNameIncludingInactive("SelectNamePopup");
+        }
+
+        if (loadPopup == null)
+        {
+            loadPopup = FindSceneObjectByNameIncludingInactive("loadPopup");
         }
 
         if (playerNameInputField == null && selectNamePopup != null)
@@ -599,6 +611,26 @@ public class MainScene : MonoBehaviour
             startNameButton.onClick.RemoveListener(OnClickStartNamedGame);
             startNameButton.onClick.AddListener(OnClickStartNamedGame);
         }
+    }
+
+    private static GameObject FindSceneObjectByNameIncludingInactive(string objectName)
+    {
+        GameObject activeObject = GameObject.Find(objectName);
+        if (activeObject != null)
+        {
+            return activeObject;
+        }
+
+        GameObject[] objects = Resources.FindObjectsOfTypeAll<GameObject>();
+        foreach (GameObject candidate in objects)
+        {
+            if (candidate.name == objectName && candidate.scene.IsValid())
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 
     private void OpenNameSelectionPopup()
