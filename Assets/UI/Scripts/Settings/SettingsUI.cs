@@ -34,7 +34,9 @@ public class SettingsUI : MonoBehaviour
     [Header("팝업창 설정")]
     [SerializeField] private GameObject confirmPopup;
     [SerializeField] private TMP_Text popupText;
+    [SerializeField] private TMP_Text confirmButtonText;
     [SerializeField] private string hotKeyWarningMessage = "비어 있는 단축키가 있습니다.\n 설정창을 닫으시겠습니까?";
+    [SerializeField] private string newGameWarningMessage = "새 게임을 시작하면 현재 저장된 진행 상황이 삭제됩니다.\n계속하시겠습니까?";
     private PopupType currentPopupType;
 
     private readonly System.Collections.Generic.Dictionary<HotKeyAction, Button> hotKeyButtons =
@@ -44,15 +46,15 @@ public class SettingsUI : MonoBehaviour
 
     //private UIManager.UIState prevState;
 
-    private void Start()
+    private void Awake()
     {
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
         }
 
-        RegisterEvents();
         CacheHotKeyButtons();
+        RegisterEvents();
         SyncHotKeyButtonsFromManager();
         CloseConfirmPopup();
     }
@@ -522,6 +524,15 @@ public class SettingsUI : MonoBehaviour
         sm.SetHotKey(action, key);
     }
 
+    // =========================================================
+    // 새 게임 시작 설정
+    // =========================================================
+
+    public void OnClickNewGame()
+    {
+        ShowConfirmPopup(PopupType.NewGame);
+    }
+
     private bool TryCloseSettingsPanel()
     {
         if (HasEmptyHotKeys())
@@ -558,19 +569,55 @@ public class SettingsUI : MonoBehaviour
     {
         currentPopupType = popupType;
 
-        switch (popupType)
+        if (popupText != null)
         {
-            case PopupType.EmptyHotKey:
-                popupText.text = hotKeyWarningMessage;
-                break;
+            switch (popupType)
+            {
+                case PopupType.EmptyHotKey:
+                    popupText.text = hotKeyWarningMessage;
+                    break;
+                case PopupType.NewGame:
+                    popupText.text = newGameWarningMessage;
+                    break;
+            }
         }
-        confirmPopup.gameObject.SetActive(true);
+
+        if (confirmButtonText != null)
+        {
+            switch (popupType)
+            {
+                case PopupType.EmptyHotKey:
+                    confirmButtonText.text = "확인";
+                    break;
+
+                case PopupType.NewGame:
+                    confirmButtonText.text = "새 게임 시작";
+                    break;
+            }
+        }
+
+        if (confirmPopup != null)
+        {
+            confirmPopup.SetActive(true);
+        }
     }
 
     private void CloseConfirmPopup()
     {
-        popupText.text = string.Empty;
-        confirmPopup.gameObject.SetActive(false);
+        if (popupText != null)
+        {
+            popupText.text = string.Empty;
+        }
+
+        if (confirmButtonText != null)
+        {
+            confirmButtonText.text = "확인";
+        }
+
+        if (confirmPopup != null)
+        {
+            confirmPopup.SetActive(false);
+        }
     }
 
     public void OnClickPopupConfirm()
@@ -580,6 +627,10 @@ public class SettingsUI : MonoBehaviour
             case PopupType.EmptyHotKey:
                 CloseConfirmPopup();
                 settingsPanel.SetActive(false);
+                break;
+            case PopupType.NewGame:
+                CloseConfirmPopup();
+                SaveManager.Instance.StartNewGame();
                 break;
             default:
                 CloseConfirmPopup();
