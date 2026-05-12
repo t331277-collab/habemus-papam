@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Controls;
+using UnityEngine.SceneManagement;
 
 public enum PopupType
 {
@@ -13,8 +14,13 @@ public enum PopupType
 
 public class SettingsUI : MonoBehaviour
 {
+    private const string GameSceneName = "GameScene";
+
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private ScrollRect settingsScrollRect;
+
+    [Header("씬별 표시 설정")]
+    [SerializeField] private GameObject inGameOnlyGroup;
 
     [Header("음향 설정")]
     [SerializeField] private VolumeSet masterVolume;
@@ -73,7 +79,9 @@ public class SettingsUI : MonoBehaviour
 
     void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         RefreshUI();
+        RefreshSceneDependentUI();
 
         //prevState = UIManager.Instance.State;
         //UIManager.Instance.SetUIState(UIManager.UIState.SETTINGS);
@@ -81,6 +89,7 @@ public class SettingsUI : MonoBehaviour
 
     void OnDisable()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
         ResumeGameFromSettings();
         //UIManager.Instance.SetUIState(prevState);
     }
@@ -133,10 +142,17 @@ public class SettingsUI : MonoBehaviour
 
         if (settingsPanel.activeSelf)
         {
+            if (IsHowToPlayPanelOpen())
+            {
+                CloseHowToPlayPanel();
+                return;
+            }
+
             TryCloseSettingsPanel();
         }
         else
         {
+            RefreshSceneDependentUI();
             settingsPanel.SetActive(true);
             PauseGameForSettings();
             CloseHowToPlayPanel();
@@ -153,6 +169,7 @@ public class SettingsUI : MonoBehaviour
             return;
         }
 
+        RefreshSceneDependentUI();
         settingsPanel.SetActive(true);
         PauseGameForSettings();
         CloseHowToPlayPanel();
@@ -242,6 +259,23 @@ public class SettingsUI : MonoBehaviour
         {
             quitGameButton.onClick.AddListener(OnClickQuitGame);
         }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        RefreshSceneDependentUI();
+    }
+
+    public void RefreshSceneDependentUI()
+    {
+        if (inGameOnlyGroup == null)
+        {
+            return;
+        }
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        bool isGameScene = activeScene.name == GameSceneName || activeScene.path.EndsWith($"/{GameSceneName}.unity");
+        inGameOnlyGroup.SetActive(isGameScene);
     }
 
     private void UnregisterEvents()
@@ -681,6 +715,19 @@ public class SettingsUI : MonoBehaviour
         return true;
     }
 
+    private void ForceCloseSettingsPanel()
+    {
+        CloseConfirmPopup();
+        CloseHowToPlayPanel();
+
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+
+        ResumeGameFromSettings();
+    }
+
     private void PauseGameForSettings()
     {
         if (isSettingsPausingGame)
@@ -771,21 +818,17 @@ public class SettingsUI : MonoBehaviour
         switch (currentPopupType)
         {
             case PopupType.EmptyHotKey:
-                CloseConfirmPopup();
-                settingsPanel.SetActive(false);
-                ResumeGameFromSettings();
+                ForceCloseSettingsPanel();
                 break;
             case PopupType.NewGame:
-                CloseConfirmPopup();
-                ResumeGameFromSettings();
+                ForceCloseSettingsPanel();
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance.StartNewGame();
                 }
                 break;
             case PopupType.QuitGame:
-                CloseConfirmPopup();
-                ResumeGameFromSettings();
+                ForceCloseSettingsPanel();
                 if (SaveManager.Instance != null)
                 {
                     SaveManager.Instance.GoToMainMenu();

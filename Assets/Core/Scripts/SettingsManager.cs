@@ -41,18 +41,30 @@ public class SettingsManager : MonoBehaviour
     public int SfxVolume => sfxVolume;
     public bool IsSfxMuted => isSfxMuted;
 
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Bootstrap()
+    {
+        if (Instance != null)
+        {
+            return;
+        }
+
+        GameObject settingsManagerObject = new GameObject(nameof(SettingsManager));
+        DontDestroyOnLoad(settingsManagerObject);
+        settingsManagerObject.AddComponent<SettingsManager>();
+    }
+
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-            ResetHotKeysToDefault();
+            Destroy(this);
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        ResetHotKeysToDefault();
     }
 
     public void SetMasterVolume(float value)
