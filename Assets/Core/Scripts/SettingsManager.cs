@@ -140,6 +140,33 @@ public class SettingsManager : MonoBehaviour
         hotKeys[action] = normalizedKey;
     }
 
+    public bool TryGetActionUsingHotKey(Key key, HotKeyAction exceptAction, out HotKeyAction usedAction)
+    {
+        Key normalizedKey = NormalizeHotKey(key);
+        if (normalizedKey == Key.None)
+        {
+            usedAction = default;
+            return false;
+        }
+
+        foreach (HotKeyAction action in DefaultHotKeys.Keys)
+        {
+            if (action == exceptAction)
+            {
+                continue;
+            }
+
+            if (GetHotKey(action) == normalizedKey)
+            {
+                usedAction = action;
+                return true;
+            }
+        }
+
+        usedAction = default;
+        return false;
+    }
+
     private void ApplySettings()
     {
         float finalMasterVolume = isMasterMuted ? 0f : masterVolume / 100f;

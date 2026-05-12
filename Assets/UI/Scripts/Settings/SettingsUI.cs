@@ -9,7 +9,8 @@ public enum PopupType
 {
     EmptyHotKey,
     NewGame,
-    QuitGame
+    QuitGame,
+    HotKeyDuplicateConfirm
 }
 
 public class SettingsUI : MonoBehaviour
@@ -52,12 +53,16 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private string hotKeyWarningMessage = "비어 있는 단축키가 있습니다.\n 설정창을 닫으시겠습니까?";
     [SerializeField] private string newGameWarningMessage = "새 게임을 시작하면 현재 저장된 진행 상황이 삭제됩니다.\n계속하시겠습니까?";
     [SerializeField] private string quitGameWarningMessage = "메인 화면으로 돌아가시겠습니까?\n현재 콘클라베 진행 상황은 저장되지 않습니다.";
+    [SerializeField] private string duplicateHotKeyWarningMessage = "이미 다른 단축키로 사용 중입니다.\n기존 단축키를 해제하고 바꾸시겠습니까?";
     private PopupType currentPopupType;
 
     private readonly System.Collections.Generic.Dictionary<HotKeyAction, Button> hotKeyButtons =
         new System.Collections.Generic.Dictionary<HotKeyAction, Button>();
     private HotKeyAction waitingHotKeyAction;
     private bool isWaitingHotKeyInput = false;
+    private HotKeyAction pendingDuplicateAction;
+    private Key pendingDuplicateKey = Key.None;
+    private bool hasPendingDuplicateHotKey = false;
     private float previousTimeScale = 1f;
     private bool isSettingsPausingGame = false;
 
@@ -485,6 +490,7 @@ public class SettingsUI : MonoBehaviour
     public void OnClickResetHotKeys()
     {
         isWaitingHotKeyInput = false;
+        ClearPendingDuplicateHotKey();
 
         if (SettingsManager.Instance == null)
         {
@@ -500,6 +506,8 @@ public class SettingsUI : MonoBehaviour
     {
         waitingHotKeyAction = action;
         isWaitingHotKeyInput = true;
+        ClearPendingDuplicateHotKey();
+        CloseConfirmPopup();
 
         if (hotKeyButtons.TryGetValue(action, out Button targetButton))
         {
@@ -555,18 +563,38 @@ public class SettingsUI : MonoBehaviour
 
     private void ApplyHotKey(Key pressedKey)
     {
-        if (IsAlphabetKey(pressedKey))
+        isWaitingHotKeyInput = false;
+
+        if (!IsAlphabetKey(pressedKey))
         {
-            UpdateManagerHotKey(waitingHotKeyAction, pressedKey);
+            SyncHotKeyButtonsFromManager();
+            return;
         }
 
+        SettingsManager sm = SettingsManager.Instance;
+        if (sm == null)
+        {
+            SyncHotKeyButtonsFromManager();
+            return;
+        }
+
+        if (sm.TryGetActionUsingHotKey(pressedKey, waitingHotKeyAction, out _))
+        {
+            pendingDuplicateAction = waitingHotKeyAction;
+            pendingDuplicateKey = pressedKey;
+            hasPendingDuplicateHotKey = true;
+            SyncHotKeyButtonsFromManager();
+            ShowConfirmPopup(PopupType.HotKeyDuplicateConfirm);
+            return;
+        }
+
+        UpdateManagerHotKey(waitingHotKeyAction, pressedKey);
         SyncHotKeyButtonsFromManager();
+
         if (!HasEmptyHotKeys())
         {
             CloseConfirmPopup();
         }
-
-        isWaitingHotKeyInput = false;
     }
 
     private bool IsAlphabetKey(Key keyCode)
@@ -609,6 +637,27 @@ public class SettingsUI : MonoBehaviour
         }
 
         sm.SetHotKey(action, key);
+    }
+
+    private void ApplyPendingDuplicateHotKey()
+    {
+        if (!hasPendingDuplicateHotKey)
+        {
+            CloseConfirmPopup();
+            return;
+        }
+
+        UpdateManagerHotKey(pendingDuplicateAction, pendingDuplicateKey);
+        ClearPendingDuplicateHotKey();
+        SyncHotKeyButtonsFromManager();
+        CloseConfirmPopup();
+    }
+
+    private void ClearPendingDuplicateHotKey()
+    {
+        pendingDuplicateAction = default;
+        pendingDuplicateKey = Key.None;
+        hasPendingDuplicateHotKey = false;
     }
 
     private bool HasEmptyHotKeys()
@@ -768,6 +817,9 @@ public class SettingsUI : MonoBehaviour
                 case PopupType.QuitGame:
                     popupText.text = quitGameWarningMessage;
                     break;
+                case PopupType.HotKeyDuplicateConfirm:
+                    popupText.text = duplicateHotKeyWarningMessage;
+                    break;
             }
         }
 
@@ -785,6 +837,10 @@ public class SettingsUI : MonoBehaviour
 
                 case PopupType.QuitGame:
                     confirmButtonText.text = "메인 화면";
+                    break;
+
+                case PopupType.HotKeyDuplicateConfirm:
+                    confirmButtonText.text = "바꾸기";
                     break;
             }
         }
@@ -834,6 +890,9 @@ public class SettingsUI : MonoBehaviour
                     SaveManager.Instance.GoToMainMenu();
                 }
                 break;
+            case PopupType.HotKeyDuplicateConfirm:
+                ApplyPendingDuplicateHotKey();
+                break;
             default:
                 CloseConfirmPopup();
                 break;
@@ -842,6 +901,12 @@ public class SettingsUI : MonoBehaviour
 
     public void OnClickPopupCancel()
     {
+        if (currentPopupType == PopupType.HotKeyDuplicateConfirm)
+        {
+            ClearPendingDuplicateHotKey();
+            SyncHotKeyButtonsFromManager();
+        }
+
         CloseConfirmPopup();
     }
 
