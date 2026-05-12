@@ -1,15 +1,30 @@
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
+
+public enum HotKeyAction
+{
+    MoveUp,
+    MoveDown,
+    MoveRight,
+    MoveLeft,
+    Pray,
+    Speech
+}
 
 public class SettingsManager : MonoBehaviour
 {
     public static SettingsManager Instance { get; private set; }
 
-    private const string DefaultUpKey = "W";
-    private const string DefaultDownKey = "S";
-    private const string DefaultRightKey = "D";
-    private const string DefaultLeftKey = "A";
-    private const string DefaultPrayKey = "F";
-    private const string DefaultSpeechKey = "G";
+    private static readonly Dictionary<HotKeyAction, Key> DefaultHotKeys = new Dictionary<HotKeyAction, Key>
+    {
+        { HotKeyAction.MoveUp, Key.W },
+        { HotKeyAction.MoveDown, Key.S },
+        { HotKeyAction.MoveRight, Key.D },
+        { HotKeyAction.MoveLeft, Key.A },
+        { HotKeyAction.Pray, Key.F },
+        { HotKeyAction.Speech, Key.G },
+    };
 
     private int masterVolume = 100;
     private bool isMasterMuted = false;
@@ -17,12 +32,7 @@ public class SettingsManager : MonoBehaviour
     private bool isBgmMuted = false;
     private int sfxVolume = 100;
     private bool isSfxMuted = false;
-    private string upKeyLabel = DefaultUpKey;
-    private string downKeyLabel = DefaultDownKey;
-    private string rightKeyLabel = DefaultRightKey;
-    private string leftKeyLabel = DefaultLeftKey;
-    private string prayKeyLabel = DefaultPrayKey;
-    private string speechKeyLabel = DefaultSpeechKey;
+    private readonly Dictionary<HotKeyAction, Key> hotKeys = new Dictionary<HotKeyAction, Key>();
 
     public int MasterVolume => masterVolume;
     public bool IsMasterMuted => isMasterMuted;
@@ -30,24 +40,31 @@ public class SettingsManager : MonoBehaviour
     public bool IsBgmMuted => isBgmMuted;
     public int SfxVolume => sfxVolume;
     public bool IsSfxMuted => isSfxMuted;
-    public string UpKeyLabel => upKeyLabel;
-    public string DownKeyLabel => downKeyLabel;
-    public string RightKeyLabel => rightKeyLabel;
-    public string LeftKeyLabel => leftKeyLabel;
-    public string PrayKeyLabel => prayKeyLabel;
-    public string SpeechKeyLabel => speechKeyLabel;
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void Bootstrap()
+    {
+        if (Instance != null)
+        {
+            return;
+        }
+
+        GameObject settingsManagerObject = new GameObject(nameof(SettingsManager));
+        DontDestroyOnLoad(settingsManagerObject);
+        settingsManagerObject.AddComponent<SettingsManager>();
+    }
 
     private void Awake()
     {
-        if (Instance == null)
+        if (Instance != null && Instance != this)
         {
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
+            Destroy(this);
+            return;
         }
-        else
-        {
-            Destroy(gameObject);
-        }
+
+        Instance = this;
+        DontDestroyOnLoad(gameObject);
+        ResetHotKeysToDefault();
     }
 
     public void SetMasterVolume(float value)
@@ -86,44 +103,68 @@ public class SettingsManager : MonoBehaviour
         ApplySettings();
     }
 
-    public void SetUpKeyLabel(string label)
-    {
-        upKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
-    public void SetDownKeyLabel(string label)
-    {
-        downKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
-    public void SetRightKeyLabel(string label)
-    {
-        rightKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
-    public void SetLeftKeyLabel(string label)
-    {
-        leftKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
-    public void SetPrayKeyLabel(string label)
-    {
-        prayKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
-    public void SetSpeechKeyLabel(string label)
-    {
-        speechKeyLabel = NormalizeHotKeyLabel(label);
-    }
-
     public void ResetHotKeysToDefault()
     {
-        upKeyLabel = DefaultUpKey;
-        downKeyLabel = DefaultDownKey;
-        rightKeyLabel = DefaultRightKey;
-        leftKeyLabel = DefaultLeftKey;
-        prayKeyLabel = DefaultPrayKey;
-        speechKeyLabel = DefaultSpeechKey;
+        hotKeys.Clear();
+
+        foreach (KeyValuePair<HotKeyAction, Key> pair in DefaultHotKeys)
+        {
+            hotKeys[pair.Key] = pair.Value;
+        }
+    }
+
+    public Key GetHotKey(HotKeyAction action)
+    {
+        if (hotKeys.TryGetValue(action, out Key key))
+        {
+            return key;
+        }
+
+        return DefaultHotKeys.TryGetValue(action, out Key defaultKey) ? defaultKey : Key.None;
+    }
+
+    public string GetHotKeyLabel(HotKeyAction action)
+    {
+        return FormatHotKeyLabel(GetHotKey(action));
+    }
+
+    public void SetHotKey(HotKeyAction action, Key key)
+    {
+        Key normalizedKey = NormalizeHotKey(key);
+
+        if (normalizedKey != Key.None)
+        {
+            ClearDuplicateHotKey(action, normalizedKey);
+        }
+
+        hotKeys[action] = normalizedKey;
+    }
+
+    public bool TryGetActionUsingHotKey(Key key, HotKeyAction exceptAction, out HotKeyAction usedAction)
+    {
+        Key normalizedKey = NormalizeHotKey(key);
+        if (normalizedKey == Key.None)
+        {
+            usedAction = default;
+            return false;
+        }
+
+        foreach (HotKeyAction action in DefaultHotKeys.Keys)
+        {
+            if (action == exceptAction)
+            {
+                continue;
+            }
+
+            if (GetHotKey(action) == normalizedKey)
+            {
+                usedAction = action;
+                return true;
+            }
+        }
+
+        usedAction = default;
+        return false;
     }
 
     private void ApplySettings()
@@ -134,8 +175,34 @@ public class SettingsManager : MonoBehaviour
         // BGM / SFX 분리는 나중에 AudioMixer나 AudioSource 분리 후 적용
     }
 
-    private static string NormalizeHotKeyLabel(string label)
+    private void ClearDuplicateHotKey(HotKeyAction currentAction, Key key)
     {
-        return string.IsNullOrWhiteSpace(label) ? string.Empty : label.ToUpper();
+        foreach (HotKeyAction action in DefaultHotKeys.Keys)
+        {
+            if (action == currentAction)
+            {
+                continue;
+            }
+
+            if (GetHotKey(action) == key)
+            {
+                hotKeys[action] = Key.None;
+            }
+        }
+    }
+
+    private static Key NormalizeHotKey(Key key)
+    {
+        if (key >= Key.A && key <= Key.Z)
+        {
+            return key;
+        }
+
+        return Key.None;
+    }
+
+    private static string FormatHotKeyLabel(Key key)
+    {
+        return key == Key.None ? string.Empty : key.ToString().ToUpper();
     }
 }

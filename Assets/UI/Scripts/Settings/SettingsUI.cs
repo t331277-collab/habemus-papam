@@ -1,27 +1,34 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.SceneManagement;
+
+public enum PopupType
+{
+    EmptyHotKey,
+    NewGame,
+    QuitGame,
+    HotKeyDuplicateConfirm
+}
 
 public class SettingsUI : MonoBehaviour
 {
-    private enum HotKeyTarget
-    {
-        None,
-        Up,
-        Down,
-        Right,
-        Left,
-        Pray,
-        Speech
-    }
+    private const string GameSceneName = "GameScene";
 
     [SerializeField] private GameObject settingsPanel;
     [SerializeField] private ScrollRect settingsScrollRect;
 
+    [Header("씬별 표시 설정")]
+    [SerializeField] private GameObject inGameOnlyGroup;
+
+    [Header("음향 설정")]
     [SerializeField] private VolumeSet masterVolume;
     [SerializeField] private VolumeSet bgmVolume;
     [SerializeField] private VolumeSet sfxVolume;
 
+    [Header("단축키 설정")]
     [SerializeField] private Button upKey;
     [SerializeField] private Button downKey;
     [SerializeField] private Button rightKey;
@@ -30,24 +37,56 @@ public class SettingsUI : MonoBehaviour
     [SerializeField] private Button speechHotKey;
     [SerializeField] private Button resetHotKeysButton;
 
-    private HotKeyTarget waitingHotKeyTarget = HotKeyTarget.None;
+    [Header("플레이 방법 설정")]
+    [SerializeField] private GameObject howToPlayPanel;
+    [SerializeField] private Button howToPlayButton;
+    [SerializeField] private Button closeHowToPlayButton;
+    [SerializeField] private ScrollRect howToPlayScrollRect;
+
+    [Header("메인 화면 이동 설정")]
+    [SerializeField] private Button quitGameButton;
+
+    [Header("팝업창 설정")]
+    [SerializeField] private GameObject confirmPopup;
+    [SerializeField] private TMP_Text popupText;
+    [SerializeField] private TMP_Text confirmButtonText;
+    [SerializeField] private string hotKeyWarningMessage = "비어 있는 단축키가 있습니다.\n 설정창을 닫으시겠습니까?";
+    [SerializeField] private string newGameWarningMessage = "새 게임을 시작하면 현재 저장된 진행 상황이 삭제됩니다.\n계속하시겠습니까?";
+    [SerializeField] private string quitGameWarningMessage = "메인 화면으로 돌아가시겠습니까?\n현재 콘클라베 진행 상황은 저장되지 않습니다.";
+    [SerializeField] private string duplicateHotKeyWarningMessage = "이미 다른 단축키로 사용 중입니다.\n기존 단축키를 해제하고 바꾸시겠습니까?";
+    private PopupType currentPopupType;
+
+    private readonly System.Collections.Generic.Dictionary<HotKeyAction, Button> hotKeyButtons =
+        new System.Collections.Generic.Dictionary<HotKeyAction, Button>();
+    private HotKeyAction waitingHotKeyAction;
+    private bool isWaitingHotKeyInput = false;
+    private HotKeyAction pendingDuplicateAction;
+    private Key pendingDuplicateKey = Key.None;
+    private bool hasPendingDuplicateHotKey = false;
+    private float previousTimeScale = 1f;
+    private bool isSettingsPausingGame = false;
 
     //private UIManager.UIState prevState;
 
-    private void Start()
+    private void Awake()
     {
         if (settingsPanel != null)
         {
             settingsPanel.SetActive(false);
         }
 
+        CloseHowToPlayPanel();
+        CacheHotKeyButtons();
         RegisterEvents();
         SyncHotKeyButtonsFromManager();
+        CloseConfirmPopup();
     }
 
     void OnEnable()
     {
+        SceneManager.sceneLoaded += OnSceneLoaded;
         RefreshUI();
+        RefreshSceneDependentUI();
 
         //prevState = UIManager.Instance.State;
         //UIManager.Instance.SetUIState(UIManager.UIState.SETTINGS);
@@ -55,6 +94,8 @@ public class SettingsUI : MonoBehaviour
 
     void OnDisable()
     {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+        ResumeGameFromSettings();
         //UIManager.Instance.SetUIState(prevState);
     }
 
@@ -65,14 +106,21 @@ public class SettingsUI : MonoBehaviour
 
     private void Update()
     {
-        if (waitingHotKeyTarget != HotKeyTarget.None)
+        if (isWaitingHotKeyInput)
         {
             CaptureHotKeyInput();
             return;
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape))
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
         {
+            if (IsHowToPlayPanelOpen())
+            {
+                CloseHowToPlayPanel();
+                return;
+            }
+
             ToggleSettingsPanel();
         }
 
@@ -97,10 +145,23 @@ public class SettingsUI : MonoBehaviour
             return;
         }
 
-        settingsPanel.SetActive(!settingsPanel.activeSelf);
-
         if (settingsPanel.activeSelf)
         {
+            if (IsHowToPlayPanelOpen())
+            {
+                CloseHowToPlayPanel();
+                return;
+            }
+
+            TryCloseSettingsPanel();
+        }
+        else
+        {
+            RefreshSceneDependentUI();
+            settingsPanel.SetActive(true);
+            PauseGameForSettings();
+            CloseHowToPlayPanel();
+            CloseConfirmPopup();
             ResetScrollToTop();
         }
     }
@@ -113,7 +174,11 @@ public class SettingsUI : MonoBehaviour
             return;
         }
 
+        RefreshSceneDependentUI();
         settingsPanel.SetActive(true);
+        PauseGameForSettings();
+        CloseHowToPlayPanel();
+        CloseConfirmPopup();
         ResetScrollToTop();
     }
 
@@ -125,7 +190,7 @@ public class SettingsUI : MonoBehaviour
             return;
         }
 
-        settingsPanel.SetActive(false);
+        TryCloseSettingsPanel();
     }
 
     private void RegisterEvents()
@@ -184,6 +249,38 @@ public class SettingsUI : MonoBehaviour
         {
             resetHotKeysButton.onClick.AddListener(OnClickResetHotKeys);
         }
+
+        if (howToPlayButton != null)
+        {
+            howToPlayButton.onClick.AddListener(OnClickHowToPlay);
+        }
+
+        if (closeHowToPlayButton != null)
+        {
+            closeHowToPlayButton.onClick.AddListener(OnClickCloseHowToPlay);
+        }
+
+        if (quitGameButton != null)
+        {
+            quitGameButton.onClick.AddListener(OnClickQuitGame);
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        RefreshSceneDependentUI();
+    }
+
+    public void RefreshSceneDependentUI()
+    {
+        if (inGameOnlyGroup == null)
+        {
+            return;
+        }
+
+        Scene activeScene = SceneManager.GetActiveScene();
+        bool isGameScene = activeScene.name == GameSceneName || activeScene.path.EndsWith($"/{GameSceneName}.unity");
+        inGameOnlyGroup.SetActive(isGameScene);
     }
 
     private void UnregisterEvents()
@@ -239,6 +336,21 @@ public class SettingsUI : MonoBehaviour
         if (resetHotKeysButton != null)
         {
             resetHotKeysButton.onClick.RemoveListener(OnClickResetHotKeys);
+        }
+
+        if (howToPlayButton != null)
+        {
+            howToPlayButton.onClick.RemoveListener(OnClickHowToPlay);
+        }
+
+        if (closeHowToPlayButton != null)
+        {
+            closeHowToPlayButton.onClick.RemoveListener(OnClickCloseHowToPlay);
+        }
+
+        if (quitGameButton != null)
+        {
+            quitGameButton.onClick.RemoveListener(OnClickQuitGame);
         }
     }
 
@@ -347,43 +459,38 @@ public class SettingsUI : MonoBehaviour
 
     private void OnClickUpKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Up;
-        SetWaitingText(upKey);
+        StartWaitingHotKeyInput(HotKeyAction.MoveUp);
     }
 
     private void OnClickDownKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Down;
-        SetWaitingText(downKey);
+        StartWaitingHotKeyInput(HotKeyAction.MoveDown);
     }
 
     private void OnClickRightKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Right;
-        SetWaitingText(rightKey);
+        StartWaitingHotKeyInput(HotKeyAction.MoveRight);
     }
 
     private void OnClickLeftKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Left;
-        SetWaitingText(leftKey);
+        StartWaitingHotKeyInput(HotKeyAction.MoveLeft);
     }
 
     private void OnClickPrayHotKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Pray;
-        SetWaitingText(prayHotKey);
+        StartWaitingHotKeyInput(HotKeyAction.Pray);
     }
 
     private void OnClickSpeechHotKey()
     {
-        waitingHotKeyTarget = HotKeyTarget.Speech;
-        SetWaitingText(speechHotKey);
+        StartWaitingHotKeyInput(HotKeyAction.Speech);
     }
 
     public void OnClickResetHotKeys()
     {
-        waitingHotKeyTarget = HotKeyTarget.None;
+        isWaitingHotKeyInput = false;
+        ClearPendingDuplicateHotKey();
 
         if (SettingsManager.Instance == null)
         {
@@ -392,6 +499,20 @@ public class SettingsUI : MonoBehaviour
 
         SettingsManager.Instance.ResetHotKeysToDefault();
         SyncHotKeyButtonsFromManager();
+        CloseConfirmPopup();
+    }
+
+    private void StartWaitingHotKeyInput(HotKeyAction action)
+    {
+        waitingHotKeyAction = action;
+        isWaitingHotKeyInput = true;
+        ClearPendingDuplicateHotKey();
+        CloseConfirmPopup();
+
+        if (hotKeyButtons.TryGetValue(action, out Button targetButton))
+        {
+            SetWaitingText(targetButton);
+        }
     }
 
     private void SetWaitingText(Button targetButton)
@@ -406,156 +527,387 @@ public class SettingsUI : MonoBehaviour
 
     private void CaptureHotKeyInput()
     {
-        if (!Input.anyKeyDown)
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null || !keyboard.anyKey.wasPressedThisFrame)
         {
             return;
         }
 
-        if (TryGetPressedKeyCode(out KeyCode pressedKey))
+        if (TryGetPressedKey(out Key pressedKey))
         {
-            ApplyHotKeyText(pressedKey);
+            ApplyHotKey(pressedKey);
         }
     }
 
-    private bool TryGetPressedKeyCode(out KeyCode pressedKey)
+    private bool TryGetPressedKey(out Key pressedKey)
     {
-        foreach (KeyCode keyCode in System.Enum.GetValues(typeof(KeyCode)))
+        Keyboard keyboard = Keyboard.current;
+        if (keyboard == null)
         {
-            if (Input.GetKeyDown(keyCode))
+            pressedKey = Key.None;
+            return false;
+        }
+
+        foreach (KeyControl keyControl in keyboard.allKeys)
+        {
+            if (keyControl.wasPressedThisFrame)
             {
-                pressedKey = keyCode;
+                pressedKey = keyControl.keyCode;
                 return true;
             }
         }
 
-        pressedKey = KeyCode.None;
+        pressedKey = Key.None;
         return false;
     }
 
-    private void ApplyHotKeyText(KeyCode pressedKey)
+    private void ApplyHotKey(Key pressedKey)
     {
-        if (IsAlphabetKey(pressedKey))
+        isWaitingHotKeyInput = false;
+
+        if (!IsAlphabetKey(pressedKey))
         {
-            string newLabel = FormatHotKeyLabel(pressedKey);
-            UpdateManagerHotKey(waitingHotKeyTarget, newLabel);
+            SyncHotKeyButtonsFromManager();
+            return;
         }
 
+        SettingsManager sm = SettingsManager.Instance;
+        if (sm == null)
+        {
+            SyncHotKeyButtonsFromManager();
+            return;
+        }
+
+        if (sm.TryGetActionUsingHotKey(pressedKey, waitingHotKeyAction, out _))
+        {
+            pendingDuplicateAction = waitingHotKeyAction;
+            pendingDuplicateKey = pressedKey;
+            hasPendingDuplicateHotKey = true;
+            SyncHotKeyButtonsFromManager();
+            ShowConfirmPopup(PopupType.HotKeyDuplicateConfirm);
+            return;
+        }
+
+        UpdateManagerHotKey(waitingHotKeyAction, pressedKey);
         SyncHotKeyButtonsFromManager();
-        waitingHotKeyTarget = HotKeyTarget.None;
-    }
 
-    private bool IsAlphabetKey(KeyCode keyCode)
-    {
-        return keyCode >= KeyCode.A && keyCode <= KeyCode.Z;
-    }
-
-    private string FormatHotKeyLabel(KeyCode keyCode)
-    {
-        string keyName = keyCode.ToString();
-
-        if (keyCode >= KeyCode.A && keyCode <= KeyCode.Z)
+        if (!HasEmptyHotKeys())
         {
-            return keyName.ToUpper();
+            CloseConfirmPopup();
         }
+    }
 
-        return keyName;
+    private bool IsAlphabetKey(Key keyCode)
+    {
+        return keyCode >= Key.A && keyCode <= Key.Z;
+    }
+
+    private void CacheHotKeyButtons()
+    {
+        hotKeyButtons.Clear();
+        hotKeyButtons[HotKeyAction.MoveUp] = upKey;
+        hotKeyButtons[HotKeyAction.MoveDown] = downKey;
+        hotKeyButtons[HotKeyAction.MoveRight] = rightKey;
+        hotKeyButtons[HotKeyAction.MoveLeft] = leftKey;
+        hotKeyButtons[HotKeyAction.Pray] = prayHotKey;
+        hotKeyButtons[HotKeyAction.Speech] = speechHotKey;
     }
 
     private void SyncHotKeyButtonsFromManager()
     {
-        SetButtonText(upKey, GetManagerHotKey(HotKeyTarget.Up));
-        SetButtonText(downKey, GetManagerHotKey(HotKeyTarget.Down));
-        SetButtonText(rightKey, GetManagerHotKey(HotKeyTarget.Right));
-        SetButtonText(leftKey, GetManagerHotKey(HotKeyTarget.Left));
-        SetButtonText(prayHotKey, GetManagerHotKey(HotKeyTarget.Pray));
-        SetButtonText(speechHotKey, GetManagerHotKey(HotKeyTarget.Speech));
-    }
-
-    private void UpdateManagerHotKey(HotKeyTarget target, string label)
-    {
-        if (target == HotKeyTarget.None)
+        SettingsManager sm = SettingsManager.Instance;
+        if (sm == null)
         {
             return;
         }
 
-        ClearDuplicateManagerHotKey(target, label);
-        SetManagerHotKey(target, label);
-    }
-
-    private void ClearDuplicateManagerHotKey(HotKeyTarget currentTarget, string label)
-    {
-        for (HotKeyTarget target = HotKeyTarget.Up; target <= HotKeyTarget.Speech; target++)
+        foreach (System.Collections.Generic.KeyValuePair<HotKeyAction, Button> pair in hotKeyButtons)
         {
-            if (target == currentTarget)
-            {
-                continue;
-            }
-
-            if (GetManagerHotKey(target) == label)
-            {
-                SetManagerHotKey(target, string.Empty);
-            }
+            SetButtonText(pair.Value, sm.GetHotKeyLabel(pair.Key));
         }
     }
 
-    private string GetManagerHotKey(HotKeyTarget target)
+    private void UpdateManagerHotKey(HotKeyAction action, Key key)
     {
         SettingsManager sm = SettingsManager.Instance;
 
         if (sm == null)
         {
-            return string.Empty;
+            return;
         }
 
-        switch (target)
+        sm.SetHotKey(action, key);
+    }
+
+    private void ApplyPendingDuplicateHotKey()
+    {
+        if (!hasPendingDuplicateHotKey)
         {
-            case HotKeyTarget.Up:
-                return sm.UpKeyLabel;
-            case HotKeyTarget.Down:
-                return sm.DownKeyLabel;
-            case HotKeyTarget.Right:
-                return sm.RightKeyLabel;
-            case HotKeyTarget.Left:
-                return sm.LeftKeyLabel;
-            case HotKeyTarget.Pray:
-                return sm.PrayKeyLabel;
-            case HotKeyTarget.Speech:
-                return sm.SpeechKeyLabel;
+            CloseConfirmPopup();
+            return;
+        }
+
+        UpdateManagerHotKey(pendingDuplicateAction, pendingDuplicateKey);
+        ClearPendingDuplicateHotKey();
+        SyncHotKeyButtonsFromManager();
+        CloseConfirmPopup();
+    }
+
+    private void ClearPendingDuplicateHotKey()
+    {
+        pendingDuplicateAction = default;
+        pendingDuplicateKey = Key.None;
+        hasPendingDuplicateHotKey = false;
+    }
+
+    private bool HasEmptyHotKeys()
+    {
+        SettingsManager sm = SettingsManager.Instance;
+        if (sm == null)
+        {
+            return false;
+        }
+
+        foreach (HotKeyAction action in hotKeyButtons.Keys)
+        {
+            if (sm.GetHotKey(action) == Key.None)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // =========================================================
+    // 새 게임 시작 설정
+    // =========================================================
+
+    public void OnClickNewGame()
+    {
+        ShowConfirmPopup(PopupType.NewGame);
+    }
+
+    // =========================================================
+    // 메인 화면 이동 설정
+    // =========================================================
+
+    public void OnClickQuitGame()
+    {
+        ShowConfirmPopup(PopupType.QuitGame);
+    }
+
+    // =========================================================
+    // 플레이 방법 설정
+    // =========================================================
+
+    public void OnClickHowToPlay()
+    {
+        OpenHowToPlayPanel();
+    }
+
+    public void OnClickCloseHowToPlay()
+    {
+        CloseHowToPlayPanel();
+    }
+
+    private void OpenHowToPlayPanel()
+    {
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(true);
+        }
+
+        ResetHowToPlayScrollToTop();
+    }
+
+    private void CloseHowToPlayPanel()
+    {
+        ResetHowToPlayScrollToTop();
+
+        if (howToPlayPanel != null)
+        {
+            howToPlayPanel.SetActive(false);
+        }
+    }
+
+    private bool IsHowToPlayPanelOpen()
+    {
+        return howToPlayPanel != null && howToPlayPanel.activeSelf;
+    }
+
+    private void ResetHowToPlayScrollToTop()
+    {
+        if (howToPlayScrollRect == null)
+        {
+            return;
+        }
+
+        Canvas.ForceUpdateCanvases();
+        howToPlayScrollRect.StopMovement();
+        howToPlayScrollRect.verticalNormalizedPosition = 1f;
+        howToPlayScrollRect.horizontalNormalizedPosition = 0f;
+    }
+
+    private bool TryCloseSettingsPanel()
+    {
+        if (HasEmptyHotKeys())
+        {
+            ShowConfirmPopup(PopupType.EmptyHotKey);
+            return false;
+        }
+
+        CloseConfirmPopup();
+        CloseHowToPlayPanel();
+        settingsPanel.SetActive(false);
+        ResumeGameFromSettings();
+        return true;
+    }
+
+    private void ForceCloseSettingsPanel()
+    {
+        CloseConfirmPopup();
+        CloseHowToPlayPanel();
+
+        if (settingsPanel != null)
+        {
+            settingsPanel.SetActive(false);
+        }
+
+        ResumeGameFromSettings();
+    }
+
+    private void PauseGameForSettings()
+    {
+        if (isSettingsPausingGame)
+        {
+            return;
+        }
+
+        previousTimeScale = Time.timeScale;
+        Time.timeScale = 0f;
+        isSettingsPausingGame = true;
+    }
+
+    private void ResumeGameFromSettings()
+    {
+        if (!isSettingsPausingGame)
+        {
+            return;
+        }
+
+        Time.timeScale = previousTimeScale;
+        isSettingsPausingGame = false;
+    }
+
+    private void ShowConfirmPopup(PopupType popupType)
+    {
+        currentPopupType = popupType;
+
+        if (popupText != null)
+        {
+            switch (popupType)
+            {
+                case PopupType.EmptyHotKey:
+                    popupText.text = hotKeyWarningMessage;
+                    break;
+                case PopupType.NewGame:
+                    popupText.text = newGameWarningMessage;
+                    break;
+                case PopupType.QuitGame:
+                    popupText.text = quitGameWarningMessage;
+                    break;
+                case PopupType.HotKeyDuplicateConfirm:
+                    popupText.text = duplicateHotKeyWarningMessage;
+                    break;
+            }
+        }
+
+        if (confirmButtonText != null)
+        {
+            switch (popupType)
+            {
+                case PopupType.EmptyHotKey:
+                    confirmButtonText.text = "확인";
+                    break;
+
+                case PopupType.NewGame:
+                    confirmButtonText.text = "새 게임 시작";
+                    break;
+
+                case PopupType.QuitGame:
+                    confirmButtonText.text = "메인 화면";
+                    break;
+
+                case PopupType.HotKeyDuplicateConfirm:
+                    confirmButtonText.text = "바꾸기";
+                    break;
+            }
+        }
+
+        if (confirmPopup != null)
+        {
+            confirmPopup.SetActive(true);
+        }
+    }
+
+    private void CloseConfirmPopup()
+    {
+        if (popupText != null)
+        {
+            popupText.text = string.Empty;
+        }
+
+        if (confirmButtonText != null)
+        {
+            confirmButtonText.text = "확인";
+        }
+
+        if (confirmPopup != null)
+        {
+            confirmPopup.SetActive(false);
+        }
+    }
+
+    public void OnClickPopupConfirm()
+    {
+        switch (currentPopupType)
+        {
+            case PopupType.EmptyHotKey:
+                ForceCloseSettingsPanel();
+                break;
+            case PopupType.NewGame:
+                ForceCloseSettingsPanel();
+                if (SaveManager.Instance != null)
+                {
+                    SaveManager.Instance.StartNewGame();
+                }
+                break;
+            case PopupType.QuitGame:
+                ForceCloseSettingsPanel();
+                if (SaveManager.Instance != null)
+                {
+                    SaveManager.Instance.GoToMainMenu();
+                }
+                break;
+            case PopupType.HotKeyDuplicateConfirm:
+                ApplyPendingDuplicateHotKey();
+                break;
             default:
-                return string.Empty;
+                CloseConfirmPopup();
+                break;
         }
     }
 
-    private void SetManagerHotKey(HotKeyTarget target, string label)
+    public void OnClickPopupCancel()
     {
-        SettingsManager sm = SettingsManager.Instance;
-
-        if (sm == null)
+        if (currentPopupType == PopupType.HotKeyDuplicateConfirm)
         {
-            return;
+            ClearPendingDuplicateHotKey();
+            SyncHotKeyButtonsFromManager();
         }
 
-        switch (target)
-        {
-            case HotKeyTarget.Up:
-                sm.SetUpKeyLabel(label);
-                break;
-            case HotKeyTarget.Down:
-                sm.SetDownKeyLabel(label);
-                break;
-            case HotKeyTarget.Right:
-                sm.SetRightKeyLabel(label);
-                break;
-            case HotKeyTarget.Left:
-                sm.SetLeftKeyLabel(label);
-                break;
-            case HotKeyTarget.Pray:
-                sm.SetPrayKeyLabel(label);
-                break;
-            case HotKeyTarget.Speech:
-                sm.SetSpeechKeyLabel(label);
-                break;
-        }
+        CloseConfirmPopup();
     }
 
     private static TMP_Text GetButtonText(Button button)
