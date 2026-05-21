@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="ParameterPreset" id="{e910e015-8934-40ae-8b31-089c0d3d093d}">
+		<property name="name">
+			<value>DummyBGMState</value>
+		</property>
+		<relationship name="folder">
+			<destination>{8d11c467-a097-4e12-8400-b0681a52944a}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{87e84050-6714-4950-a413-0275df553765}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{87e84050-6714-4950-a413-0275df553765}">
+		<property name="parameterType">
+			<value>1</value>
+		</property>
+		<property name="maximum">
+			<value>2</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="isExposedRecursively">
+			<value>false</value>
+		</property>
+	</object>
+</objects>

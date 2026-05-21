@@ -114,6 +114,7 @@ public class CardinalManager : MonoBehaviour
     {
         StopAllCoroutines();
         StartCoroutine(ResetAndEnterSequence());
+        SoundManager.Instance.PlayBGM("DummyBGM", 1);
     }
 
     private IEnumerator ResetAndEnterSequence()
@@ -160,6 +161,7 @@ public class CardinalManager : MonoBehaviour
         yield return new WaitForSeconds(5f);
 
         Time.timeScale = 1f;
+        SoundManager.Instance.PlayBGM("DummyBGM", 0);
 
         Cardinal player = cardinals.Find(c => c.CompareTag("Player"));
         StateController playerSC = null;
@@ -248,6 +250,8 @@ public class CardinalManager : MonoBehaviour
     // =========================================================
     public void StopConClave()
     {
+        SoundManager.Instance.PlayBGM("DummyBGM", 1);
+
         Time.timeScale = 5f;
         if (cardinals == null || cardinals.Count == 0) return;
 
@@ -341,7 +345,7 @@ public class CardinalManager : MonoBehaviour
         Debug.Log("All cardinals have exited.");
         Time.timeScale = 1f;
 
-        
+        SoundManager.Instance.PlayBGM("DummyBGM");
     }
     private void MoveCardinalToExit(Cardinal c, Vector3 exitPos)
     {

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{07c0e3eb-14ed-4549-9a66-c25341df7ab7}">
+		<property name="assetPath">
+			<value>DummyBGM.mp3</value>
+		</property>
+		<property name="isStreaming">
+			<value>true</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>44.0999985</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>78.968163265306117</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{c8ff7e0e-b114-4801-b4cf-084c98d8b2e1}</destination>
+		</relationship>
+	</object>
+</objects>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.03.00">
+	<object class="AudioFile" id="{109c9b93-9c93-4e22-b8c2-e15188c3ed79}">
+		<property name="assetPath">
+			<value>DummySFX.wav</value>
+		</property>
+		<property name="frequencyInKHz">
+			<value>96</value>
+		</property>
+		<property name="channelCount">
+			<value>2</value>
+		</property>
+		<property name="length">
+			<value>0.50666666666666671</value>
+		</property>
+		<relationship name="masterAssetFolder">
+			<destination>{c8ff7e0e-b114-4801-b4cf-084c98d8b2e1}</destination>
+		</relationship>
+	</object>
+</objects>
