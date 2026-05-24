@@ -15,6 +15,7 @@ public class SaveModel
     public PlotManagerSaveData plots = new PlotManagerSaveData();
     public List<FieldItemSaveData> fieldItems = new List<FieldItemSaveData>();
     public GameNameSaveData names = new GameNameSaveData();
+    public ActionStatsSaveData actionStats = new ActionStatsSaveData();
 }
 
 [Serializable]
@@ -40,6 +41,126 @@ public class GameNameSaveData
 public class CompletedPlayerNameSaveData
 {
     public List<string> playerInputNames = new List<string>();
+}
+
+[Serializable]
+public class ActionStatsSaveData
+{
+    public int prayCount;
+    public int speechCount;
+    public int plotCount;
+    public int itemAcquireTotalCount;
+    public List<ItemAcquireCountSaveData> itemAcquireCounts = new List<ItemAcquireCountSaveData>();
+    public float highPietyTime;
+    public float highInfluenceTime;
+    public float lowPietyTime;
+    public float lowInfluenceTime;
+    public int stunCount;
+    public int healthGameOverCount;
+    public int badEndingCount;
+    public int happyEndingCount;
+    public int papalElectionCount;
+    public int papalElectionFailedCount;
+    public int currentPopeGeneration;
+    public int conclaveCount;
+
+    public void RecordItemAcquired(string itemId, string itemName)
+    {
+        itemAcquireTotalCount++;
+
+        if (string.IsNullOrWhiteSpace(itemId))
+        {
+            itemId = string.IsNullOrWhiteSpace(itemName) ? "Unknown" : itemName;
+        }
+
+        ItemAcquireCountSaveData record = itemAcquireCounts.Find(item => item.itemId == itemId);
+
+        if (record == null)
+        {
+            record = new ItemAcquireCountSaveData
+            {
+                itemId = itemId,
+                itemName = string.IsNullOrWhiteSpace(itemName) ? itemId : itemName
+            };
+            itemAcquireCounts.Add(record);
+        }
+
+        record.itemName = string.IsNullOrWhiteSpace(itemName) ? record.itemName : itemName;
+        record.count++;
+    }
+
+    public string GetMostAcquiredItemName()
+    {
+        ItemAcquireCountSaveData bestRecord = null;
+
+        foreach (ItemAcquireCountSaveData record in itemAcquireCounts)
+        {
+            if (record == null)
+            {
+                continue;
+            }
+
+            if (bestRecord == null || record.count > bestRecord.count)
+            {
+                bestRecord = record;
+            }
+        }
+
+        if (bestRecord == null)
+        {
+            return "없음";
+        }
+
+        return string.IsNullOrWhiteSpace(bestRecord.itemName) ? bestRecord.itemId : bestRecord.itemName;
+    }
+
+    public ActionStatsSaveData Clone()
+    {
+        ActionStatsSaveData clone = new ActionStatsSaveData
+        {
+            prayCount = prayCount,
+            speechCount = speechCount,
+            plotCount = plotCount,
+            itemAcquireTotalCount = itemAcquireTotalCount,
+            highPietyTime = highPietyTime,
+            highInfluenceTime = highInfluenceTime,
+            lowPietyTime = lowPietyTime,
+            lowInfluenceTime = lowInfluenceTime,
+            stunCount = stunCount,
+            healthGameOverCount = healthGameOverCount,
+            badEndingCount = badEndingCount,
+            happyEndingCount = happyEndingCount,
+            papalElectionCount = papalElectionCount,
+            papalElectionFailedCount = papalElectionFailedCount,
+            currentPopeGeneration = currentPopeGeneration,
+            conclaveCount = conclaveCount
+        };
+
+        foreach (ItemAcquireCountSaveData record in itemAcquireCounts)
+        {
+            if (record == null)
+            {
+                continue;
+            }
+
+            clone.itemAcquireCounts.Add(new ItemAcquireCountSaveData
+            {
+                itemId = record.itemId,
+                itemName = record.itemName,
+                count = record.count
+            });
+        }
+
+        return clone;
+    }
+}
+
+[Serializable]
+public class ItemAcquireCountSaveData
+{
+    public string itemId;
+    public string itemName;
+    public int count;
 }
 
 [Serializable]

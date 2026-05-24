@@ -121,6 +121,10 @@ public class SaveManager : MonoBehaviour
 
         EnsureCurrentPlayerName();
         currentGameNames.npcNames.Clear();
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.ClearCurrentRunStats();
+        }
         DeleteSave();
         SceneManager.LoadScene(GameSceneName);
     }
@@ -159,6 +163,10 @@ public class SaveManager : MonoBehaviour
     {
         pendingLoad = false;
         pendingNewGame = false;
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.ClearCurrentRunStats();
+        }
         DeleteSave();
     }
 
@@ -166,6 +174,10 @@ public class SaveManager : MonoBehaviour
     {
         pendingLoad = false;
         pendingNewGame = false;
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.ClearCurrentRunStats();
+        }
         DeleteSave();
     }
 
@@ -273,7 +285,8 @@ public class SaveManager : MonoBehaviour
             events = InGameManager.Instance.EventManager != null ? InGameManager.Instance.EventManager.CaptureSaveData() : new EventManagerSaveData(),
             plots = PlotManager.Instance != null ? PlotManager.Instance.CaptureSaveData() : new PlotManagerSaveData(),
             fieldItems = InGameManager.Instance.CaptureFieldItemSaveData(),
-            names = CloneNames(currentGameNames)
+            names = CloneNames(currentGameNames),
+            actionStats = ActionRecordManager.Instance != null ? ActionRecordManager.Instance.CaptureCurrentRunStats() : new ActionStatsSaveData()
         };
 
         return saveModel;
@@ -316,6 +329,12 @@ public class SaveManager : MonoBehaviour
         }
 
         InGameManager.Instance.RestoreFieldItems(saveModel.fieldItems);
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RestoreCurrentRunStats(saveModel.actionStats);
+        }
+
         RefreshSceneUi(saveModel);
     }
 

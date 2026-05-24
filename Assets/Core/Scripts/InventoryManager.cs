@@ -144,6 +144,11 @@ public class InventoryManager : MonoBehaviour
         inventoryItems.Add(runtimeItem);
         runtimeItem.OnAcquire();
 
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordItemAcquired(runtimeItem);
+        }
+
         if (playerCardinal != null && runtimeItem.usageType == ItemUsageType.Passive)
         {
             playerCardinal.AddPassiveItem(runtimeItem);

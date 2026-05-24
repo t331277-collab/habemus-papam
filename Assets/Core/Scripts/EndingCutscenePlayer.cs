@@ -21,28 +21,41 @@ public class EndingCutscenePlayer : MonoBehaviour
     [SerializeField] private bool playOnStart = true;
     [SerializeField] private bool clearEndingResultAfterPlay = true;
     [SerializeField] private string mainMenuSceneName = "MainScene";
-    [SerializeField] private float fallbackReturnDelay = 10f;
+    [SerializeField] private Button goToMainSceneButton;
+    [SerializeField] private float goToMainSceneButtonFadeDuration = 1f;
 
     private RenderTexture runtimeRenderTexture;
-    private Coroutine fallbackReturnCoroutine;
+    private CanvasGroup goToMainSceneButtonCanvasGroup;
+    private Coroutine buttonFadeCoroutine;
 
     private void Awake()
     {
         EnsureVideoPlayer();
+        EnsureGoToMainSceneButton();
+        HideGoToMainSceneButton();
     }
 
     private void OnEnable()
     {
         EnsureVideoPlayer();
+        EnsureGoToMainSceneButton();
 
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached += HandleVideoFinished;
         }
+
+        if (goToMainSceneButton != null)
+        {
+            goToMainSceneButton.onClick.AddListener(LoadMainMenu);
+        }
     }
 
     private void Start()
     {
+        HideGoToMainSceneButton();
+        EndingResultPanelRenderer.PopulateCurrentRunStats();
+
         if (playOnStart)
         {
             PlaySelectedEnding();
@@ -54,6 +67,11 @@ public class EndingCutscenePlayer : MonoBehaviour
         if (videoPlayer != null)
         {
             videoPlayer.loopPointReached -= HandleVideoFinished;
+        }
+
+        if (goToMainSceneButton != null)
+        {
+            goToMainSceneButton.onClick.RemoveListener(LoadMainMenu);
         }
     }
 
@@ -136,6 +154,37 @@ public class EndingCutscenePlayer : MonoBehaviour
         videoPlayer.audioOutputMode = VideoAudioOutputMode.Direct;
     }
 
+    private void EnsureGoToMainSceneButton()
+    {
+        if (goToMainSceneButton == null)
+        {
+            Button[] buttons = FindObjectsByType<Button>(
+                FindObjectsInactive.Include,
+                FindObjectsSortMode.None);
+
+            foreach (Button button in buttons)
+            {
+                if (button != null && button.gameObject.name == "GoToMainSceneBtn")
+                {
+                    goToMainSceneButton = button;
+                    break;
+                }
+            }
+        }
+
+        if (goToMainSceneButton == null)
+        {
+            return;
+        }
+
+        goToMainSceneButtonCanvasGroup = goToMainSceneButton.GetComponent<CanvasGroup>();
+
+        if (goToMainSceneButtonCanvasGroup == null)
+        {
+            goToMainSceneButtonCanvasGroup = goToMainSceneButton.gameObject.AddComponent<CanvasGroup>();
+        }
+    }
+
     private void ConfigureRenderTarget(VideoClip clip)
     {
         if (targetRawImage == null)
@@ -162,7 +211,7 @@ public class EndingCutscenePlayer : MonoBehaviour
 
     private void HandleVideoFinished(VideoPlayer source)
     {
-        LoadMainMenu();
+        ShowGoToMainSceneButton();
     }
 
     private void HandleMissingClip()
@@ -174,27 +223,93 @@ public class EndingCutscenePlayer : MonoBehaviour
             EndingResult.Clear();
         }
 
-        if (fallbackReturnCoroutine != null)
-        {
-            StopCoroutine(fallbackReturnCoroutine);
-        }
-
-        fallbackReturnCoroutine = StartCoroutine(ReturnToMainMenuAfterDelay());
+        ShowGoToMainSceneButton();
     }
 
-    private IEnumerator ReturnToMainMenuAfterDelay()
+    private void HideGoToMainSceneButton()
     {
-        float elapsed = 0f;
-        float delay = Mathf.Max(0f, fallbackReturnDelay);
+        if (buttonFadeCoroutine != null)
+        {
+            StopCoroutine(buttonFadeCoroutine);
+            buttonFadeCoroutine = null;
+        }
 
-        while (elapsed < delay)
+        if (goToMainSceneButton == null)
+        {
+            return;
+        }
+
+        goToMainSceneButton.interactable = false;
+        goToMainSceneButton.gameObject.SetActive(false);
+
+        if (goToMainSceneButtonCanvasGroup != null)
+        {
+            goToMainSceneButtonCanvasGroup.alpha = 0f;
+            goToMainSceneButtonCanvasGroup.interactable = false;
+            goToMainSceneButtonCanvasGroup.blocksRaycasts = false;
+        }
+    }
+
+    private void ShowGoToMainSceneButton()
+    {
+        EnsureGoToMainSceneButton();
+
+        if (goToMainSceneButton == null)
+        {
+            Debug.LogWarning("[Ending] GoToMainSceneBtn was not found. Returning to MainScene immediately.");
+            LoadMainMenu();
+            return;
+        }
+
+        if (buttonFadeCoroutine != null)
+        {
+            StopCoroutine(buttonFadeCoroutine);
+        }
+
+        buttonFadeCoroutine = StartCoroutine(FadeInGoToMainSceneButton());
+    }
+
+    private IEnumerator FadeInGoToMainSceneButton()
+    {
+        goToMainSceneButton.gameObject.SetActive(true);
+        goToMainSceneButton.interactable = false;
+
+        if (goToMainSceneButtonCanvasGroup == null)
+        {
+            EnsureGoToMainSceneButton();
+        }
+
+        float elapsed = 0f;
+        float duration = Mathf.Max(0f, goToMainSceneButtonFadeDuration);
+
+        if (goToMainSceneButtonCanvasGroup != null)
+        {
+            goToMainSceneButtonCanvasGroup.alpha = 0f;
+            goToMainSceneButtonCanvasGroup.interactable = false;
+            goToMainSceneButtonCanvasGroup.blocksRaycasts = false;
+        }
+
+        while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
+
+            if (goToMainSceneButtonCanvasGroup != null)
+            {
+                goToMainSceneButtonCanvasGroup.alpha = Mathf.Clamp01(elapsed / duration);
+            }
+
             yield return null;
         }
 
-        fallbackReturnCoroutine = null;
-        LoadMainMenu();
+        if (goToMainSceneButtonCanvasGroup != null)
+        {
+            goToMainSceneButtonCanvasGroup.alpha = 1f;
+            goToMainSceneButtonCanvasGroup.interactable = true;
+            goToMainSceneButtonCanvasGroup.blocksRaycasts = true;
+        }
+
+        goToMainSceneButton.interactable = true;
+        buttonFadeCoroutine = null;
     }
 
     private void LoadMainMenu()
@@ -204,6 +319,11 @@ public class EndingCutscenePlayer : MonoBehaviour
         if (SaveManager.Instance != null)
         {
             SaveManager.Instance.CompleteCurrentGame();
+        }
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.ClearCurrentRunStats();
         }
 
         if (!string.IsNullOrWhiteSpace(mainMenuSceneName))

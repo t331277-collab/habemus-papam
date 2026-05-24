@@ -286,6 +286,11 @@ public class InGameManager : MonoBehaviour
             case GameContext.GameContextEvent.ConclaveStart:
                 Debug.Log($"[InGameManager] 콘클라베 시작: {gameContext.CurrentConclave}");
 
+                if (ActionRecordManager.Instance != null)
+                {
+                    ActionRecordManager.Instance.RecordConclaveStarted();
+                }
+
                 if (CardinalManager.Instance != null)
                 {
                     CardinalManager.Instance.StartConClave();

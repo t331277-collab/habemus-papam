@@ -150,6 +150,11 @@ public class PlotManager : MonoBehaviour
         performer?.OnPlotExecuted();
         AvailPlotSets[plotSet].use(index);
 
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordPlot(performer);
+        }
+
         CheckIsAllUsed(plotSet);
     }
 

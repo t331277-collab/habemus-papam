@@ -230,6 +230,11 @@ public class ElectionManager : MonoBehaviour
         }
         else
         {
+            if (ActionRecordManager.Instance != null)
+            {
+                ActionRecordManager.Instance.RecordPapalElectionFailed();
+            }
+
             if (judgmentPanel != null) judgmentPanel.SetActive(false);
             if (electionFailedPanel != null) electionFailedPanel.SetActive(true);
         }
@@ -333,6 +338,11 @@ public class ElectionManager : MonoBehaviour
         if (judgmentPanel != null) judgmentPanel.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (gameClearPanel != null) gameClearPanel.SetActive(false);
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordPapalElection(endingType);
+        }
 
         EndingResult.Set(endingType);
         Time.timeScale = 1f;
