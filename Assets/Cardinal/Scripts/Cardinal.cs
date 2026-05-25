@@ -76,6 +76,11 @@ public class Cardinal : MonoBehaviour
                 isKnockedOut = true;
                 hp = 0f;
 
+                if (ActionRecordManager.Instance != null)
+                {
+                    ActionRecordManager.Instance.RecordKnockOut(this);
+                }
+
                 Debug.Log($"[{gameObject.name}] 체력이 0이 되어 기절했습니다!");
             }
         }
@@ -335,6 +340,11 @@ public class Cardinal : MonoBehaviour
         {
             item?.OnPray(this);
         }
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordPray(this);
+        }
     }
 
     public void Speech()
@@ -396,6 +406,11 @@ public class Cardinal : MonoBehaviour
         foreach (var item in items)
         {
             item?.OnSpeech(this);
+        }
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordSpeech(this);
         }
     }
 
