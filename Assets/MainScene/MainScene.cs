@@ -48,7 +48,19 @@ public class MainScene : MonoBehaviour
     private bool hasCachedSendNavigationEvents;
     private Button highlightedButton;
     private Outline highlightedOutline;
+    private bool hasKeyboardNavigationMoved;
     private readonly Dictionary<Button, Outline> buttonOutlines = new();
+    private readonly Dictionary<Button, Image> navigationButtonImages = new();
+    private static readonly string[] navigationImageButtonNames =
+    {
+        "GameStartBtn",
+        "Books",
+        "Setting",
+        "LoadBtn",
+        "ResetData",
+        "Dict",
+        "PopeList",
+    };
     private readonly Dictionary<Selectable, bool> popeListSelectableInteractableStates = new();
     private readonly List<Sprite> resolvedPopeListCreditSprites = new();
     private int currentPopeCreditIndex;
@@ -73,6 +85,7 @@ public class MainScene : MonoBehaviour
     {
         ResolveNameSelectionReferences();
         InitializePopeListRuntimeBindings();
+        SetNavigationButtonImagesVisible(null);
         SetStartGameWarningPopup(false);
         SetLoadWarningPopup(false);
         SetLoadPopup(false);
@@ -427,6 +440,7 @@ public class MainScene : MonoBehaviour
             if (IsNavigationIndexEligible(nextIndex))
             {
                 currentNavigationIndex = nextIndex;
+                hasKeyboardNavigationMoved = true;
                 UpdateSelectionVisual();
                 return;
             }
@@ -537,6 +551,7 @@ public class MainScene : MonoBehaviour
             }
 
             ApplyOutlineStyle(targetOutline);
+            UpdateNavigationButtonImageVisibility(currentButton);
             return;
         }
 
@@ -545,6 +560,7 @@ public class MainScene : MonoBehaviour
         targetOutline.enabled = true;
         highlightedButton = currentButton;
         highlightedOutline = targetOutline;
+        UpdateNavigationButtonImageVisibility(currentButton);
     }
 
     private void ClearSelectionHighlight()
@@ -556,6 +572,60 @@ public class MainScene : MonoBehaviour
 
         highlightedButton = null;
         highlightedOutline = null;
+        SetCachedNavigationButtonImagesVisible(null);
+    }
+
+    private void UpdateNavigationButtonImageVisibility(Button currentButton)
+    {
+        SetNavigationButtonImagesVisible(hasKeyboardNavigationMoved ? currentButton : null);
+    }
+
+    private void SetNavigationButtonImagesVisible(Button visibleButton)
+    {
+        ResolveNavigationButtonImageReferences();
+        SetCachedNavigationButtonImagesVisible(visibleButton);
+    }
+
+    private void SetCachedNavigationButtonImagesVisible(Button visibleButton)
+    {
+        foreach (KeyValuePair<Button, Image> entry in navigationButtonImages)
+        {
+            if (entry.Value != null)
+            {
+                entry.Value.enabled = entry.Key != null && entry.Key == visibleButton;
+            }
+        }
+    }
+
+    private void ResolveNavigationButtonImageReferences()
+    {
+        GameObject canvasObject = FindSceneObjectByNameIncludingInactive("Canvas");
+        if (canvasObject == null)
+        {
+            return;
+        }
+
+        Transform mainScreenTransform = canvasObject.transform.Find("MainScreen");
+        if (mainScreenTransform == null)
+        {
+            return;
+        }
+
+        foreach (string buttonName in navigationImageButtonNames)
+        {
+            Transform buttonTransform = FindDeepChild(mainScreenTransform, buttonName);
+            if (buttonTransform == null)
+            {
+                continue;
+            }
+
+            Button button = buttonTransform.GetComponent<Button>();
+            Image image = buttonTransform.GetComponent<Image>();
+            if (button != null && image != null)
+            {
+                navigationButtonImages[button] = image;
+            }
+        }
     }
 
     private bool IsNavigationBlocked()
