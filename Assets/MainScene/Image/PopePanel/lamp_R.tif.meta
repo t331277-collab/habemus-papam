@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: cf4b41dd595c3bb4a8344deb9b1d11c8
+guid: 7b7368d70f9f9ed4ca8b8e1703fdaf68
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1563620848058282944
-    second: frame4_0
+      213: -1827785589118957048
+    second: lamp_R_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -109,17 +109,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: frame4_0
+      name: lamp_R_0
       rect:
         serializedVersion: 2
-        x: 1068
-        y: 422
-        width: 180
-        height: 216
+        x: 322
+        y: 105
+        width: 81
+        height: 112
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +141,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 0c3b8eb70e813b510800000000000000
-      internalID: 1563620848058282944
+      spriteID: 80a8cf2d0b662a6e0800000000000000
+      internalID: -1827785589118957048
       vertices: []
       indices: 
       edges: []
@@ -148,7 +161,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      frame4_0: 1563620848058282944
+      lamp_R_0: -1827785589118957048
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

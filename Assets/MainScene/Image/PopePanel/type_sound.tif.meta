@@ -1,55 +1,61 @@
 fileFormatVersion: 2
-guid: ed28ce5228cf238409a4991f2b82ccc8
+guid: 22206c97aeb6afc41ba66ea7213a1cf1
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -1299476960889295530
-    second: type_art_0
+      213: -2864411573430303108
+    second: type_sound_0
   - first:
-      213: -6805788327269467850
-    second: type_art_1
+      213: -3677283665226950712
+    second: type_sound_1
   - first:
-      213: -617294426851615234
-    second: type_art_2
+      213: -6582501810851927519
+    second: type_sound_2
   - first:
-      213: 4542284725559121458
-    second: type_art_3
+      213: -1039629632135292484
+    second: type_sound_3
   - first:
-      213: 5068856154777467155
-    second: type_art_4
+      213: -3168076799931509857
+    second: type_sound_4
   - first:
-      213: -4535343217262824386
-    second: type_art_5
+      213: 7363984610996870537
+    second: type_sound_5
   - first:
-      213: -9183255726114507371
-    second: type_art_6
+      213: 5125322924097022148
+    second: type_sound_6
   - first:
-      213: -8451509358510484863
-    second: type_art_7
+      213: -4150285601436567730
+    second: type_sound_7
   - first:
-      213: 1712436800239937656
-    second: type_art_8
+      213: 7199622878592516784
+    second: type_sound_8
   - first:
-      213: -91690616326468152
-    second: type_art_9
+      213: -6896905831306555810
+    second: type_sound_9
   - first:
-      213: -5183672019351196449
-    second: type_art_10
+      213: 1095188819065317944
+    second: type_sound_10
   - first:
-      213: -8324403037316967916
-    second: type_art_11
+      213: 8680385320393297276
+    second: type_sound_11
   - first:
-      213: 5947618011480507249
-    second: type_art_12
+      213: -6881234763264523012
+    second: type_sound_12
   - first:
-      213: -6356577202919037277
-    second: type_art_13
+      213: -4425214388673688808
+    second: type_sound_13
   - first:
-      213: -5716930181355738405
-    second: type_art_14
+      213: -7639048047209400384
+    second: type_sound_14
   - first:
-      213: 6207918164688068984
-    second: type_art_15
+      213: 4671267113805345536
+    second: type_sound_15
+  - first:
+      213: -8568408798720119600
+    second: type_sound_16
+  - first:
+      213: 5411096998368035928
+    second: type_sound_17
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -154,16 +160,29 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: iOS
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: type_art_0
+      name: type_sound_0
       rect:
         serializedVersion: 2
-        x: 863
-        y: 360
-        width: 115
+        x: 747
+        y: 355
+        width: 298
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -173,150 +192,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 65da368c69457fde0800000000000000
-      internalID: -1299476960889295530
+      spriteID: c764b2ba9d09f38d0800000000000000
+      internalID: -2864411573430303108
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_1
+      name: type_sound_1
       rect:
         serializedVersion: 2
-        x: 982
-        y: 361
-        width: 80
-        height: 30
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 6397a90339bfc81a0800000000000000
-      internalID: -6805788327269467850
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_2
-      rect:
-        serializedVersion: 2
-        x: 607
-        y: 307
-        width: 57
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: efd5ea54dfdee67f0800000000000000
-      internalID: -617294426851615234
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_3
-      rect:
-        serializedVersion: 2
-        x: 668
-        y: 307
-        width: 221
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 23652af44ef690f30800000000000000
-      internalID: 4542284725559121458
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_4
-      rect:
-        serializedVersion: 2
-        x: 895
-        y: 317
-        width: 13
-        height: 8
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 319301b11d1385640800000000000000
-      internalID: 5068856154777467155
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_5
-      rect:
-        serializedVersion: 2
-        x: 914
-        y: 306
-        width: 246
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: e3472988f593f01c0800000000000000
-      internalID: -4535343217262824386
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_6
-      rect:
-        serializedVersion: 2
-        x: 1167
-        y: 316
-        width: 13
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5957f5372958e8080800000000000000
-      internalID: -9183255726114507371
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_7
-      rect:
-        serializedVersion: 2
-        x: 1198
-        y: 306
+        x: 1053
+        y: 355
         width: 37
         height: 31
       alignment: 0
@@ -327,19 +214,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 182d716340536ba80800000000000000
-      internalID: -8451509358510484863
+      spriteID: 8c71dc35df9a7fcc0800000000000000
+      internalID: -3677283665226950712
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_8
+      name: type_sound_2
       rect:
         serializedVersion: 2
-        x: 1230
-        y: 306
-        width: 67
+        x: 1095
+        y: 355
+        width: 69
         height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -349,20 +236,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 878ab9a623cc3c710800000000000000
-      internalID: 1712436800239937656
+      spriteID: 12a2ec68a7146a4a0800000000000000
+      internalID: -6582501810851927519
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_9
+      name: type_sound_3
       rect:
         serializedVersion: 2
-        x: 1294
-        y: 306
-        width: 34
-        height: 31
+        x: 677
+        y: 302
+        width: 230
+        height: 33
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -371,19 +258,19 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8cdcf98cedf3abef0800000000000000
-      internalID: -91690616326468152
+      spriteID: cb91b969b5e7291f0800000000000000
+      internalID: -1039629632135292484
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_10
+      name: type_sound_4
       rect:
         serializedVersion: 2
-        x: 716
-        y: 253
-        width: 50
+        x: 903
+        y: 302
+        width: 68
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -393,40 +280,18 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fdca07e33c5ef08b0800000000000000
-      internalID: -5183672019351196449
+      spriteID: f931de68feab804d0800000000000000
+      internalID: -3168076799931509857
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_11
+      name: type_sound_5
       rect:
         serializedVersion: 2
-        x: 773
-        y: 253
-        width: 151
-        height: 32
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 4121a89ca87c97c80800000000000000
-      internalID: -8324403037316967916
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_12
-      rect:
-        serializedVersion: 2
-        x: 931
-        y: 263
+        x: 979
+        y: 312
         width: 13
         height: 9
       alignment: 0
@@ -437,20 +302,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 173c202d11f2a8250800000000000000
-      internalID: 5947618011480507249
+      spriteID: 98d59e5dcf0223660800000000000000
+      internalID: 7363984610996870537
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_13
+      name: type_sound_6
       rect:
         serializedVersion: 2
-        x: 949
-        y: 245
-        width: 141
-        height: 39
+        x: 1000
+        y: 302
+        width: 117
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -459,41 +324,63 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 3a62aa866b6e8c7a0800000000000000
-      internalID: -6356577202919037277
+      spriteID: 4c828f95b0ec02740800000000000000
+      internalID: 5125322924097022148
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: type_art_14
-      rect:
-        serializedVersion: 2
-        x: 1094
-        y: 262
-        width: 13
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: bdae4962a4269a0b0800000000000000
-      internalID: -5716930181355738405
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: type_art_15
+      name: type_sound_7
       rect:
         serializedVersion: 2
         x: 1114
-        y: 252
-        width: 104
+        y: 302
+        width: 18
+        height: 31
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4774f11c393766c0800000000000000
+      internalID: -4150285601436567730
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_8
+      rect:
+        serializedVersion: 2
+        x: 1140
+        y: 312
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0b24843ecd23ae360800000000000000
+      internalID: 7199622878592516784
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_9
+      rect:
+        serializedVersion: 2
+        x: 1161
+        y: 302
+        width: 84
         height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -503,8 +390,184 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 8716de80ea4f62650800000000000000
-      internalID: 6207918164688068984
+      spriteID: e5e07a310b44940a0800000000000000
+      internalID: -6896905831306555810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_10
+      rect:
+        serializedVersion: 2
+        x: 674
+        y: 249
+        width: 311
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83a2e5aad64e23f00800000000000000
+      internalID: 1095188819065317944
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_11
+      rect:
+        serializedVersion: 2
+        x: 991
+        y: 259
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c7dce8f457ce67870800000000000000
+      internalID: 8680385320393297276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_12
+      rect:
+        serializedVersion: 2
+        x: 1010
+        y: 241
+        width: 60
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf48c8fe071f080a0800000000000000
+      internalID: -6881234763264523012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_13
+      rect:
+        serializedVersion: 2
+        x: 1063
+        y: 249
+        width: 36
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 81b482495fa7692c0800000000000000
+      internalID: -4425214388673688808
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_14
+      rect:
+        serializedVersion: 2
+        x: 1095
+        y: 249
+        width: 37
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c731f34646acf590800000000000000
+      internalID: -7639048047209400384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_15
+      rect:
+        serializedVersion: 2
+        x: 1128
+        y: 249
+        width: 35
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 003f459c0bca3d040800000000000000
+      internalID: 4671267113805345536
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_16
+      rect:
+        serializedVersion: 2
+        x: 1170
+        y: 258
+        width: 13
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0dca4fd4895e61980800000000000000
+      internalID: -8568408798720119600
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: type_sound_17
+      rect:
+        serializedVersion: 2
+        x: 1191
+        y: 249
+        width: 65
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 854c8e00d04181b40800000000000000
+      internalID: 5411096998368035928
       vertices: []
       indices: 
       edges: []
@@ -523,22 +586,24 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      type_art_0: -1299476960889295530
-      type_art_1: -6805788327269467850
-      type_art_10: -5183672019351196449
-      type_art_11: -8324403037316967916
-      type_art_12: 5947618011480507249
-      type_art_13: -6356577202919037277
-      type_art_14: -5716930181355738405
-      type_art_15: 6207918164688068984
-      type_art_2: -617294426851615234
-      type_art_3: 4542284725559121458
-      type_art_4: 5068856154777467155
-      type_art_5: -4535343217262824386
-      type_art_6: -9183255726114507371
-      type_art_7: -8451509358510484863
-      type_art_8: 1712436800239937656
-      type_art_9: -91690616326468152
+      type_sound_0: -2864411573430303108
+      type_sound_1: -3677283665226950712
+      type_sound_10: 1095188819065317944
+      type_sound_11: 8680385320393297276
+      type_sound_12: -6881234763264523012
+      type_sound_13: -4425214388673688808
+      type_sound_14: -7639048047209400384
+      type_sound_15: 4671267113805345536
+      type_sound_16: -8568408798720119600
+      type_sound_17: 5411096998368035928
+      type_sound_2: -6582501810851927519
+      type_sound_3: -1039629632135292484
+      type_sound_4: -3168076799931509857
+      type_sound_5: 7363984610996870537
+      type_sound_6: 5125322924097022148
+      type_sound_7: -4150285601436567730
+      type_sound_8: 7199622878592516784
+      type_sound_9: -6896905831306555810
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
