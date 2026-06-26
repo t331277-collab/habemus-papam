@@ -10,7 +10,8 @@ public class ElectionManager : MonoBehaviour
 
     [Header("UI 연결")]
     [SerializeField] private StatsUI statsUI;
-    [Tooltip("판정을 시작할 팝업 UI 패널")]
+    [Tooltip("투표 화면")]
+    [SerializeField] private CheckUI checkUI;
     [SerializeField] private GameObject judgmentStartPanel;
     [Tooltip("콘클라베 종료 후 나타나는 '판정 창 열기' 버튼")]
     [SerializeField] private Button openJudgeButton;
@@ -41,12 +42,7 @@ public class ElectionManager : MonoBehaviour
     [Tooltip("기본으로 깔고 가는 최소 당선 확률 (기본: 0)")]
     [SerializeField] private float baseProbability = 0f;
 
-    [Tooltip("숫자가 빙그르르 지속될 시간 (초)")]
-    [SerializeField] private float jackpotDuration = 2.5f;
-
     private Cardinal currentWinnerCandidate;
-    private Coroutine jackpotCoroutine;
-
     public Cardinal CurrentWinnerCandidate => currentWinnerCandidate;
 
     public void DebugElectPlayer()
@@ -85,97 +81,57 @@ public class ElectionManager : MonoBehaviour
 
     void Start()
     {
-        if (openJudgeButton != null)
-        {
-            openJudgeButton.onClick.AddListener(OpenJudgmentPanel);
-            openJudgeButton.gameObject.SetActive(false); 
-        }
-        if (startJudgmentButton != null)
-        {
-            startJudgmentButton.onClick.AddListener(ExecuteJudgment);
-        }
-
-        if (closeFailedPanelButton != null)
-        {
-            closeFailedPanelButton.onClick.AddListener(CloseFailedPanel);
-        }
-
-        if (judgmentPanel != null) judgmentPanel.SetActive(false);
+        if (checkUI != null) checkUI.gameObject.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
         if (gameClearPanel != null) gameClearPanel.SetActive(false);
     }
 
     public void OnConclaveEnded()
     {
-        if (judgmentStartPanel != null)
+        if (checkUI != null)
         {
-            judgmentStartPanel.gameObject.SetActive(true);
-            openJudgeButton.gameObject.SetActive(true);
-
+            SetCheckUI();
         }
     }
 
-    private void OpenJudgmentPanel()
+    private void SetCheckUI()
     {
-        if (openJudgeButton != null) openJudgeButton.gameObject.SetActive(false);
-        if(judgmentStartPanel != null) judgmentStartPanel.gameObject.SetActive(false);
         if (statsUI == null) return;
+        checkUI.gameObject.SetActive(true);
 
-        Cardinal[] cardinals = statsUI.LinkedCardinals;
-        float maxCombinedStat = -1f;
-        currentWinnerCandidate = null;
-
-        foreach (var c in cardinals)
-        {
-            if (c == null) continue;
-
-            float combinedStat = c.Piety + c.Influence;
-            if (combinedStat > maxCombinedStat)
-            {
-                maxCombinedStat = combinedStat;
-                currentWinnerCandidate = c;
-            }
-        }
+        currentWinnerCandidate = CardinalManager.Instance.Cardinals[GetWinner()];
+        checkUI.SetWinner(GetWinner());
 
         if (currentWinnerCandidate != null)
         {
             float winProbability = CalculateWinProbability(currentWinnerCandidate);
-
-            if (judgmentPanel != null) judgmentPanel.SetActive(true);
-
-            if (jackpotCoroutine != null) StopCoroutine(jackpotCoroutine);
-            jackpotCoroutine = StartCoroutine(JackpotRoutine(winProbability));
+            checkUI.SetProbability(winProbability);
         }
     }
-
-    private IEnumerator JackpotRoutine(float finalProb)
+        private int GetWinner()
     {
-        float elapsed = 0f;
+        float[,] stats = new float[4,2];
+        int winner = 0;
 
-        if (startJudgmentButton != null) startJudgmentButton.interactable = false;
-
-        while (elapsed < jackpotDuration)
+        for(int i = 0; i<4; i++)
         {
-            elapsed += Time.deltaTime;
-
-            float randomTick = Random.Range(0f, 100f);
-
-            if (probabilityText != null)
+            float influence = CardinalManager.Instance.Cardinals[i].Influence;
+            float piety = CardinalManager.Instance.Cardinals[i].Piety;
+            stats[i,0] = Mathf.Max(influence, piety);
+            stats[i,1] = Mathf.Min(influence, piety);
+        }
+        
+        float maxStat = -999f;
+        for(int i = 0; i<4; i++)
+        {
+            if(stats[i,0] > maxStat) winner = i;
+            else if (stats[i,0] == maxStat)
             {
-                probabilityText.text = $" <color=black>{randomTick:F1}%</color>";
+                if(stats[i,1]>stats[winner,1]) winner = i;
+                //스탯 다 같으면 번호 낮은 놈이 승자. StatsUI와 동일한 방법으로 적용해야 함.
             }
-
-            yield return null;
         }
-
-        if (probabilityText != null)
-        {
-            probabilityText.text = $" <color=black>{finalProb:F1}%</color>";
-        }
-
-        if (startJudgmentButton != null) startJudgmentButton.interactable = true;
-
-        jackpotCoroutine = null;
+        return winner;
     }
 
     // 최종 확률 판정 및 게임 결과 도출
