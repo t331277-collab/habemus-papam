@@ -12,26 +12,8 @@ public class ElectionManager : MonoBehaviour
     [SerializeField] private StatsUI statsUI;
     [Tooltip("투표 화면")]
     [SerializeField] private CheckUI checkUI;
-    [SerializeField] private GameObject judgmentStartPanel;
-    [Tooltip("콘클라베 종료 후 나타나는 '판정 창 열기' 버튼")]
-    [SerializeField] private Button openJudgeButton;
-    [Tooltip("판정을 진행할 팝업 UI 패널")]
-    [SerializeField] private GameObject judgmentPanel;
-    [Tooltip("판정 팝업 내 당선 확률을 표시할 TMP 텍스트")]
-    [SerializeField] private TextMeshProUGUI probabilityText;
-    [Tooltip("판정 팝업 안에 있는 '판정 시작' 버튼")]
-    [SerializeField] private Button startJudgmentButton;
-    [Tooltip("플레이어 당선 시 (게임 오버)")]
-    [SerializeField] private GameObject gameOverPanel;
-    [Tooltip("NPC 당선 시 (게임 클리어)")]
-    [SerializeField] private GameObject gameClearPanel;
     [Tooltip("당선 확정 후 이동할 엔딩 씬 이름")]
     [SerializeField] private string endingSceneName = "EndingScene";
-
-    [Tooltip("아무도 당선되지 않았을 때(부결) 띄울 창")]
-    [SerializeField] private GameObject electionFailedPanel;
-    [Tooltip("부결 창을 닫는 버튼")]
-    [SerializeField] private Button closeFailedPanelButton;
 
     [Header("당선 확률 공식 설정")]
     [Tooltip("후보자 합산 점수(경건함+정치력)에 곲할 값 -> 가중치(기본: 0.035)")]
@@ -44,6 +26,7 @@ public class ElectionManager : MonoBehaviour
 
     private Cardinal currentWinnerCandidate;
     public Cardinal CurrentWinnerCandidate => currentWinnerCandidate;
+    private bool isElected = false;
 
     public void DebugElectPlayer()
     {
@@ -82,8 +65,7 @@ public class ElectionManager : MonoBehaviour
     void Start()
     {
         if (checkUI != null) checkUI.gameObject.SetActive(false);
-        if (gameOverPanel != null) gameOverPanel.SetActive(false);
-        if (gameClearPanel != null) gameClearPanel.SetActive(false);
+        isElected = false;
     }
 
     public void OnConclaveEnded()
@@ -106,6 +88,7 @@ public class ElectionManager : MonoBehaviour
         {
             float winProbability = CalculateWinProbability(currentWinnerCandidate);
             checkUI.SetProbability(winProbability);
+            ExecuteJudgment();
         }
     }
         private int GetWinner()
@@ -135,7 +118,7 @@ public class ElectionManager : MonoBehaviour
     }
 
     // 최종 확률 판정 및 게임 결과 도출
-    private void ExecuteJudgment()
+    public void ExecuteJudgment()
     {
         if (currentWinnerCandidate == null || InGameManager.Instance == null) return;
 
@@ -146,7 +129,7 @@ public class ElectionManager : MonoBehaviour
         float winProbability = (progress * scoreDivisor) + (candidateScore * progressDivisor) + baseProbability;
 
         float diceRoll = UnityEngine.Random.Range(0f, 100f);
-        bool isElected = diceRoll <= winProbability;
+        isElected = diceRoll <= winProbability;
 
         if (isElected && currentWinnerCandidate.CompareTag("Player"))
         {
@@ -168,7 +151,9 @@ public class ElectionManager : MonoBehaviour
                 }
             }
         }
-
+    }
+    public void GetNextScenes()
+    {
         if (isElected)
         {
             Debug.Log($"-> {currentWinnerCandidate.name} 당선!");
@@ -176,12 +161,12 @@ public class ElectionManager : MonoBehaviour
             if (currentWinnerCandidate.CompareTag("Player"))
             {
                 Debug.Log($"[Election] Player elected: {currentWinnerCandidate.name}");
-                LoadEndingScene(EndingType.Bad);
+                //LoadEndingScene(EndingType.Bad);
             }
             else
             {
                 Debug.Log($"[Election] NPC elected: {currentWinnerCandidate.name}");
-                LoadEndingScene(EndingType.Normal);
+                //LoadEndingScene(EndingType.Normal);
             }
         }
         else
@@ -189,18 +174,16 @@ public class ElectionManager : MonoBehaviour
             if (ActionRecordManager.Instance != null)
             {
                 ActionRecordManager.Instance.RecordPapalElectionFailed();
+                ClosePanel();
             }
-
-            if (judgmentPanel != null) judgmentPanel.SetActive(false);
-            if (electionFailedPanel != null) electionFailedPanel.SetActive(true);
         }
     }
 
-    private void CloseFailedPanel()
+    private void ClosePanel()
     {
-        if (electionFailedPanel != null)
+        if (checkUI != null)
         {
-            electionFailedPanel.SetActive(false);
+            checkUI.gameObject.SetActive(false);
         }
 
         if (InGameManager.Instance.IsSushiOn && SushiUI.Instance != null)
@@ -291,10 +274,6 @@ public class ElectionManager : MonoBehaviour
 
     private void LoadEndingScene(EndingType endingType)
     {
-        if (judgmentPanel != null) judgmentPanel.SetActive(false);
-        if (gameOverPanel != null) gameOverPanel.SetActive(false);
-        if (gameClearPanel != null) gameClearPanel.SetActive(false);
-
         if (ActionRecordManager.Instance != null)
         {
             ActionRecordManager.Instance.RecordPapalElection(endingType);

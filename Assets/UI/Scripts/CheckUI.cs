@@ -10,8 +10,6 @@ public class CheckUI : MonoBehaviour
     [SerializeField] private Button Vote;
     [SerializeField] private Sprite[] sprites; //코루틴 돌릴 스프라이트.
     [SerializeField] private Animator anim;
-    private string enterAnim = "Enter";
-    private string electAnim = "Elect";
     private int currentSprite = 0;
     private bool isClicked = false;
     
@@ -24,10 +22,16 @@ public class CheckUI : MonoBehaviour
         ElectEnd
     }
     [SerializeField] private AnimState animState;
-    [SerializeField] private string ElectionMessage = "화면을 눌러 투표 결과를 확인하세요.";
+    [SerializeField] private string ElectionMessage = "운명의 순간이다...\n제발 나만 아니면 돼.";
+    [SerializeField] private string ElectionSubMessage = "투표함을 눌러 투표 결과를 확인하세요!";
+    [SerializeField] private string[] JudgeMessage;
+    [SerializeField] private string JudgeSubMessage = "투표함을 눌러 판정 결과를 확인하세요!";
+    [SerializeField] private string miscMessage = "신탁 성공 확률";
     [SerializeField] private TextMeshProUGUI text;
+    [SerializeField] private TextMeshProUGUI subText;
+    [SerializeField] private TextMeshProUGUI miscText;
     [SerializeField] private TextMeshProUGUI probabilityText;
-    private float jackpotDuration;
+    [SerializeField] private float jackpotDuration = 3f;
     private Coroutine jackpotCoroutine;
     private float winProbability = 0; //ElectionManager에서 정해진 승리 확률.
     private int winner = -1;
@@ -46,13 +50,13 @@ public class CheckUI : MonoBehaviour
         isClicked = false;
         text.text = "";
         probabilityText.text = "";
-        anim.Play("Enter", 0, 0f);
+        miscText.text = "";
     }
-    public void SetSprite(int i, int offset = 0)
+    public void SetSprite(int i)
     {
         if(currentSprite == i) return;
         currentSprite = i;
-        img.sprite = sprites[(i+offset)%4];
+        img.sprite = sprites[i];
     }
     private void Skip() //스킵 버튼을 누르면 스킵.
     {
@@ -62,42 +66,54 @@ public class CheckUI : MonoBehaviour
             Debug.Log("투표 화면 오류!");
         }
         if(animState == AnimState.Enter || animState == AnimState.ElectWait || animState == AnimState.Elect)
-        {
-            SetSprite(4, winner);
-            text.text = ElectionMessage;
-            animState = AnimState.ElectEnd;
-            //스킵 버튼을 다시 누르면 다음 화면으로 넘어감.
-        }
+        OnElectAnimFinished();
     }
     private void OnVote()
     {
-        Vote.gameObject.SetActive(false);
-        if(animState==AnimState.ElectWait)
+        Debug.Log("투표함 클릭됨");
+        if(animState == AnimState.ElectWait)
         {
+            text.text = ElectionMessage;
             anim.Play("Elect", 0, 0f);
+            animState = AnimState.Elect;
+            return;
         }
-        jackpotCoroutine = StartCoroutine(JackpotRoutine(winProbability));
+        if(animState == AnimState.Elect)
+        {
+            Skip();
+            return;
+        }
+        if(animState==AnimState.ElectEnd)
+        {
+            ElectionManager.Instance.GetNextScenes();
+        }
     }
     private void OnEnable()
     {
         animState = AnimState.Enter;
-        text.text = "";
+        text.text = ElectionMessage;
+        subText.text = ElectionSubMessage;
         probabilityText.text = "";
         anim.Play("Enter", 0, 0f);
         Vote.gameObject.SetActive(false);
     }
-    private void OnEnterAnimFinished()
+    public void OnEnterAnimFinished()
     {
         text.text = ElectionMessage;
+        subText.text = ElectionSubMessage;
         animState = AnimState.ElectWait;
         Vote.gameObject.SetActive(true);
+        anim.Play("Idle", 0, 0f);
     }
-    private void OnElectionFinished()
+    public void OnElectAnimFinished()
     {
-        Vote.gameObject.SetActive(false);
         animState = AnimState.ElectEnd;
-        SetSprite(4, winner);
-        if (jackpotCoroutine != null) StopCoroutine(jackpotCoroutine);
+        SetSprite(4+(winner%4));
+
+        string s = JudgeMessage[winner];
+        text.text = s.Replace("NAME", ElectionManager.Instance.CurrentWinnerCandidate.name); //이름 찾아야 함. StatsUI에서 찾는 방식은 좀 그럼.
+        miscText.text = miscMessage;
+
         jackpotCoroutine = StartCoroutine(JackpotRoutine(winProbability));
     }
     private IEnumerator JackpotRoutine(float finalProb)
@@ -112,7 +128,7 @@ public class CheckUI : MonoBehaviour
 
             if (probabilityText != null)
             {
-                probabilityText.text = $" <color=black>{randomTick:F1}%</color>";
+                probabilityText.text = $" <color=white>{randomTick:F1}%</color>";
             }
 
             yield return null;
@@ -120,9 +136,12 @@ public class CheckUI : MonoBehaviour
 
         if (probabilityText != null)
         {
-            probabilityText.text = $" <color=black>{finalProb:F1}%</color>";
+            probabilityText.text = $" <color=white>{finalProb:F1}%</color>";
         }
 
         jackpotCoroutine = null;
     }
+    public void DoNothing()
+    {
+    }//애니메이션을 위한 더미함수.
 }
