@@ -41,16 +41,17 @@ public class MainScene : MonoBehaviour
     [SerializeField] private Color selectedOutlineColor = Color.black;
     [SerializeField] private Vector2 selectedOutlineDistance = new Vector2(8f, -8f);
     [SerializeField] private bool selectedOutlineUseGraphicAlpha = false;
-    [SerializeField] private bool wrapNavigation = true;
 
     private int currentNavigationIndex = -1;
     private bool cachedSendNavigationEvents;
     private bool hasCachedSendNavigationEvents;
     private Button highlightedButton;
     private Outline highlightedOutline;
-    private bool hasKeyboardNavigationMoved;
     private readonly Dictionary<Button, Outline> buttonOutlines = new();
     private readonly Dictionary<Button, Image> navigationButtonImages = new();
+    private readonly Dictionary<Image, Color> navigationButtonImageColors = new();
+    private readonly Dictionary<Button, Vector2Int> navigationButtonCoordinates = new();
+    private readonly HashSet<Button> navigationPointerBoundButtons = new();
     private static readonly string[] navigationImageButtonNames =
     {
         "GameStartBtn",
@@ -60,6 +61,15 @@ public class MainScene : MonoBehaviour
         "ResetData",
         "Dict",
         "PopeList",
+    };
+    private static readonly Dictionary<string, Vector2Int> navigationCoordinatesByButtonName = new()
+    {
+        { "LoadBtn", new Vector2Int(0, 0) },
+        { "Setting", new Vector2Int(-2, 0) },
+        { "GameStartBtn", new Vector2Int(-1, 1) },
+        { "ResetData", new Vector2Int(1, 0) },
+        { "Dict", new Vector2Int(2, 0) },
+        { "PopeList", new Vector2Int(2, 1) },
     };
     private readonly Dictionary<Selectable, bool> popeListSelectableInteractableStates = new();
     private readonly List<Sprite> resolvedPopeListCreditSprites = new();
@@ -373,11 +383,19 @@ public class MainScene : MonoBehaviour
 
         if (WasMoveLeftPressed())
         {
-            MoveSelection(-1);
+            MoveSelection(Vector2Int.left);
         }
         else if (WasMoveRightPressed())
         {
-            MoveSelection(1);
+            MoveSelection(Vector2Int.right);
+        }
+        else if (WasMoveUpPressed())
+        {
+            MoveSelection(Vector2Int.up);
+        }
+        else if (WasMoveDownPressed())
+        {
+            MoveSelection(Vector2Int.down);
         }
 
         if (WasSubmitPressed())
@@ -409,9 +427,9 @@ public class MainScene : MonoBehaviour
         }
     }
 
-    private void MoveSelection(int direction)
+    private void MoveSelection(Vector2Int direction)
     {
-        if (direction == 0 || navigationButtons == null || navigationButtons.Count == 0)
+        if (direction == Vector2Int.zero || navigationButtons == null || navigationButtons.Count == 0)
         {
             return;
         }
@@ -422,28 +440,49 @@ public class MainScene : MonoBehaviour
             return;
         }
 
-        int nextIndex = currentNavigationIndex;
+        Button currentButton = GetCurrentNavigationButton();
+        if (currentButton == null || !navigationButtonCoordinates.TryGetValue(currentButton, out Vector2Int currentCoordinate))
+        {
+            RefreshNavigation(true);
+            return;
+        }
+
+        int bestIndex = -1;
+        int bestPrimaryDistance = int.MaxValue;
+        int bestSecondaryDistance = int.MaxValue;
 
         for (int i = 0; i < navigationButtons.Count; i++)
         {
-            nextIndex += direction;
-
-            if (wrapNavigation)
+            if (i == currentNavigationIndex || !IsNavigationIndexEligible(i))
             {
-                nextIndex = WrapIndex(nextIndex, navigationButtons.Count);
-            }
-            else if (nextIndex < 0 || nextIndex >= navigationButtons.Count)
-            {
-                return;
+                continue;
             }
 
-            if (IsNavigationIndexEligible(nextIndex))
+            Button candidateButton = navigationButtons[i];
+            if (candidateButton == null || !navigationButtonCoordinates.TryGetValue(candidateButton, out Vector2Int candidateCoordinate))
             {
-                currentNavigationIndex = nextIndex;
-                hasKeyboardNavigationMoved = true;
-                UpdateSelectionVisual();
-                return;
+                continue;
             }
+
+            Vector2Int delta = candidateCoordinate - currentCoordinate;
+            if (!TryGetDirectionalDistance(delta, direction, out int primaryDistance, out int secondaryDistance))
+            {
+                continue;
+            }
+
+            if (primaryDistance < bestPrimaryDistance
+                || (primaryDistance == bestPrimaryDistance && secondaryDistance < bestSecondaryDistance))
+            {
+                bestIndex = i;
+                bestPrimaryDistance = primaryDistance;
+                bestSecondaryDistance = secondaryDistance;
+            }
+        }
+
+        if (bestIndex >= 0)
+        {
+            currentNavigationIndex = bestIndex;
+            UpdateSelectionVisual();
         }
     }
 
@@ -461,13 +500,21 @@ public class MainScene : MonoBehaviour
 
     private void RefreshNavigation(bool forceSelectFirstButton)
     {
+        ResolveNavigationButtonImageReferences();
+        RegisterNavigationPointerBindings();
+
         if (IsNavigationBlocked())
         {
             ClearSelectionHighlight();
             return;
         }
 
-        int firstEligibleIndex = FindFirstEligibleNavigationIndex();
+        int firstEligibleIndex = FindDefaultNavigationIndex();
+        if (firstEligibleIndex < 0)
+        {
+            firstEligibleIndex = FindFirstEligibleNavigationIndex();
+        }
+
         if (firstEligibleIndex < 0)
         {
             currentNavigationIndex = -1;
@@ -501,6 +548,25 @@ public class MainScene : MonoBehaviour
         return -1;
     }
 
+    private int FindDefaultNavigationIndex()
+    {
+        if (navigationButtons == null)
+        {
+            return -1;
+        }
+
+        for (int i = 0; i < navigationButtons.Count; i++)
+        {
+            Button button = navigationButtons[i];
+            if (button != null && button.name == "LoadBtn" && IsNavigationIndexEligible(i))
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private bool IsNavigationIndexEligible(int index)
     {
         if (navigationButtons == null || index < 0 || index >= navigationButtons.Count)
@@ -525,6 +591,23 @@ public class MainScene : MonoBehaviour
         }
 
         return navigationButtons[currentNavigationIndex];
+    }
+
+    private void SelectNavigationButton(Button button)
+    {
+        if (button == null || navigationButtons == null)
+        {
+            return;
+        }
+
+        int index = navigationButtons.IndexOf(button);
+        if (!IsNavigationIndexEligible(index))
+        {
+            return;
+        }
+
+        currentNavigationIndex = index;
+        UpdateSelectionVisual();
     }
 
     private void UpdateSelectionVisual()
@@ -577,7 +660,7 @@ public class MainScene : MonoBehaviour
 
     private void UpdateNavigationButtonImageVisibility(Button currentButton)
     {
-        SetNavigationButtonImagesVisible(hasKeyboardNavigationMoved ? currentButton : null);
+        SetNavigationButtonImagesVisible(currentButton);
     }
 
     private void SetNavigationButtonImagesVisible(Button visibleButton)
@@ -592,9 +675,28 @@ public class MainScene : MonoBehaviour
         {
             if (entry.Value != null)
             {
-                entry.Value.enabled = entry.Key != null && entry.Key == visibleButton;
+                SetNavigationButtonImageAlpha(entry.Value, entry.Key != null && entry.Key == visibleButton);
             }
         }
+    }
+
+    private void SetNavigationButtonImageAlpha(Image image, bool isVisible)
+    {
+        if (image == null)
+        {
+            return;
+        }
+
+        image.enabled = true;
+        if (!navigationButtonImageColors.TryGetValue(image, out Color baseColor))
+        {
+            baseColor = image.color;
+            navigationButtonImageColors[image] = baseColor;
+        }
+
+        Color color = baseColor;
+        color.a = isVisible ? (baseColor.a > 0f ? baseColor.a : 1f) : 0f;
+        image.color = color;
     }
 
     private void ResolveNavigationButtonImageReferences()
@@ -611,21 +713,125 @@ public class MainScene : MonoBehaviour
             return;
         }
 
+        if (navigationButtons != null)
+        {
+            foreach (Button button in navigationButtons)
+            {
+                CacheNavigationButtonReference(button, false);
+            }
+        }
+
         foreach (string buttonName in navigationImageButtonNames)
         {
-            Transform buttonTransform = FindDeepChild(mainScreenTransform, buttonName);
+            Transform buttonTransform = mainScreenTransform.Find(buttonName);
             if (buttonTransform == null)
             {
                 continue;
             }
 
             Button button = buttonTransform.GetComponent<Button>();
-            Image image = buttonTransform.GetComponent<Image>();
-            if (button != null && image != null)
+            CacheNavigationButtonReference(button, true);
+        }
+    }
+
+    private void CacheNavigationButtonReference(Button button, bool addToNavigationButtons)
+    {
+        if (button == null)
+        {
+            return;
+        }
+
+        Image image = button.GetComponent<Image>();
+        if (image != null)
+        {
+            navigationButtonImages[button] = image;
+            if (!navigationButtonImageColors.ContainsKey(image))
             {
-                navigationButtonImages[button] = image;
+                navigationButtonImageColors[image] = image.color;
             }
         }
+
+        if (navigationCoordinatesByButtonName.TryGetValue(button.name, out Vector2Int coordinate))
+        {
+            navigationButtonCoordinates[button] = coordinate;
+            if (addToNavigationButtons && navigationButtons != null && !navigationButtons.Contains(button))
+            {
+                navigationButtons.Add(button);
+            }
+        }
+    }
+
+    private void RegisterNavigationPointerBindings()
+    {
+        if (navigationButtons == null)
+        {
+            return;
+        }
+
+        foreach (Button button in navigationButtons)
+        {
+            if (button == null || navigationPointerBoundButtons.Contains(button))
+            {
+                continue;
+            }
+
+            EventTrigger trigger = button.GetComponent<EventTrigger>();
+            if (trigger == null)
+            {
+                trigger = button.gameObject.AddComponent<EventTrigger>();
+            }
+
+            if (trigger.triggers == null)
+            {
+                trigger.triggers = new List<EventTrigger.Entry>();
+            }
+
+            EventTrigger.Entry pointerDownEntry = new EventTrigger.Entry
+            {
+                eventID = EventTriggerType.PointerDown,
+            };
+            pointerDownEntry.callback.AddListener(_ => SelectNavigationButton(button));
+            trigger.triggers.Add(pointerDownEntry);
+            navigationPointerBoundButtons.Add(button);
+        }
+    }
+
+    private static bool TryGetDirectionalDistance(
+        Vector2Int delta,
+        Vector2Int direction,
+        out int primaryDistance,
+        out int secondaryDistance)
+    {
+        primaryDistance = int.MaxValue;
+        secondaryDistance = int.MaxValue;
+
+        if (direction.x != 0)
+        {
+            int signedDistance = delta.x * direction.x;
+            if (signedDistance <= 0)
+            {
+                return false;
+            }
+
+            primaryDistance = Mathf.Abs(delta.x);
+            secondaryDistance = Mathf.Abs(delta.y);
+            return true;
+        }
+
+        if (direction.y != 0)
+        {
+            int signedDistance = delta.y * direction.y;
+            if (signedDistance <= 0)
+            {
+                return false;
+            }
+
+            primaryDistance = Mathf.Abs(delta.y);
+            secondaryDistance = Mathf.Abs(delta.x);
+            return true;
+        }
+
+        return false;
     }
 
     private bool IsNavigationBlocked()
@@ -1736,6 +1942,16 @@ public class MainScene : MonoBehaviour
     private static bool WasMoveRightPressed()
     {
         return Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D);
+    }
+
+    private static bool WasMoveUpPressed()
+    {
+        return Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.W);
+    }
+
+    private static bool WasMoveDownPressed()
+    {
+        return Input.GetKeyDown(KeyCode.DownArrow) || Input.GetKeyDown(KeyCode.S);
     }
 
     private static bool WasSubmitPressed()
