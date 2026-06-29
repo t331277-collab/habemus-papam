@@ -81,6 +81,11 @@ public class Cardinal : MonoBehaviour
                     ActionRecordManager.Instance.RecordKnockOut(this);
                 }
 
+                if (CompareTag("Player") && InGameManager.Instance != null)
+                {
+                    InGameManager.Instance.HandlePlayerHpReachedZero(this);
+                }
+
                 Debug.Log($"[{gameObject.name}] 체력이 0이 되어 기절했습니다!");
             }
         }

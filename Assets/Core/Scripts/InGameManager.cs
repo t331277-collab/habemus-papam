@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameContext
@@ -166,6 +167,10 @@ public class InGameManager : MonoBehaviour
     private bool isTimeRunning = false;
     private bool isFirstStart = true;
     private bool isSushiOn = false;
+    private bool hasHandledFirstPlayerHpZero = false;
+    private bool shouldRevivePlayerOnNextConclave = false;
+    private bool isHandlingFinalPlayerHpZero = false;
+    private bool isEndingConclaveAfterPlayerHpZero = false;
 
     public GameBalance Balance => balance;
     public GameContext Context => gameContext;
@@ -236,6 +241,7 @@ public class InGameManager : MonoBehaviour
 
     public void StartTimer()
     {
+        isEndingConclaveAfterPlayerHpZero = false;
         isTimeRunning = true;
         Debug.Log("타이머 작동 시작");
 
@@ -290,6 +296,8 @@ public class InGameManager : MonoBehaviour
                 {
                     ActionRecordManager.Instance.RecordConclaveStarted();
                 }
+
+                TryRevivePlayerOnNextConclave();
 
                 if (CardinalManager.Instance != null)
                 {
@@ -531,6 +539,147 @@ public class InGameManager : MonoBehaviour
 
         startButton.interactable = interactable;
         startButton.gameObject.SetActive(visible);
+    }
+
+    public void HandlePlayerHpReachedZero(Cardinal player)
+    {
+        if (player == null || !player.CompareTag("Player") || isHandlingFinalPlayerHpZero)
+        {
+            return;
+        }
+
+        if (!hasHandledFirstPlayerHpZero)
+        {
+            hasHandledFirstPlayerHpZero = true;
+            shouldRevivePlayerOnNextConclave = true;
+
+            if (PlayerHealthVignetteController.Instance != null)
+            {
+                PlayerHealthVignetteController.Instance.PlayFirstPlayerDownEffect(EndCurrentConclaveAfterPlayerHpZero);
+            }
+            else
+            {
+                EndCurrentConclaveAfterPlayerHpZero();
+            }
+            return;
+        }
+
+        isHandlingFinalPlayerHpZero = true;
+        StopTimer();
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.StopBGM();
+        }
+
+        if (ActionRecordManager.Instance != null)
+        {
+            ActionRecordManager.Instance.RecordHealthGameOver();
+        }
+
+        if (PlayerHealthVignetteController.Instance != null)
+        {
+            PlayerHealthVignetteController.Instance.PlayFinalGameOverEffect(DeleteCurrentGameAndReturnToMain);
+        }
+        else
+        {
+            DeleteCurrentGameAndReturnToMain();
+        }
+    }
+
+    private void EndCurrentConclaveAfterPlayerHpZero()
+    {
+        if (isEndingConclaveAfterPlayerHpZero)
+        {
+            return;
+        }
+
+        isEndingConclaveAfterPlayerHpZero = true;
+        StopTimer();
+
+        if (inventoryUIPanel != null)
+        {
+            inventoryUIPanel.SetActive(false);
+        }
+
+        ClearFieldItems();
+
+        if (CardinalManager.Instance != null)
+        {
+            CardinalManager.Instance.StopConClave();
+        }
+    }
+
+    private void TryRevivePlayerOnNextConclave()
+    {
+        if (!shouldRevivePlayerOnNextConclave)
+        {
+            return;
+        }
+
+        Cardinal player = FindPlayerCardinal();
+        if (player == null)
+        {
+            return;
+        }
+
+        player.ChangeHp(50f - player.Hp);
+        shouldRevivePlayerOnNextConclave = false;
+
+        Debug.Log("[Player HP] Player revived to 50 HP for the next conclave.");
+    }
+
+    private Cardinal FindPlayerCardinal()
+    {
+        if (CardinalManager.Instance == null)
+        {
+            return null;
+        }
+
+        foreach (Cardinal cardinal in CardinalManager.Instance.Cardinals)
+        {
+            if (cardinal != null && cardinal.CompareTag("Player"))
+            {
+                return cardinal;
+            }
+        }
+
+        return null;
+    }
+
+    private void DeleteCurrentGameAndReturnToMain()
+    {
+        Time.timeScale = 1f;
+
+        if (SaveManager.Instance != null)
+        {
+            SaveManager.Instance.DiscardCurrentGameSave();
+            SaveManager.Instance.GoToMainMenu();
+            return;
+        }
+
+        SceneManager.LoadScene("MainScene");
+    }
+
+    public void DebugSetPlayerHpTo21()
+    {
+        if (CardinalManager.Instance == null)
+        {
+            Debug.LogWarning("[Debug] CardinalManager was not found. Cannot set player HP.");
+            return;
+        }
+
+        foreach (Cardinal cardinal in CardinalManager.Instance.Cardinals)
+        {
+            if (cardinal != null && cardinal.CompareTag("Player"))
+            {
+                cardinal.ChangeHp(21f - cardinal.Hp);
+                Debug.Log($"[Debug] Player HP set to {cardinal.Hp}.");
+                return;
+            }
+        }
+
+        Debug.LogWarning("[Debug] Player cardinal was not found. Cannot set player HP.");
     }
 
     public int GetProgress()
