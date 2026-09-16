@@ -15,7 +15,6 @@ MonoBehaviour:
   plotID: P034
   plotName: "언더독"
   plotDescription: "중요한 것은 깎이지 않는 마음"
-    \uB9C8\uC74C"
   plotEffect: "자신을 포함한 가장 체력<sprite name=hp>이 낮은 후보 정치력<sprite name=influence>, 경건함<sprite name=piety> 6 증가"
   plotCondiText: <sprite name=influence>5<sprite name=up>
   plotCostText: <sprite name=piety>  4

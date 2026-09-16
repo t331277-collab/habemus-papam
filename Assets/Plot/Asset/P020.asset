@@ -15,7 +15,6 @@ MonoBehaviour:
   plotID: P020
   plotName: "선물 개봉"
   plotDescription: "한 번 만에 나왔는데 이거 좋은 건가요?"
-    \uC88B\uC740 \uAC74\uAC00\uC694?"
   plotEffect: "랜덤 아이템 2개 획득"
   plotCondiText: <sprite name=influence>8<sprite name=up>
   plotCostText: <sprite name=piety>  3

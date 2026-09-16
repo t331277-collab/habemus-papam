@@ -15,7 +15,6 @@ MonoBehaviour:
   plotID: P011
   plotName: "태양의 혀"
   plotDescription: "태양의 혀를 지닌 자여, 정당함을 말하라."
-    \uB9D0\uD558\uB77C."
   plotEffect: "자신을 포함한 모든 후보, 50% 확률로 체력<sprite name=hp> 2 감소 및 정치력<sprite name=influence> 2 증가.\n50% 확률로 체력<sprite name=hp> 1 증가."
   plotCondiText: <sprite name=influence>2<sprite name=up>
   plotCostText: <sprite name=piety>  0
