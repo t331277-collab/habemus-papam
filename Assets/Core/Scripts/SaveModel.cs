@@ -283,6 +283,7 @@ public class GameContextSaveData
     public bool showInventoryPanel;
     public bool hasHandledFirstPlayerHpZero;
     public bool shouldRevivePlayerOnNextConclave;
+    public int firstHpZeroCandidateSlot = -1;
     public List<int> npcTurnBehaviours = new List<int>();
     public List<bool> npcTurnActionsExecuted = new List<bool>();
     public List<bool> npcNextTurnActionBlocked = new List<bool>();

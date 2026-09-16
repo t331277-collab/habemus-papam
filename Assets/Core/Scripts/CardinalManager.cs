@@ -385,6 +385,23 @@ public class CardinalManager : MonoBehaviour
         StartCoroutine(ProcessExitSequence());
     }
 
+    public void SkipConclaveExitSequence()
+    {
+        if (!IsConclaveTransitionInProgress)
+        {
+            return;
+        }
+
+        StopAllCoroutines();
+        leftGroupList.Clear();
+        rightGroupList.Clear();
+        leftLinePositions.Clear();
+        rightLinePositions.Clear();
+        exitingCardinalCount = 0;
+        Time.timeScale = 1f;
+        SetConclaveTransition(false);
+    }
+
     private IEnumerator ProcessExitSequence()
     {
         yield return new WaitForSeconds(5.0f); 

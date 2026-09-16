@@ -77,6 +77,13 @@ public class ElectionManager : MonoBehaviour
 
         Cardinal[] candidates = statsUI.LinkedCardinals;
         int winner = GetWinner(candidates);
+        if (InGameManager.Instance != null &&
+            InGameManager.Instance.TryGetFirstHpZeroCandidateSlot(out int hpZeroCandidateSlot) &&
+            hpZeroCandidateSlot >= 0 && hpZeroCandidateSlot < candidates.Length &&
+            candidates[hpZeroCandidateSlot] != null)
+        {
+            winner = hpZeroCandidateSlot;
+        }
         currentWinnerCandidate = candidates[winner];
         checkUI.SetWinner(winner);
 

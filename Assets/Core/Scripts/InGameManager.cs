@@ -496,6 +496,8 @@ public class GameContext
 
 public class InGameManager : MonoBehaviour
 {
+    private const int NoCandidateSlot = -1;
+
     public static InGameManager Instance { get; private set; }
 
     [SerializeField] private GameBalance balance;
@@ -506,6 +508,7 @@ public class InGameManager : MonoBehaviour
     [Header("UI 연결")]
     [SerializeField] private Button startButton;
     [SerializeField] private GameObject inventoryUIPanel;
+    private GameObject hpZeroPopup;
 
     [Header("아이템 스폰 설정")]
     [Tooltip("아이템이 스폰될 수 있는 위치들")]
@@ -527,8 +530,10 @@ public class InGameManager : MonoBehaviour
     private bool isSushiOn = false;
     private bool hasHandledFirstPlayerHpZero = false;
     private bool shouldRevivePlayerOnNextConclave = false;
+    private int firstHpZeroCandidateSlot = NoCandidateSlot;
     private bool isHandlingFinalPlayerHpZero = false;
     private bool isEndingConclaveAfterPlayerHpZero = false;
+    private bool isAwaitingHpZeroPopupConfirmation = false;
     private bool isConclaveExitInProgress = false;
     private bool blockNextTurn;
     private bool blockRemainingCurrentTurn;
@@ -588,10 +593,21 @@ public class InGameManager : MonoBehaviour
 
         GameContext.ValidateActionRules();
         ValidateInitialTutorialRules();
+        ValidateHpZeroCandidateRules();
         gameContext = new GameContext();
         gameContext.OnGameContextEvent += HandleGameContextEvent;
 
         eventManager = GetComponent<EventManager>();
+
+        GameObject popup = GetHpZeroPopup();
+        if (popup != null)
+        {
+            Button confirmButton = popup.GetComponentInChildren<Button>(true);
+            if (confirmButton != null)
+            {
+                confirmButton.onClick.AddListener(ConfirmPlayerHpZeroPopup);
+            }
+        }
     }
 
     void Start()
@@ -679,6 +695,7 @@ public class InGameManager : MonoBehaviour
         eventBeforeActions = false;
         lastEventCheckedActionPosition = -1;
         endConclaveAfterEvent = false;
+        firstHpZeroCandidateSlot = NoCandidateSlot;
         prayerBlockedCandidateNumbers.Clear();
         speechHpRecoveryByCandidateNumber.Clear();
         pendingEffects.Clear();
@@ -692,6 +709,12 @@ public class InGameManager : MonoBehaviour
         {
             inventoryUIPanel.SetActive(false);
         }
+
+        GameObject popup = GetHpZeroPopup();
+        if (popup != null)
+        {
+            popup.SetActive(false);
+        }
     }
 
     void HandleGameContextEvent(GameContext.GameContextEvent eventType)
@@ -700,6 +723,7 @@ public class InGameManager : MonoBehaviour
         {
             case GameContext.GameContextEvent.ConclaveStart:
                 isConclaveExitInProgress = false;
+                firstHpZeroCandidateSlot = NoCandidateSlot;
 
                 if (ActionRecordManager.Instance != null)
                 {
@@ -955,7 +979,8 @@ public class InGameManager : MonoBehaviour
             startButtonInteractable = startButton == null || startButton.interactable,
             showInventoryPanel = inventoryUIPanel != null && inventoryUIPanel.activeSelf,
             hasHandledFirstPlayerHpZero = hasHandledFirstPlayerHpZero,
-            shouldRevivePlayerOnNextConclave = shouldRevivePlayerOnNextConclave
+            shouldRevivePlayerOnNextConclave = shouldRevivePlayerOnNextConclave,
+            firstHpZeroCandidateSlot = firstHpZeroCandidateSlot
         };
 
         for (int position = 0; position < GameContext.BaseActionPositions; position++)
@@ -1023,6 +1048,10 @@ public class InGameManager : MonoBehaviour
         endConclaveAfterEvent = saveData.endConclaveAfterEvent;
         hasHandledFirstPlayerHpZero = saveData.hasHandledFirstPlayerHpZero;
         shouldRevivePlayerOnNextConclave = saveData.shouldRevivePlayerOnNextConclave;
+        firstHpZeroCandidateSlot = saveData.firstHpZeroCandidateSlot >= 0 &&
+            saveData.firstHpZeroCandidateSlot <= 3
+                ? saveData.firstHpZeroCandidateSlot
+                : NoCandidateSlot;
         isHandlingFinalPlayerHpZero = false;
         isEndingConclaveAfterPlayerHpZero = false;
         isConclaveExitInProgress = false;
@@ -1068,15 +1097,7 @@ public class InGameManager : MonoBehaviour
         {
             hasHandledFirstPlayerHpZero = true;
             shouldRevivePlayerOnNextConclave = true;
-
-            if (PlayerHealthVignetteController.Instance != null)
-            {
-                PlayerHealthVignetteController.Instance.PlayFirstPlayerDownEffect(EndCurrentConclaveAfterPlayerHpZero);
-            }
-            else
-            {
-                EndCurrentConclaveAfterPlayerHpZero();
-            }
+            ShowPlayerHpZeroPopup();
             return;
         }
 
@@ -1106,15 +1127,48 @@ public class InGameManager : MonoBehaviour
         }
     }
 
-    private void EndCurrentConclaveAfterPlayerHpZero()
+    public void RecordCandidateHpReachedZero(Cardinal candidate)
     {
-        if (isEndingConclaveAfterPlayerHpZero)
+        int candidateSlot = GetCandidateNumber(candidate);
+        if (candidateSlot < 0 || candidateSlot > 3)
         {
             return;
         }
 
-        isEndingConclaveAfterPlayerHpZero = true;
+        firstHpZeroCandidateSlot = KeepFirstHpZeroCandidateSlot(
+            firstHpZeroCandidateSlot, candidateSlot);
+    }
+
+    public bool TryGetFirstHpZeroCandidateSlot(out int candidateSlot)
+    {
+        candidateSlot = firstHpZeroCandidateSlot;
+        return candidateSlot >= 0;
+    }
+
+    private static int KeepFirstHpZeroCandidateSlot(int currentSlot, int newSlot)
+    {
+        return currentSlot >= 0 ? currentSlot : newSlot;
+    }
+
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
+    private static void ValidateHpZeroCandidateRules()
+    {
+        Debug.Assert(
+            KeepFirstHpZeroCandidateSlot(NoCandidateSlot, 2) == 2 &&
+            KeepFirstHpZeroCandidateSlot(2, 0) == 2,
+            "체력 0 후보의 최초 발생 순서 규칙이 손상됐습니다.");
+    }
+
+    private void ShowPlayerHpZeroPopup()
+    {
+        if (isAwaitingHpZeroPopupConfirmation)
+        {
+            return;
+        }
+
+        isAwaitingHpZeroPopupConfirmation = true;
         StopTimer();
+        isConclaveExitInProgress = true;
         GameSceneCameraZoom.ReleaseAllGameCameraZoomAndFollow(1f);
 
         if (inventoryUIPanel != null)
@@ -1126,7 +1180,60 @@ public class InGameManager : MonoBehaviour
 
         if (CardinalManager.Instance != null)
         {
-            CardinalManager.Instance.StopConClave();
+            CardinalManager.Instance.SkipConclaveExitSequence();
+        }
+
+        GameObject popup = GetHpZeroPopup();
+        if (popup != null)
+        {
+            popup.SetActive(true);
+            return;
+        }
+
+        ConfirmPlayerHpZeroPopup();
+    }
+
+    private GameObject GetHpZeroPopup()
+    {
+        if (hpZeroPopup != null)
+        {
+            return hpZeroPopup;
+        }
+
+        foreach (GameObject candidate in Resources.FindObjectsOfTypeAll<GameObject>())
+        {
+            if (candidate.scene.IsValid() && candidate.name == "HPZeroPopUP")
+            {
+                hpZeroPopup = candidate;
+                return hpZeroPopup;
+            }
+        }
+
+        return null;
+    }
+
+    private void ConfirmPlayerHpZeroPopup()
+    {
+        if (!isAwaitingHpZeroPopupConfirmation || isEndingConclaveAfterPlayerHpZero)
+        {
+            return;
+        }
+
+        isAwaitingHpZeroPopupConfirmation = false;
+        isEndingConclaveAfterPlayerHpZero = true;
+        isConclaveExitInProgress = false;
+
+        GameObject popup = GetHpZeroPopup();
+        if (popup != null)
+        {
+            popup.SetActive(false);
+        }
+
+        ConfigureStartButton(true, true);
+
+        if (ElectionManager.Instance != null)
+        {
+            ElectionManager.Instance.OnConclaveEnded();
         }
     }
 

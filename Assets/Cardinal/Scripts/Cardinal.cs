@@ -95,6 +95,11 @@ public class Cardinal : MonoBehaviour
                     ActionRecordManager.Instance.RecordKnockOut(this);
                 }
 
+                if (InGameManager.Instance != null)
+                {
+                    InGameManager.Instance.RecordCandidateHpReachedZero(this);
+                }
+
                 if (CompareTag("Player") && InGameManager.Instance != null)
                 {
                     InGameManager.Instance.HandlePlayerHpReachedZero(this);
@@ -355,6 +360,11 @@ public class Cardinal : MonoBehaviour
         if (actualLoss > 0f && InGameManager.Instance != null)
         {
             InGameManager.Instance.RecordPendingHpLoss(this, actualLoss);
+        }
+
+        if (previousHp > 0f && hp <= 0f)
+        {
+            ResolveHpState();
         }
     }
 
