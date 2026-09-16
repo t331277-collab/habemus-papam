@@ -189,6 +189,14 @@ public class MainScene : MonoBehaviour
     public void OnClickStartGame()
     {
         SoundManager.Instance.PlaySFX("NewGame");
+
+        bool hasContinueData = SaveManager.Instance != null && SaveManager.Instance.HasSave();
+        if (!hasContinueData)
+        {
+            LoadIntroNewspaperScene();
+            return;
+        }
+
         SetStartGameWarningPopup(true);
     }
 

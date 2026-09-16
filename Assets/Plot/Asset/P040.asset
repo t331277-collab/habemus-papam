@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -13,22 +13,29 @@ MonoBehaviour:
   m_Name: P040
   m_EditorClassIdentifier: Assembly-CSharp::P040
   plotID: P040
-  plotName: "뇌물 주기"
-  plotDescription: "엄청난 뇌물해야"
-  plotEffect: "무작위 상대 후보 한 명 경건함<sprite name=piety>, 정치력<sprite name=influence> 7 증가"
+  plotName: "\uB1CC\uBB3C \uC8FC\uAE30"
+  plotDescription: "\uC5C4\uCCAD\uB09C \uB1CC\uBB3C\uD574\uC57C"
+  plotEffect: "\uBB34\uC791\uC704 \uC0C1\uB300 \uD6C4\uBCF4 \uD55C \uBA85 \uACBD\uAC74\uD568<sprite
+    name=piety>, \uC815\uCE58\uB825<sprite name=influence> 7 \uC99D\uAC00"
   plotCondiText: <sprite name=influence>9<sprite name=up>
   plotCostText: <sprite name=piety>  9
   plotImage: {fileID: 0}
+  icon1: {fileID: 0}
+  icon2: {fileID: 0}
+  icon3: {fileID: 0}
+  icon1S: {fileID: 0}
+  icon2S: {fileID: 0}
+  icon3S: {fileID: 0}
+  plotIconImageIndexes:
+    icon1: -1
+    icon2: -1
+    icon3: -1
+    icon1S: -1
+    icon2S: -1
+    icon3S: -1
   plotGrade: 0
   plotWeightBase: 20
   plotWeightMultiplier: 0
-  icons:
-    icon1: {fileID: 0}
-    icon2: {fileID: 0}
-    icon3: {fileID: 0}
-    icon1S: {fileID: 0}
-    icon2S: {fileID: 0}
-    icon3S: {fileID: 0}
   minInfluence: 9
   pietyCost: 9
   statsDelta: 7

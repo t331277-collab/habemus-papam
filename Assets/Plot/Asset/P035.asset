@@ -1,4 +1,4 @@
-﻿%YAML 1.1
+%YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
 MonoBehaviour:
@@ -13,21 +13,27 @@ MonoBehaviour:
   m_Name: P035
   m_EditorClassIdentifier: Assembly-CSharp::P035
   plotID: P035
-  plotName: "체력 전부 회복"
-  plotDescription: "설명은 필요 없다!"
-  plotEffect: "체력<sprite name=hp> 전부 회복"
+  plotName: "\uCCB4\uB825 \uC804\uBD80 \uD68C\uBCF5"
+  plotDescription: "\uC124\uBA85\uC740 \uD544\uC694 \uC5C6\uB2E4!"
+  plotEffect: "\uCCB4\uB825<sprite name=hp> \uC804\uBD80 \uD68C\uBCF5"
   plotCondiText: <sprite name=influence>9<sprite name=up>
   plotCostText: <sprite name=piety>  4
   plotImage: {fileID: 0}
+  icon1: {fileID: 0}
+  icon2: {fileID: 0}
+  icon3: {fileID: 0}
+  icon1S: {fileID: 0}
+  icon2S: {fileID: 0}
+  icon3S: {fileID: 0}
+  plotIconImageIndexes:
+    icon1: -1
+    icon2: -1
+    icon3: -1
+    icon1S: -1
+    icon2S: -1
+    icon3S: -1
   plotGrade: 1
   plotWeightBase: 10
   plotWeightMultiplier: 0.05
-  icons:
-    icon1: {fileID: 0}
-    icon2: {fileID: 0}
-    icon3: {fileID: 0}
-    icon1S: {fileID: 0}
-    icon2S: {fileID: 0}
-    icon3S: {fileID: 0}
   minInfluence: 9
   pietyCost: 4
