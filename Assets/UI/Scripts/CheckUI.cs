@@ -42,6 +42,7 @@ public class CheckUI : MonoBehaviour
     [SerializeField] private float jackpotDuration = 3f;
     [SerializeField] private GameObject judgementVideoObject;
     [SerializeField] private VideoPlayer vp;
+    [SerializeField] private float nonEndingVideoFadeDuration = 1f;
     [Header("Judgement Videos")]
     [Tooltip("당선 판정일 때 순서대로 재생할 영상입니다.")]
     [SerializeField] private VideoClip[] SuccessVideoQueue;
@@ -52,6 +53,9 @@ public class CheckUI : MonoBehaviour
     private int currentVideoIndex;
     private bool isPlayingJudgementVideos;
     private bool isWaitingForJudgementVideoClick;
+    private bool isFadingFinalNonEndingVideo;
+    private Coroutine judgementVideoFadeCoroutine;
+    private RawImage judgementVideoImage;
     private bool isRevealingResult;
     private Coroutine resultRevealCoroutine;
     private Vector3 probabilityBaseScale;
@@ -79,6 +83,8 @@ public class CheckUI : MonoBehaviour
         probabilityText.text = "";
         miscText.text = "";
         CacheProbabilityVisual();
+        CacheJudgementVideoImage();
+        ResetJudgementVideoFade();
         SetJudgementVideoObjectActive(false);
     }
     private void OnDisable()
@@ -88,6 +94,7 @@ public class CheckUI : MonoBehaviour
         jackpotCoroutine = null;
         resultRevealCoroutine = null;
         isRevealingResult = false;
+        ResetJudgementVideoFade();
         RestoreProbabilityVisual();
     }
     private void OnDestroy()
@@ -308,6 +315,7 @@ public class CheckUI : MonoBehaviour
 
         isPlayingJudgementVideos = true;
         isWaitingForJudgementVideoClick = false;
+        ResetJudgementVideoFade();
         SetJudgementVideoObjectActive(true);
         vp.loopPointReached -= OnJudgementVideoFinished;
         vp.prepareCompleted -= OnJudgementVideoPrepared;
@@ -320,6 +328,8 @@ public class CheckUI : MonoBehaviour
 
     private void PlayNextJudgementVideo()
     {
+        ResetJudgementVideoFade();
+
         while (currentVideoIndex < activeVideoQueue.Length && activeVideoQueue[currentVideoIndex] == null)
         {
             currentVideoIndex++;
@@ -346,11 +356,58 @@ public class CheckUI : MonoBehaviour
         source.time = 0;
         source.frame = 0;
         source.Play();
+
+        if (ShouldFadeAndAutoFinishCurrentVideo())
+        {
+            isFadingFinalNonEndingVideo = true;
+            judgementVideoFadeCoroutine = StartCoroutine(FadeOutFinalNonEndingVideo(source));
+        }
     }
 
     private void OnJudgementVideoFinished(VideoPlayer source)
     {
+        if (isFadingFinalNonEndingVideo || ShouldFadeAndAutoFinishCurrentVideo())
+        {
+            SetJudgementVideoAlpha(0f);
+            FinishJudgementVideos();
+            return;
+        }
+
         PlayNextJudgementVideo();
+    }
+
+    private IEnumerator FadeOutFinalNonEndingVideo(VideoPlayer source)
+    {
+        float fadeDuration = Mathf.Max(0.01f, nonEndingVideoFadeDuration);
+
+        while (isPlayingJudgementVideos && source != null && source.clip != null)
+        {
+            double length = source.length;
+            if (length > 0d && !double.IsInfinity(length) && !double.IsNaN(length))
+            {
+                double remaining = Mathf.Max(0f, (float)(length - source.time));
+                SetJudgementVideoAlpha(remaining >= fadeDuration
+                    ? 1f
+                    : (float)(remaining / fadeDuration));
+            }
+
+            yield return null;
+        }
+
+        judgementVideoFadeCoroutine = null;
+        isFadingFinalNonEndingVideo = false;
+    }
+
+    private bool ShouldFadeAndAutoFinishCurrentVideo()
+    {
+        if (ElectionManager.Instance == null || ElectionManager.Instance.IsElected) return false;
+
+        for (int i = currentVideoIndex; i < activeVideoQueue.Length; i++)
+        {
+            if (activeVideoQueue[i] != null) return false;
+        }
+
+        return true;
     }
 
     private void OnJudgementVideoError(VideoPlayer source, string message)
@@ -394,7 +451,38 @@ public class CheckUI : MonoBehaviour
         }
         ClearJudgementVideoTexture();
         SetJudgementVideoObjectActive(false);
+        ResetJudgementVideoFade();
         ElectionManager.Instance.GetNextScenes();
+    }
+
+    private void CacheJudgementVideoImage()
+    {
+        if (judgementVideoImage == null && judgementVideoObject != null)
+        {
+            judgementVideoImage = judgementVideoObject.GetComponent<RawImage>();
+        }
+    }
+
+    private void SetJudgementVideoAlpha(float alpha)
+    {
+        CacheJudgementVideoImage();
+        if (judgementVideoImage == null) return;
+
+        Color color = judgementVideoImage.color;
+        color.a = Mathf.Clamp01(alpha);
+        judgementVideoImage.color = color;
+    }
+
+    private void ResetJudgementVideoFade()
+    {
+        if (judgementVideoFadeCoroutine != null)
+        {
+            StopCoroutine(judgementVideoFadeCoroutine);
+            judgementVideoFadeCoroutine = null;
+        }
+
+        isFadingFinalNonEndingVideo = false;
+        SetJudgementVideoAlpha(1f);
     }
 
     private void SetJudgementVideoObjectActive(bool active)
