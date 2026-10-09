@@ -71,10 +71,7 @@ public class P021 : Plot
             if (target != null && target != performer) target.ChangeInfluence(influenceDelta);
         }
 
-        int pastConclaveCount = ActionRecordManager.Instance != null
-            ? ActionRecordManager.Instance.GetCurrentConclaveCount()
-            : 0;
-        int totalHpDamage = Mathf.Max(0, pastConclaveCount/4) * nextConclaveHpDamagePerConclave;
+        int totalHpDamage = gameManager.GetCurrentDay() * nextConclaveHpDamagePerConclave;
         gameManager.ScheduleNextConclaveHpDamage(plotID, performer, totalHpDamage);
     }
 }

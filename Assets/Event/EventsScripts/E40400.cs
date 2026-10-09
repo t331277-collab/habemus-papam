@@ -37,6 +37,7 @@ public class E40400 : Event
 
         foreach(var cardinal in CardinalManager.Instance.Cardinals)
         {
+            if (cardinal == null || !cardinal.CanReceiveHpEffects) continue;
             cardinal.ChangeHp(2f);
         }
         InGameManager.Instance.ChangeCurrentTurnActions(1,

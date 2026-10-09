@@ -172,6 +172,7 @@ public class StateController : MonoBehaviour
 
     void Update()
     {
+        if (cardinal != null && !cardinal.CompareTag("Player") && !cardinal.CanAct) return;
         switch (currentState)
         {
             case CardinalState.Idle:
@@ -205,6 +206,8 @@ public class StateController : MonoBehaviour
     // ---------------------------------------------------------
     public void ChangeState(CardinalState newState)
     {
+        if (cardinal != null && !cardinal.CompareTag("Player") && !cardinal.CanAct &&
+            newState != CardinalState.CutScene) return;
         if (currentState == newState) return;
         ExitState(currentState);
         currentState = newState;

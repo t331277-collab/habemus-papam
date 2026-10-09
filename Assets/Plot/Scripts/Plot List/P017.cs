@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "P017", menuName = "Plot/이 불경한 자가", order = 017)]
@@ -59,9 +59,8 @@ public class P017 : Plot
 
         PayCost(performer);
 
-        var cm = CardinalManager.Instance;
 
-        var target = cm.Cardinals.Take(3)
+        var target = GetEligibleHpTargets()
             .OrderByDescending(c => c.Hp)
             .ThenBy(c => Random.value)
             .LastOrDefault();

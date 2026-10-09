@@ -26,6 +26,9 @@ public class Cardinal : MonoBehaviour
     private List<Item> items;
     private NavMeshAgent agent;
     private bool isKnockedOut = false;
+    private bool hasBeenKnockedOut;
+    private bool isDead;
+    private int knockedOutDay = -1;
     private readonly HashSet<string> minHpOneEffectSources = new HashSet<string>();
     private GameContext subscribedGameContext;
     private bool isInitialized = false;
@@ -38,6 +41,10 @@ public class Cardinal : MonoBehaviour
     public float MaxHp => maxHp;
     public float MoveSpeed => baseMoveSpeed * speedMultiplier;
     public bool IsKnockedOut => isKnockedOut;
+    public bool HasBeenKnockedOut => hasBeenKnockedOut;
+    public bool IsDead => isDead;
+    public bool CanReceiveHpEffects => !isDead && (CompareTag("Player") || !isKnockedOut);
+    public bool CanAct => !isDead && !isKnockedOut && hp > 0f;
 
     void Awake()
     {
@@ -67,6 +74,7 @@ public class Cardinal : MonoBehaviour
 
     public void ResolveHpState()
     {
+        if (isDead) return;
         if (hp <= 0f && !isKnockedOut)
         {
             bool isRevived = false;
@@ -84,6 +92,14 @@ public class Cardinal : MonoBehaviour
             {
                 isKnockedOut = true;
                 hp = 0f;
+                if (!CompareTag("Player"))
+                {
+                    isDead = hasBeenKnockedOut;
+                    hasBeenKnockedOut = true;
+                    knockedOutDay = InGameManager.Instance != null ? InGameManager.Instance.GetCurrentDay() : 1;
+                    if (gameObject.activeInHierarchy) GetComponent<StateController>()?.StopForGameOver();
+                    gameObject.SetActive(false);
+                }
 
                 if (CompareTag("Player") && SoundManager.Instance != null)
                 {
@@ -111,10 +127,22 @@ public class Cardinal : MonoBehaviour
                 }
             }
         }
-        else if (hp > 0f)
+        else if (hp > 0f && CompareTag("Player"))
         {
             isKnockedOut = false;
         }
+    }
+
+    public void PrepareNpcForNewDay(int day)
+    {
+        if (CompareTag("Player") || isDead) return;
+        if (!isInitialized) InitCardinal();
+        if (!isKnockedOut || day <= knockedOutDay) return;
+
+        // Recovery is the only path that restores a knocked-out NPC's HP.
+        hp = 7f;
+        isKnockedOut = false;
+        knockedOutDay = -1;
     }
 
     void InitCardinal()
@@ -160,6 +188,9 @@ public class Cardinal : MonoBehaviour
         speedMultiplier = 1f;
         prayDeltaHpEvent = 0f;
         isKnockedOut = false;
+        hasBeenKnockedOut = false;
+        isDead = false;
+        knockedOutDay = -1;
         minHpOneEffectSources.Clear();
 
         if (agent != null)
@@ -212,6 +243,9 @@ public class Cardinal : MonoBehaviour
             prayDeltaHpEvent = prayDeltaHpEvent,
             minHpOneEffectSources = savedMinHpSources,
             isKnockedOut = isKnockedOut,
+            hasBeenKnockedOut = hasBeenKnockedOut,
+            isDead = isDead,
+            knockedOutDay = knockedOutDay,
             isSchemer = stateController != null && stateController.IsSchemer,
             isConClaving = stateController != null && stateController.ConClaving,
             state = (int)savedState,
@@ -258,6 +292,13 @@ public class Cardinal : MonoBehaviour
             }
         }
         isKnockedOut = saveData.isKnockedOut;
+        isDead = !CompareTag("Player") && saveData.isDead;
+        if (!CompareTag("Player") && (isDead || hp <= 0f)) isKnockedOut = true;
+        hasBeenKnockedOut = saveData.hasBeenKnockedOut || isKnockedOut || isDead;
+        knockedOutDay = isKnockedOut && saveData.knockedOutDay < 1
+            ? InGameManager.Instance != null ? InGameManager.Instance.GetCurrentDay() : 1
+            : saveData.knockedOutDay;
+        if (isKnockedOut && !CompareTag("Player")) hp = 0f;
         isInitialized = true;
 
         if (agent != null)
@@ -344,6 +385,7 @@ public class Cardinal : MonoBehaviour
 
     public void ChangeHp(float delta)
     {
+        if (!CanReceiveHpEffects) return;
         float previousHp = hp;
         float nextHp = hp + delta;
 
@@ -376,11 +418,13 @@ public class Cardinal : MonoBehaviour
 
     public void ChangeInfluence(float delta)
     {
+        if (isDead) return;
         influence = Mathf.Clamp(influence + delta, 0f, 10f);
     }
 
     public void ChangePiety(float delta)
     {
+        if (isDead) return;
         piety = Mathf.Clamp(piety + delta, 0f, 10f);
     }
 
@@ -501,6 +545,9 @@ public class Cardinal : MonoBehaviour
 
     public void Pray()
     {
+        // World-area prayer is cosmetic for NPCs; their stats are resolved by the turn logic.
+        if (!CompareTag("Player")) return;
+
         if (InGameManager.Instance == null || !InGameManager.Instance.CanPerformPlayerAction(this))
         {
             return;
@@ -517,6 +564,7 @@ public class Cardinal : MonoBehaviour
 
     public bool PerformNpcPrayer(float successChance)
     {
+        if (!CanAct) return false;
         return ResolvePrayer(Mathf.Clamp01(successChance), false);
     }
 
@@ -574,6 +622,15 @@ public class Cardinal : MonoBehaviour
 
     public void Speech()
     {
+        // Keep NPC world-area speech animations without applying a second gameplay result.
+        if (!CompareTag("Player"))
+        {
+            if (!CanAct) return;
+            if (InGameManager.Instance != null)
+                ResolveSpeech(InGameManager.Instance.GetSpeechSuccessChance(this), false, false);
+            return;
+        }
+
         if (InGameManager.Instance == null || !InGameManager.Instance.CanPerformPlayerAction(this))
         {
             return;
@@ -585,10 +642,11 @@ public class Cardinal : MonoBehaviour
 
     public bool PerformNpcSpeech(float successChance)
     {
+        if (!CanAct) return false;
         return ResolveSpeech(Mathf.Clamp01(successChance), false);
     }
 
-    private bool ResolveSpeech(float successChance, bool completePlayerAction)
+    private bool ResolveSpeech(float successChance, bool completePlayerAction, bool applyGameplayEffects = true)
     {
         if (InGameManager.Instance == null) return false;
 
@@ -605,6 +663,12 @@ public class Cardinal : MonoBehaviour
         if (anim == null)
         {
             anim = GetComponentInChildren<Animation_Controller>();
+        }
+
+        if (!applyGameplayEffects)
+        {
+            if (playSpeechAnimation && anim != null) anim.SetSpeechAnimation(success ? 2 : 3);
+            return success;
         }
 
         if (success)

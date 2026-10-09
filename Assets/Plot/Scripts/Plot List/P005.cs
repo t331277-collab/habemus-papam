@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "P005", menuName = "Plot/골탕 먹이기", order = 005)]
@@ -59,10 +59,11 @@ public class P005 : Plot
 
         PayCost(performer);
 
-        var cm = CardinalManager.Instance;
 
-        int targetIndex = Random.Range(0, 3);
+        var targets = GetEligibleHpTargets();
+        if (targets.Count == 0) return;
+        int targetIndex = Random.Range(0, targets.Count);
 
-        ApplyHpDelta(performer, cm.Cardinals[targetIndex], hpDelta);
+        ApplyHpDelta(performer, targets[targetIndex], hpDelta);
     }
 }

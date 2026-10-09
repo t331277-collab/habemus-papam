@@ -19,6 +19,7 @@ public class MainScene : MonoBehaviour
 
     private const string IntroNewspaperSceneName = "IntroNewspaperScene";
 
+    [SerializeField] private GameObject gameLogo;
     [SerializeField] private GameObject startGameWarningPopup;
     [SerializeField] private GameObject loadWarningPopup;
     [SerializeField] private GameObject loadPopup;
@@ -46,6 +47,7 @@ public class MainScene : MonoBehaviour
     [SerializeField] private Button popeListLeftArrowButton;
     [SerializeField] private Button popeListRightArrowButton;
     [SerializeField] private Button popeListBackButton;
+    [SerializeField] private Button popeListZoomOutButton;
     [SerializeField] private List<Selectable> popeListBlockedSelectables = new();
     [SerializeField] private Camera mainCamera;
     [SerializeField] private Camera subCamera;
@@ -362,6 +364,18 @@ public class MainScene : MonoBehaviour
         SetPopeListPopup(false);
     }
 
+    public void OnClickPopeListZoomOut()
+    {
+        if (!isViewingSubCamera)
+        {
+            return;
+        }
+
+        SoundManager.Instance.PlaySFX("ButtonLight");
+        popeListHistoryPresenter?.ExitBrowseMode();
+        TransitionToMainCamera();
+    }
+
     public void OnClickPopeListLeftArrow()
     {
         SoundManager.Instance.PlaySFX("ButtonLight");
@@ -422,6 +436,11 @@ public class MainScene : MonoBehaviour
 
     private void SetPopeListPopup(bool isActive)
     {
+        if (gameLogo != null)
+        {
+            gameLogo.SetActive(!isActive);
+        }
+
         if (isActive)
         {
             InitializePopeListRuntimeBindings();
@@ -470,7 +489,7 @@ public class MainScene : MonoBehaviour
         SetText(loadPlayerHpText, FormatStatValue(preview.playerHp));
         SetText(loadPlayerInfluenceText, FormatStatValue(preview.playerInfluence));
         SetText(loadPlayerPietyText, FormatStatValue(preview.playerPiety));
-        SetText(loadDayText, (((Mathf.Max(1, preview.day) - 1) * 4) + Mathf.Clamp(preview.conclave, 0, 3) + 1).ToString());
+        SetText(loadDayText, Mathf.Max(1, preview.day).ToString());
         SetText(loadConclaveText, preview.conclaveName);
     }
 
@@ -561,8 +580,7 @@ public class MainScene : MonoBehaviour
     {
         if (isViewingSubCamera && WasCancelPressed())
         {
-            popeListHistoryPresenter?.ExitBrowseMode();
-            TransitionToMainCamera();
+            OnClickPopeListZoomOut();
             return;
         }
 
@@ -1481,6 +1499,7 @@ public class MainScene : MonoBehaviour
         ResolvePopeListReferences();
         RegisterPopeListFrameButtonListeners();
         RegisterPopeListArrowButtonListeners();
+        RegisterPopeListZoomOutButtonListener();
         RegisterPopeListCreditNavigationButtonListeners();
         RefreshPopeListCreditSpriteSources();
         ResolvePopeListHistoryPresenter();
@@ -1709,6 +1728,37 @@ public class MainScene : MonoBehaviour
         }
 
         popeListArrowButtonListenersRegistered = true;
+    }
+
+    private void RegisterPopeListZoomOutButtonListener()
+    {
+        if (popeListZoomOutButton == null)
+        {
+            return;
+        }
+
+        popeListZoomOutButton.onClick.RemoveListener(OnClickPopeListZoomOut);
+        if (popeListZoomOutButton.onClick.GetPersistentEventCount() == 0)
+        {
+            popeListZoomOutButton.onClick.AddListener(OnClickPopeListZoomOut);
+        }
+
+        SetPopeListZoomOutButtonVisible(isViewingSubCamera);
+    }
+
+    private void SetPopeListZoomOutButtonVisible(bool isVisible)
+    {
+        if (popeListZoomOutButton == null)
+        {
+            return;
+        }
+
+        popeListZoomOutButton.gameObject.SetActive(isVisible);
+        popeListZoomOutButton.interactable = isVisible;
+        if (popeListZoomOutButton.targetGraphic != null)
+        {
+            popeListZoomOutButton.targetGraphic.raycastTarget = true;
+        }
     }
 
     private void RegisterPopeListCreditNavigationButtonListeners()
@@ -1949,6 +1999,7 @@ public class MainScene : MonoBehaviour
         results.Remove(popeListLeftArrowButton);
         results.Remove(popeListRightArrowButton);
         results.Remove(popeListBackButton);
+        results.Remove(popeListZoomOutButton);
         if (popeListFrameButtons != null)
         {
             foreach (Button frameButton in popeListFrameButtons)
@@ -2030,6 +2081,7 @@ public class MainScene : MonoBehaviour
     {
         InitializePopeListRuntimeBindings();
         isViewingSubCamera = useSubCamera;
+        SetPopeListZoomOutButtonVisible(useSubCamera);
         BeginPopeListZoomTransition(useSubCamera);
         BeginCameraTransition(useSubCamera);
     }
@@ -2082,7 +2134,7 @@ public class MainScene : MonoBehaviour
         }
 
         CameraState startState = CameraState.From(sourceCamera);
-        CameraState targetState = CameraState.From(targetCamera);
+        CameraState targetState = useSubCamera ? subCameraInitialState : mainCameraInitialState;
 
         sourceCamera.enabled = true;
         if (targetCamera != sourceCamera)
@@ -2115,7 +2167,7 @@ public class MainScene : MonoBehaviour
         Camera inactiveCamera = useSubCamera ? mainCamera : subCamera;
         if (inactiveCamera != null && inactiveCamera != targetCamera)
         {
-            startState.ApplyTo(inactiveCamera);
+            RestoreCameraInitialState(inactiveCamera);
             inactiveCamera.enabled = false;
             SetCameraAudio(inactiveCamera, false);
         }
@@ -2193,6 +2245,7 @@ public class MainScene : MonoBehaviour
         RestorePopeListPopupTransform();
         RestorePopeListEffectColors();
         isViewingSubCamera = false;
+        SetPopeListZoomOutButtonVisible(false);
     }
 
     private void CachePopeListInitialGraphicColors()

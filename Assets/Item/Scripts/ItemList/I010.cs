@@ -12,10 +12,10 @@ public class I010 : Item
         itemID = "I010";
         itemName = "교단 주보";
         itemDescription = "교단의 동향을 파악해 교주 자리를 한 발 빠르게 피한다.";
-        itemEffectDescription = "오늘 연설 시 <color=#4488FF>정치력</color> 변화량을 <color=#66CCFF>0</color>으로 고정하고, 대신 <color=#FFD84D>경건함</color>을 <color=#66CCFF>+1</color> 회복";
+        itemEffectDescription = "획득한 날짜 포함, 3일 동안 연설 시 <color=#4488FF>정치력</color> 변화량을 <color=#66CCFF>0</color>으로 고정하고, 대신 <color=#FFD84D>경건함</color>을 <color=#66CCFF>+1</color> 회복";
 
         itemGrade = ItemGrade.Common;
-        itemExpirationType = ItemExpirationType.Conclave; 
+        itemExpirationType = ItemExpirationType.Day;
         usageType = ItemUsageType.Passive;
 
         pietyBonus = 1f;

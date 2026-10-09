@@ -67,7 +67,7 @@ public class PopeListHistoryPresenter : MonoBehaviour
             }
         }
 
-        headline = $"제 {records.Count}대 교주 ({baseName}) {regnalNumber}세 서거";
+        headline = $"제 {latestRecord.generation}대 교주 ({baseName}) {regnalNumber}세 서거";
         return true;
     }
 
@@ -230,16 +230,11 @@ public class PopeListHistoryPresenter : MonoBehaviour
 
         if (history.Count > 0)
         {
-            PapalElectionRecordSaveData latestRecord = history[history.Count - 1];
-            string latestName = latestRecord != null ? latestRecord.popeName?.Trim() : string.Empty;
+            string latestName = baseNames[baseNames.Count - 1];
 
-            if (!string.IsNullOrEmpty(latestName) && latestRecord != null && latestRecord.generation > 0)
+            if (!string.IsNullOrEmpty(latestName))
             {
-                LatestPopeDisplayName = $"{latestName} {ToRomanNumeral(latestRecord.generation)}";
-            }
-            else
-            {
-                LatestPopeDisplayName = latestName;
+                LatestPopeDisplayName = $"{latestName} {ToRomanNumeral(occurrences[latestName])}";
             }
         }
     }

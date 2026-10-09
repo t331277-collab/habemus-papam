@@ -62,6 +62,7 @@ public class E31210 : Event
             var cardinals = CardinalManager.Instance.Cardinals;
             foreach(var c in cardinals)
             {
+                if (c == null || !c.CanReceiveHpEffects) continue;
                 c.ChangeHp(-2f);
             }
 
@@ -71,7 +72,7 @@ public class E31210 : Event
         {  // 실패했을 때 로직
             EliminateCandidate(2);
             Cardinal candidate3 = GetCandidate(3);
-            if(candidate3 != null)
+            if(candidate3 != null && candidate3.CanReceiveHpEffects)
             {
                 candidate3.ChangeHp(-4f);
                 candidate3.ChangeInfluence(5f);

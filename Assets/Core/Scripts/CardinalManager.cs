@@ -89,6 +89,12 @@ public class CardinalManager : MonoBehaviour
             conclaveWallCollider != null && conclaveWallCollider.OverlapPoint(position);
     }
 
+    public void PrepareNpcsForNewDay(int day)
+    {
+        foreach (Cardinal cardinal in cardinals)
+            if (cardinal != null) cardinal.PrepareNpcForNewDay(day);
+    }
+
     public List<Cardinal> GetAICardinlas()
     {
         var aiCardinals = cardinals.Where(c => !c.CompareTag("Player")).ToList();
@@ -178,7 +184,7 @@ public class CardinalManager : MonoBehaviour
 
         for (int i = 0; i < aiCardinals.Count; i += 2)
         {
-            if (i < aiCardinals.Count)
+            if (i < aiCardinals.Count && aiCardinals[i].CanAct)
             {
                 Cardinal aiLeft = aiCardinals[i];
                 ResetCardinalState(aiLeft, leftPath.spawnPoint.position);
@@ -190,7 +196,7 @@ public class CardinalManager : MonoBehaviour
                 }
             }
 
-            if (i + 1 < aiCardinals.Count)
+            if (i + 1 < aiCardinals.Count && aiCardinals[i + 1].CanAct)
             {
                 Cardinal aiRight = aiCardinals[i + 1];
                 ResetCardinalState(aiRight, rightPath.spawnPoint.position);
@@ -241,7 +247,7 @@ public class CardinalManager : MonoBehaviour
 
         foreach (var c in cardinals)
         {
-            if (c == null) continue;
+            if (c == null || (!c.CompareTag("Player") && !c.CanAct)) continue;
             StateController sc = c.GetComponent<StateController>();
             if (sc != null)
             {
@@ -286,6 +292,7 @@ public class CardinalManager : MonoBehaviour
     }
     private void ResetCardinalState(Cardinal c, Vector3 startPos)
     {
+        if (c == null || (!c.CompareTag("Player") && !c.CanAct)) return;
         c.gameObject.SetActive(true);
 
         StateController sc = c.GetComponent<StateController>();
@@ -631,6 +638,7 @@ public class CardinalManager : MonoBehaviour
     private void AssignRandomSchemers()
     {
         var candidates = cardinals.Where(c => c != null &&
+            c.CanAct &&
             c.gameObject.activeSelf &&
             !c.CompareTag("Player")).ToList();
         var selectedSchemers = candidates.OrderBy(x => Random.value).Take(2).ToList();
@@ -806,9 +814,10 @@ public class CardinalManager : MonoBehaviour
         cardinal.ApplySaveData(saveData);
         RestoreCardinalTransform(cardinal, saveData.position.ToVector3(), saveData.rotationZ);
 
-        cardinal.gameObject.SetActive(saveData.isActive);
+        bool canBeActive = saveData.isActive && (cardinal.CompareTag("Player") || cardinal.CanAct);
+        cardinal.gameObject.SetActive(canBeActive);
 
-        if (!saveData.isActive)
+        if (!canBeActive)
         {
             return;
         }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [CreateAssetMenu(fileName = "P010", menuName = "Plot/태양의 발", order = 010)]
 
@@ -60,17 +60,18 @@ public class P010 : Plot
 
         PayCost(performer);
 
-        var cm = CardinalManager.Instance;
 
+        var targets = GetEligibleHpTargets();
+        if (targets.Count == 0) return;
         int lowestPietyCardinal = 0;
 
-        for (int i = 1; i < 3; i++)
+        for (int i = 1; i < targets.Count; i++)
         {
-            if (cm.Cardinals[i].Piety < cm.Cardinals[lowestPietyCardinal].Piety)
+            if (targets[i].Piety < targets[lowestPietyCardinal].Piety)
             {
                 lowestPietyCardinal = i;
             }
-            else if (cm.Cardinals[i].Piety == cm.Cardinals[lowestPietyCardinal].Piety)
+            else if (targets[i].Piety == targets[lowestPietyCardinal].Piety)
             {
                 if (Random.value > 0.5f)
                 {
@@ -79,8 +80,8 @@ public class P010 : Plot
             }
         }
 
-        ApplyHpDelta(performer, cm.Cardinals[lowestPietyCardinal], hpDelta);
-        cm.Cardinals[lowestPietyCardinal].ChangePiety(pietyDelta);
+        ApplyHpDelta(performer, targets[lowestPietyCardinal], hpDelta);
+        targets[lowestPietyCardinal].ChangePiety(pietyDelta);
     }
 
 }

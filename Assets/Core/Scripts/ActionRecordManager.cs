@@ -276,8 +276,8 @@ public class ActionRecordManager : MonoBehaviour
 
     public int GetCurrentConclaveCount() => currentRunStats.conclaveCount;
     public int GetPersistentConclaveCount() => persistentStats.conclaveCount;
-    public float GetCurrentConclaveDays() => currentRunStats.conclaveCount / 4f;
-    public float GetPersistentConclaveDays() => persistentStats.conclaveCount / 4f;
+    public float GetCurrentConclaveDays() => currentRunStats.conclaveCount;
+    public float GetPersistentConclaveDays() => persistentStats.conclaveCount;
 
     private void TrackPlayerStatThresholdTimes()
     {

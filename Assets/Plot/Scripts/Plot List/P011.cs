@@ -79,6 +79,7 @@ public class P011 : Plot
 
         for (int i = 0; i < 3; i++)
         {
+            if (!cm.Cardinals[i].CanReceiveHpEffects) continue;
             if (Random.value < 0.5f)
             {
                 ApplyHpDelta(performer, cm.Cardinals[i], hpDecrease);

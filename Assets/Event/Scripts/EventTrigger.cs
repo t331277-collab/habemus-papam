@@ -12,6 +12,7 @@ public enum EventTier
 
 public readonly struct EventTriggerContext
 {
+    // Uses the same one-based day number as the in-game Day display.
     public int Day { get; }
     public GameContext.Conclave Conclave { get; }
     public int Turn { get; }
@@ -40,37 +41,38 @@ public sealed class EventTrigger
     public bool MatchesPosition(EventTriggerContext context)
     {
         int day = context.Day;
-        int turn = context.Turn;
         int action = context.ActionPosition;
 
+        // Preserve the original event positions after making each conclave one day:
+        // displayed day = (former day - 1) * 4 + former turn.
         switch (EventId)
         {
-            case "E11100": return IsPosition(day, turn, action, 1, 1, 1);
-            case "E11300": return IsPosition(day, turn, action, 1, 1, 2);
-            case "E12300": return IsPosition(day, turn, action, 1, 2, 1);
-            case "E12100": return IsPosition(day, turn, action, 1, 2, 2);
-            case "E12200": return IsPosition(day, turn, action, 1, 2, 3);
+            case "E11100": return IsPosition(day, action, 1, 1);
+            case "E11300": return IsPosition(day, action, 1, 2);
+            case "E12300": return IsPosition(day, action, 2, 1);
+            case "E12100": return IsPosition(day, action, 2, 2);
+            case "E12200": return IsPosition(day, action, 2, 3);
 
             case "E20000":
-                return day == 1 && MatchesAny(turn, action, 3, 2, 3, 4, 4, 2, 4, 4);
+                return day >= 3 && day <= 4 && (action == 2 || action == 4);
             case "E21000":
-                return day == 2 && MatchesAny(turn, action, 2, 2, 2, 4, 3, 2, 3, 4);
-            case "E21100": return IsPosition(day, turn, action, 3, 1, 1);
-            case "E21101": return day == 3;
+                return day >= 6 && day <= 7 && (action == 2 || action == 4);
+            case "E21100": return IsPosition(day, action, 9, 1);
+            case "E21101": return day >= 9 && day <= 12;
 
             case "E30000":
-                return day == 2 && MatchesAny(turn, action, 2, 1, 2, 3, 3, 1, 3, 3);
-            case "E31000": return day >= 2 && day <= 3;
+                return day >= 6 && day <= 7 && (action == 1 || action == 3);
+            case "E31000": return day >= 5 && day <= 12;
             case "E31100":
             case "E31200": return true;
-            case "E31101": return IsPosition(day, turn, action, 4, 1, 1);
-            case "E31210": return IsPosition(day, turn, action, 4, 2, 2);
+            case "E31101": return IsPosition(day, action, 13, 1);
+            case "E31210": return IsPosition(day, action, 14, 2);
 
             case "E31212":
-                return day == 1 && turn == 4 && action >= 1 && action <= 4;
-            case "E31213": return IsPosition(day, turn, action, 2, 2, 2);
+                return day == 4 && action >= 1 && action <= 4;
+            case "E31213": return IsPosition(day, action, 6, 2);
             case "E32000":
-                return day == 2 && turn == 3 && action >= 1 && action <= 3;
+                return day == 7 && action >= 1 && action <= 3;
 
             case "E11200":
             case "E31211":
@@ -133,10 +135,22 @@ public sealed class EventTrigger
     [System.Diagnostics.Conditional("UNITY_EDITOR")]
     public static void ValidateRules()
     {
-        EventTriggerContext scheduled = new EventTriggerContext(1, GameContext.Conclave.Dawn, 3, 2);
+        EventTriggerContext scheduled = new EventTriggerContext(3, GameContext.Conclave.Afternoon, 3, 2);
         Debug.Assert(new EventTrigger("E20000").MatchesPosition(scheduled), "E20000 위치 규칙이 손상됐습니다.");
         Debug.Assert(!new EventTrigger("E20000").MatchesPosition(
-            new EventTriggerContext(1, GameContext.Conclave.Dawn, 3, 3)), "E20000이 지정되지 않은 위치와 일치합니다.");
+            new EventTriggerContext(3, GameContext.Conclave.Afternoon, 3, 3)), "E20000이 지정되지 않은 위치와 일치합니다.");
+        Debug.Assert(new EventTrigger("E12100").MatchesPosition(
+            new EventTriggerContext(2, GameContext.Conclave.Morning, 2, 2)),
+            "첫 번째 Morning 이벤트는 Day 2에 발생해야 합니다.");
+        Debug.Assert(new EventTrigger("E31213").MatchesPosition(
+            new EventTriggerContext(6, GameContext.Conclave.Morning, 2, 2)),
+            "두 번째 Morning 이벤트는 Day 6에 발생해야 합니다.");
+        EventTrigger delayedStory = new EventTrigger("E21101");
+        Debug.Assert(!delayedStory.MatchesPosition(new EventTriggerContext(8, GameContext.Conclave.Evening, 4, 1)) &&
+            delayedStory.MatchesPosition(new EventTriggerContext(9, GameContext.Conclave.Dawn, 1, 1)) &&
+            delayedStory.MatchesPosition(new EventTriggerContext(12, GameContext.Conclave.Evening, 4, 4)) &&
+            !delayedStory.MatchesPosition(new EventTriggerContext(13, GameContext.Conclave.Dawn, 1, 1)),
+            "기존 3일차 이벤트 범위는 Day 9~12여야 합니다.");
         Debug.Assert(Mathf.Approximately(new EventTrigger("E31000").GetChance(), 0.7f),
             "E31000 확률 규칙이 손상됐습니다.");
         Debug.Assert(IsSubEventId("E40000") && IsSubEventId("E50600") && !IsSubEventId("E32000"),
@@ -163,20 +177,9 @@ public sealed class EventTrigger
         }
     }
 
-    private static bool IsPosition(int day, int turn, int action, int expectedDay, int expectedTurn,
-        int expectedAction)
+    private static bool IsPosition(int day, int action, int expectedDay, int expectedAction)
     {
-        return day == expectedDay && turn == expectedTurn && action == expectedAction;
-    }
-
-    private static bool MatchesAny(int turn, int action, params int[] turnActionPairs)
-    {
-        for (int index = 0; index + 1 < turnActionPairs.Length; index += 2)
-        {
-            if (turn == turnActionPairs[index] && action == turnActionPairs[index + 1]) return true;
-        }
-
-        return false;
+        return day == expectedDay && action == expectedAction;
     }
 }
 }

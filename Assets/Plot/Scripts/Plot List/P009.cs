@@ -1,4 +1,4 @@
-﻿
+
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "P009", menuName = "Plot/태양의 눈", order = 009)]
@@ -58,17 +58,18 @@ public class P009 : Plot
 
         PayCost(performer);
 
-        var cm = CardinalManager.Instance;
 
+        var targets = GetEligibleHpTargets();
+        if (targets.Count == 0) return;
         int lowestPietyCardinal = 0;
 
-        for (int i = 1; i < 3; i++)
+        for (int i = 1; i < targets.Count; i++)
         {
-            if (cm.Cardinals[i].Piety < cm.Cardinals[lowestPietyCardinal].Piety)
+            if (targets[i].Piety < targets[lowestPietyCardinal].Piety)
             {
                 lowestPietyCardinal = i;
             }
-            else if (cm.Cardinals[i].Piety == cm.Cardinals[lowestPietyCardinal].Piety)
+            else if (targets[i].Piety == targets[lowestPietyCardinal].Piety)
             {
                 if (Random.value > 0.5f)
                 {
@@ -77,7 +78,7 @@ public class P009 : Plot
             }
         }
 
-        ApplyHpDelta(performer, cm.Cardinals[lowestPietyCardinal], hpDelta);
+        ApplyHpDelta(performer, targets[lowestPietyCardinal], hpDelta);
     }
 
 }

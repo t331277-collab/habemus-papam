@@ -22,17 +22,19 @@ public class GameContext
 
     public enum Conclave
     {
-        Dawn,
-        Morning,
-        Evening,
-        Afternoon
+        // Serialized values are the chronological slots within the four-conclave cycle.
+        Dawn = 0,
+        Morning = 1,
+        Afternoon = 2,
+        Evening = 3
     }
 
     public enum GameContextEvent
     {
         ConclaveStart,
         ConclaveEnd,
-        TurnStart
+        TurnStart,
+        ActionPositionStart
     }
 
     int currentDay;
@@ -49,6 +51,7 @@ public class GameContext
 
     public event Action<GameContextEvent> OnGameContextEvent;
 
+    // One conclave is one displayed game day; time-of-day still cycles independently.
     public int CurrentDay => currentDay;
     public Conclave CurrentConclave => currentConclave;
     public int CurrentTurn => currentTurn;
@@ -80,6 +83,7 @@ public class GameContext
     public int PerformedActionsInPosition => performedActionsInPosition;
     public int CompletedUnavailableActions => completedUnavailableActions;
     public int CurrentActionPosition => Mathf.Clamp(currentActionPositionIndex + 1, 1, BaseActionPositions);
+    public Conclave CurrentTimeOfDay => (Conclave)(CurrentActionPosition - 1);
     public int CurrentPositionActionCount => GetActionCountForPosition(
         currentActionPositionIndex < BaseActionPositions ? currentActionPositionIndex : BaseActionPositions - 1);
     public int CurrentActionNumber => AreActionsComplete()
@@ -105,7 +109,7 @@ public class GameContext
 
     public void InitGameContext(int day=1, Conclave conclave=Conclave.Dawn)
     {
-        currentDay = day;
+        currentDay = Mathf.Max(1, day);
         currentConclave = conclave;
         currentEvent = ScriptableObject.CreateInstance<E11100>();
         ResetTurns();
@@ -117,7 +121,7 @@ public class GameContext
         int restoredActionsInPosition = 0, List<int> restoredUnavailableActionCounts = null,
         int restoredPerformedActionsInPosition = 0, int restoredCompletedUnavailableActions = 0)
     {
-        currentDay = day;
+        currentDay = Mathf.Max(1, day);
         currentConclave = conclave;
         currentTurn = (int)currentConclave + 1;
         completedUnavailableActions = 0;
@@ -160,10 +164,10 @@ public class GameContext
 
     public void AdvanceConclave()
     {
-        if (currentConclave == Conclave.Afternoon)
+        currentDay++;
+        if (currentConclave == Conclave.Evening)
         {
             currentConclave = Conclave.Dawn;
-            currentDay++;
         }
         else
         {
@@ -227,6 +231,8 @@ public class GameContext
         currentActionPositionIndex++;
         completedActionsInPosition = 0;
         performedActionsInPosition = 0;
+        if (currentActionPositionIndex < BaseActionPositions)
+            OnGameContextEvent?.Invoke(GameContextEvent.ActionPositionStart);
         return true;
     }
 
@@ -410,24 +416,24 @@ public class GameContext
         clock.currentConclave = Conclave.Dawn;
         clock.ResetTurns();
         clock.AdvanceConclave();
-        Debug.Assert(clock.CurrentConclave == Conclave.Morning && clock.CurrentTurn == 2 && clock.CurrentDay == 1,
+        Debug.Assert(clock.CurrentConclave == Conclave.Morning && clock.CurrentTurn == 2 && clock.CurrentDay == 2,
             "Morning과 X=2 동기화가 손상됐습니다.");
         clock.AdvanceConclave();
-        Debug.Assert(clock.CurrentConclave == Conclave.Evening && clock.CurrentTurn == 3,
-            "Evening과 X=3 동기화가 손상됐습니다.");
+        Debug.Assert(clock.CurrentConclave == Conclave.Afternoon && clock.CurrentTurn == 3 && clock.CurrentDay == 3,
+            "Afternoon과 X=3 동기화가 손상됐습니다.");
         clock.AdvanceConclave();
-        Debug.Assert(clock.CurrentConclave == Conclave.Afternoon && clock.CurrentTurn == 4,
-            "Afternoon과 X=4 동기화가 손상됐습니다.");
+        Debug.Assert(clock.CurrentConclave == Conclave.Evening && clock.CurrentTurn == 4 && clock.CurrentDay == 4,
+            "Evening과 X=4 동기화가 손상됐습니다.");
         clock.AdvanceConclave();
-        Debug.Assert(clock.CurrentConclave == Conclave.Dawn && clock.CurrentTurn == 1 && clock.CurrentDay == 2,
-            "Afternoon 종료 후 다음 Day 전환 규칙이 손상됐습니다.");
+        Debug.Assert(clock.CurrentConclave == Conclave.Dawn && clock.CurrentTurn == 1 && clock.CurrentDay == 5,
+            "Evening 종료 후 다음 Day 전환 규칙이 손상됐습니다.");
 
         GameContext restored = new GameContext();
         restored.RestoreState(2, Conclave.Morning, 1, 4, false, 1);
         Debug.Assert(restored.CurrentTurn == 2 && restored.CompletedActions == 2 &&
             restored.ActionsThisTurn == 8 && restored.CurrentActionPosition == 2,
             "위치 진행 버전 1 저장 변환이 손상됐습니다.");
-        restored.RestoreState(2, Conclave.Evening, 3, 8, false, 3,
+        restored.RestoreState(3, Conclave.Afternoon, 3, 8, false, 3,
             new List<int> { 3, 1, 2, 2 }, 1, 0);
         Debug.Assert(restored.CompletedActions == 3 && restored.CurrentActionPosition == 2 &&
             restored.CurrentPositionActionCount == 1,
@@ -542,6 +548,8 @@ public class InGameManager : MonoBehaviour
     private int lastEventCheckedActionPosition = -1;
     private bool endConclaveAfterEvent;
     private bool isResolvingPlayerActionNotice;
+    private bool awaitingTurnPresentation;
+    private TimeUI pendingTurnPresentation;
     private bool isCompletingSpeechAction;
     private readonly PlayerActionEffectQueue playerActionEffects = new PlayerActionEffectQueue();
     private readonly NPCBehaviour[,] npcTurnBehaviours = new NPCBehaviour[3, 4];
@@ -641,10 +649,39 @@ public class InGameManager : MonoBehaviour
 
     void Update()
     {
+        UpdateTurnPresentationWait();
+    }
+
+    private void UpdateTurnPresentationWait()
+    {
+        if (!awaitingTurnPresentation) return;
+        if (isTimeRunning && pendingTurnPresentation != null &&
+            pendingTurnPresentation.IsTurnPresentationRunning) return;
+
+        awaitingTurnPresentation = false;
+        pendingTurnPresentation = null;
+        if (isTimeRunning) BeginCurrentActionPosition();
+    }
+
+    private bool TryWaitForTurnPresentation()
+    {
+        TimeUI timeUI = UIManager.Instance != null && UIManager.Instance.Ingame != null
+            ? UIManager.Instance.Ingame.Time
+            : null;
+        if (timeUI == null) return false;
+
+        timeUI.EnsureTurnPresentation(gameContext);
+        if (!timeUI.IsTurnPresentationRunning) return false;
+
+        pendingTurnPresentation = timeUI;
+        awaitingTurnPresentation = true;
+        return true;
     }
 
     public void StartTimer()
     {
+        awaitingTurnPresentation = false;
+        pendingTurnPresentation = null;
         isEndingConclaveAfterPlayerHpZero = false;
         isTimeRunning = true;
         awaitingTurnEvent = false;
@@ -666,6 +703,8 @@ public class InGameManager : MonoBehaviour
     public void StopTimer()
     {
         isTimeRunning = false;
+        awaitingTurnPresentation = false;
+        pendingTurnPresentation = null;
     }
 
     public void OnExitSequenceFinished()
@@ -685,6 +724,8 @@ public class InGameManager : MonoBehaviour
 
     void InitGame()
     {
+        awaitingTurnPresentation = false;
+        pendingTurnPresentation = null;
         isTimeRunning = false;
         isFirstStart = true;
         isSushiOn = false;
@@ -734,6 +775,7 @@ public class InGameManager : MonoBehaviour
 
                 if (CardinalManager.Instance != null)
                 {
+                    CardinalManager.Instance.PrepareNpcsForNewDay(gameContext.CurrentDay);
                     CardinalManager.Instance.StartConClave();
                 }
                 ProcessPendingEffects();
@@ -1038,6 +1080,8 @@ public class InGameManager : MonoBehaviour
             saveData.performedActionsInPosition, saveData.completedUnavailableActions);
         gameContext.ChangeCurrentTurnActions(saveData.nextTurnActionModifier);
         isTimeRunning = saveData.isTimeRunning;
+        awaitingTurnPresentation = false;
+        pendingTurnPresentation = null;
         isFirstStart = saveData.isFirstStart;
         isSushiOn = saveData.isSushiOn;
         blockNextTurn = saveData.blockNextTurn;
@@ -1324,8 +1368,9 @@ public class InGameManager : MonoBehaviour
 
     public bool CanPerformPlayerAction(Cardinal performer)
     {
+        if (performer != null && !performer.CompareTag("Player") && !performer.CanAct) return false;
         return performer == null || !performer.CompareTag("Player") ||
-            (isTimeRunning && !awaitingTurnEvent && !isResolvingPlayerActionNotice && !isCompletingSpeechAction &&
+            (isTimeRunning && !awaitingTurnPresentation && !awaitingTurnEvent && !isResolvingPlayerActionNotice && !isCompletingSpeechAction &&
              PlayerActionNoticePopupController.Instance?.IsOpen != true && gameContext.CanPlayerAct());
     }
 
@@ -1406,7 +1451,7 @@ public class InGameManager : MonoBehaviour
             npcTurnActionsExecuted[candidateIndex, actionIndex] = true;
 
             Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-            if (candidate == null || candidate.Hp <= 0f || candidate.IsKnockedOut) continue;
+            if (candidate == null || !candidate.CanAct) continue;
             ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, actionIndex], actionIndex);
         }
 
@@ -1420,7 +1465,7 @@ public class InGameManager : MonoBehaviour
                 npcTurnActionsExecuted[candidateIndex, 1] = true;
 
                 Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-                if (candidate == null || candidate.Hp <= 0f || candidate.IsKnockedOut) continue;
+                if (candidate == null || !candidate.CanAct) continue;
                 ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, 1], 1);
             }
         }
@@ -1434,7 +1479,7 @@ public class InGameManager : MonoBehaviour
         {
             int candidateIndex = candidateNumber - 1;
             Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-            if (candidate == null || candidate.Hp <= 0f || candidate.IsKnockedOut) continue;
+            if (candidate == null || !candidate.CanAct) continue;
 
             NPCBehaviour behaviour;
             if (baseActionIndex < 2 && !npcTurnActionsExecuted[candidateIndex, baseActionIndex])
@@ -1546,7 +1591,7 @@ public class InGameManager : MonoBehaviour
 
                 npcTurnActionsExecuted[candidateIndex, actionIndex] = true;
                 Cardinal candidate = GetRepresentativeCandidate(candidateIndex + 1);
-                if (candidate == null || candidate.Hp <= 0f || candidate.IsKnockedOut) continue;
+                if (candidate == null || !candidate.CanAct) continue;
                 ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, actionIndex], actionIndex);
             }
         }
@@ -1593,9 +1638,9 @@ public class InGameManager : MonoBehaviour
             $"체력 {hpBefore:0.##} -> {candidate.Hp:0.##} ({candidate.Hp - hpBefore:+0.##;-0.##;0}), " +
             $"경건함 {pietyBefore:0.##} -> {candidate.Piety:0.##} ({candidate.Piety - pietyBefore:+0.##;-0.##;0}), " +
             $"정치력 {influenceBefore:0.##} -> {candidate.Influence:0.##} ({candidate.Influence - influenceBefore:+0.##;-0.##;0})");
-        NpcActionOutcomeState outcomeState = !wasKnockedOut && candidate.IsKnockedOut
-            ? NpcActionOutcomeState.KnockedOut
-            : NpcActionOutcomeState.None;
+        NpcActionOutcomeState outcomeState = candidate.IsDead ? NpcActionOutcomeState.Dead :
+            !wasKnockedOut && candidate.IsKnockedOut ? NpcActionOutcomeState.KnockedOut :
+            NpcActionOutcomeState.None;
         StatsUI statsUI = CardinalManager.Instance != null ? CardinalManager.Instance.StatsUI : null;
         string candidateName = statsUI != null ? statsUI.GetDisplayName(candidateNumber) : candidate.name;
         return new NpcActionResult(candidateName, behaviour, succeeded, outcomeState);
@@ -1650,11 +1695,10 @@ public class InGameManager : MonoBehaviour
 
     private void GetNextConclaveSchedule(out int triggerDay, out GameContext.Conclave triggerConclave)
     {
-        triggerDay = gameContext.CurrentDay;
+        triggerDay = gameContext.CurrentDay + 1;
         triggerConclave = gameContext.CurrentConclave;
-        if (triggerConclave == GameContext.Conclave.Afternoon)
+        if (triggerConclave == GameContext.Conclave.Evening)
         {
-            triggerDay++;
             triggerConclave = GameContext.Conclave.Dawn;
         }
         else
@@ -1710,14 +1754,13 @@ public class InGameManager : MonoBehaviour
                 continue;
             }
 
-            bool isDue = gameContext.CurrentDay > effect.triggerDay ||
-                gameContext.CurrentDay == effect.triggerDay && (int)gameContext.CurrentConclave >= effect.triggerConclave;
+            bool isDue = gameContext.CurrentDay >= effect.triggerDay;
             if (!isDue) continue;
 
             Cardinal owner = GetCandidateByNumber(effect.ownerCandidateNumber);
             foreach (Cardinal target in GetRepresentativeCandidates())
             {
-                if (target == null || target == owner) continue;
+                if (target == null || target == owner || !target.CanReceiveHpEffects) continue;
                 switch ((PendingEffectType)effect.effectType)
                 {
                     case PendingEffectType.P021NextConclaveHpDamage:
@@ -1886,7 +1929,7 @@ public class InGameManager : MonoBehaviour
     private bool CanCompletePlayerAction(Cardinal performer)
     {
         return performer != null && performer.CompareTag("Player") && isTimeRunning &&
-            !awaitingTurnEvent && !gameContext.IsEventPhase;
+            !awaitingTurnPresentation && !awaitingTurnEvent && !gameContext.IsEventPhase;
     }
 
     private void CompletePlayerActionNow(Cardinal performer, NPCBehaviour completedAction)
@@ -1916,7 +1959,7 @@ public class InGameManager : MonoBehaviour
         if (playerState == null || !playerState.CompareTag("Player") ||
             !playerState.CanAcceptManualInteraction()) return false;
 
-        if (!isTimeRunning || awaitingTurnEvent || isResolvingPlayerActionNotice || isCompletingSpeechAction ||
+        if (!isTimeRunning || awaitingTurnPresentation || awaitingTurnEvent || isResolvingPlayerActionNotice || isCompletingSpeechAction ||
             PlayerActionNoticePopupController.Instance?.IsOpen == true || !gameContext.CanPlayerAct())
             return false;
 
@@ -2174,11 +2217,16 @@ public class InGameManager : MonoBehaviour
 
     private void BeginCurrentActionPosition()
     {
-        if (!isTimeRunning || isConclaveExitInProgress || awaitingTurnEvent ||
+        if (!isTimeRunning || isConclaveExitInProgress || awaitingTurnPresentation || awaitingTurnEvent ||
             isResolvingPlayerActionNotice) return;
 
         while (!gameContext.AreActionsComplete())
         {
+            // Finish the indicator and both color transitions before choosing this turn's event.
+            if (!gameContext.IsCurrentActionPositionResolved && gameContext.IsAtActionPositionStart &&
+                lastEventCheckedActionPosition != gameContext.CurrentActionPositionIndex &&
+                TryWaitForTurnPresentation()) return;
+
             if (TryShowPendingUnavailableNotice()) return;
 
             if (gameContext.IsCurrentActionPositionResolved)

@@ -5,7 +5,8 @@ using UnityEngine;
 [Serializable]
 public class SaveModel
 {
-    public int version = 5;
+    public const int CurrentVersion = 6;
+    public int version = CurrentVersion;
     public string savedAtUtc;
     public string sceneName = "GameScene";
     public SaveCheckpointType checkpointType;
@@ -19,6 +20,54 @@ public class SaveModel
     public GameNameSaveData names = new GameNameSaveData();
     public ActionStatsSaveData actionStats = new ActionStatsSaveData();
     public SushiSaveData sushi = new SushiSaveData();
+}
+
+public static class SaveDateMigration
+{
+    // Version 5 stored four conclaves per day. Version 6 stores the displayed Day directly.
+    public static bool TryUpgrade(SaveModel saveModel)
+    {
+        if (saveModel == null) return false;
+        if (saveModel.version == SaveModel.CurrentVersion) return true;
+        if (saveModel.version != 5 || saveModel.gameContext == null) return false;
+
+        GameContextSaveData context = saveModel.gameContext;
+        context.day = ConvertLegacyDay(context.day, context.conclave);
+
+        if (context.pendingEffects != null)
+        {
+            foreach (PendingEffectSaveData effect in context.pendingEffects)
+            {
+                if (effect == null) continue;
+                effect.createdDay = ConvertLegacyDay(effect.createdDay, effect.createdConclave);
+                effect.triggerDay = ConvertLegacyDay(effect.triggerDay, effect.triggerConclave);
+            }
+        }
+
+        if (context.playerActionEffects != null)
+        {
+            foreach (PlayerActionEffectData effect in context.playerActionEffects)
+            {
+                if (effect == null) continue;
+                // These effects did not save a creation time-of-day. Keep current-day effects
+                // valid for the loaded conclave; they expire when the next displayed day starts.
+                effect.createdDay = ConvertLegacyDay(effect.createdDay, context.conclave);
+            }
+        }
+
+        if (saveModel.plots != null && saveModel.plots.activeDay > 0)
+            saveModel.plots.activeDay = ConvertLegacyDay(saveModel.plots.activeDay, context.conclave);
+
+        saveModel.version = SaveModel.CurrentVersion;
+        return true;
+    }
+
+    private static int ConvertLegacyDay(int day, int conclave)
+    {
+        // The stored 0..3 values are cycle positions, including in saves made before
+        // the Afternoon/Evening names were corrected. Keep the original progress slot.
+        return (Mathf.Max(1, day) - 1) * 4 + Mathf.Clamp(conclave, 0, 3) + 1;
+    }
 }
 
 public enum SaveCheckpointType
@@ -82,7 +131,8 @@ public class ActionStatsSaveData
     public int happyEndingCount;
     public int papalElectionCount;
     public int papalElectionFailedCount;
-    public int currentPopeGeneration;
+    // The first elected pope succeeds the initial pope and becomes generation 2.
+    public int currentPopeGeneration = 1;
     public int papalElectionHistoryVersion;
     public List<PapalElectionRecordSaveData> papalElectionHistory = new List<PapalElectionRecordSaveData>();
     public int conclaveCount;
@@ -316,6 +366,9 @@ public class CardinalSaveData
     public float prayDeltaHpEvent;
     public List<string> minHpOneEffectSources = new List<string>();
     public bool isKnockedOut;
+    public bool hasBeenKnockedOut;
+    public bool isDead;
+    public int knockedOutDay = -1;
     public bool isSchemer;
     public bool isConClaving;
     public int state;

@@ -120,7 +120,7 @@ public abstract class Event : ScriptableObject
     protected void EliminateCandidate(int candidateNumber)
     {
         Cardinal candidate = GetCandidate(candidateNumber);
-        if (candidate != null)
+        if (candidate != null && candidate.CanReceiveHpEffects)
         {
             candidate.ChangeHp(-candidate.Hp);
         }
@@ -129,7 +129,7 @@ public abstract class Event : ScriptableObject
     protected void SetCandidateStats(int candidateNumber, float hp, float influence, float piety)
     {
         Cardinal candidate = GetCandidate(candidateNumber);
-        if (candidate == null)
+        if (candidate == null || !candidate.CanReceiveHpEffects)
         {
             return;
         }

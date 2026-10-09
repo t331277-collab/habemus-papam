@@ -49,7 +49,7 @@ public class E32000 : Event
             EndCurrentConclave();
 
             var aiCardinals = CardinalManager.Instance.GetAICardinlas();
-            if(aiCardinals.Count > 1)
+            if(aiCardinals.Count > 1 && aiCardinals[1].CanReceiveHpEffects)
             {
                 aiCardinals[1].ChangePiety(8f);
                 aiCardinals[1].ChangeHp(-10f);
@@ -115,7 +115,7 @@ public class E32000 : Event
 
         for(int i = 0; i < 3 && i < aiCardinals.Count; i++)
         {
-            targets.Add(aiCardinals[i]);
+            if (aiCardinals[i].CanReceiveHpEffects) targets.Add(aiCardinals[i]);
         }
 
         return targets;

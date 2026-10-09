@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using System.Collections.Generic;
+
 public enum PlotGrade { Common, Rare, Legendary }
 public enum PlotCostResource { Piety, Hp }
 
@@ -130,7 +132,7 @@ public abstract class Plot : ScriptableObject
 
     protected void ApplyHpDelta(Cardinal performer, Cardinal target, float delta)
     {
-        if (target == null) return;
+        if (target == null || !target.CanReceiveHpEffects) return;
 
         EventManager eventManager = InGameManager.Instance != null
             ? InGameManager.Instance.EventManager
@@ -139,6 +141,16 @@ public abstract class Plot : ScriptableObject
             ? eventManager.ModifyPlotHpDelta(performer, target, delta)
             : delta;
         target.ChangeHp(effectiveDelta);
+    }
+
+    protected static List<Cardinal> GetEligibleHpTargets()
+    {
+        List<Cardinal> targets = new List<Cardinal>();
+        if (CardinalManager.Instance == null) return targets;
+        List<Cardinal> cardinals = CardinalManager.Instance.Cardinals;
+        for (int i = 0; i < 3 && i < cardinals.Count; i++)
+            if (cardinals[i] != null && cardinals[i].CanReceiveHpEffects) targets.Add(cardinals[i]);
+        return targets;
     }
 
     private static bool IsPietyCostWaived(Cardinal performer)

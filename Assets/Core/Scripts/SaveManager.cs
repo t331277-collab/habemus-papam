@@ -7,7 +7,7 @@ using UnityEngine.SceneManagement;
 
 public class SaveManager : MonoBehaviour
 {
-    private const int CurrentSaveVersion = 5;
+    private const int CurrentSaveVersion = SaveModel.CurrentVersion;
     private const string MainSceneName = "MainScene";
     private const string IntroNewspaperSceneName = "IntroNewspaperScene";
     private const string GameSceneName = "GameScene";
@@ -73,7 +73,7 @@ public class SaveManager : MonoBehaviour
         try
         {
             SaveModel saveModel = JsonUtility.FromJson<SaveModel>(File.ReadAllText(SaveFilePath));
-            if (saveModel != null && saveModel.version == CurrentSaveVersion)
+            if (SaveDateMigration.TryUpgrade(saveModel))
             {
                 return true;
             }
@@ -116,11 +116,7 @@ public class SaveManager : MonoBehaviour
             Debug.LogWarning("[Save] 플레이어 저장 데이터를 찾지 못해 기본값으로 미리보기를 구성합니다.");
         }
 
-        int conclaveIndex = Mathf.Clamp(
-            saveModel.gameContext.conclave,
-            0,
-            Enum.GetValues(typeof(GameContext.Conclave)).Length - 1);
-        GameContext.Conclave conclave = (GameContext.Conclave)conclaveIndex;
+        GameContext.Conclave timeOfDay = GetSavedTimeOfDay(saveModel.gameContext);
 
         preview = new SavePreviewData
         {
@@ -129,11 +125,24 @@ public class SaveManager : MonoBehaviour
             playerInfluence = playerSave != null ? playerSave.influence : 0f,
             playerPiety = playerSave != null ? playerSave.piety : 0f,
             day = Mathf.Max(1, saveModel.gameContext.day),
-            conclave = conclaveIndex,
-            conclaveName = conclave.ToString()
+            conclave = (int)timeOfDay,
+            conclaveName = timeOfDay.ToString()
         };
 
         return true;
+    }
+
+    private static GameContext.Conclave GetSavedTimeOfDay(GameContextSaveData savedContext)
+    {
+        // Use the same action-progress restoration as loading, including older saves.
+        GameContext context = new GameContext();
+        context.RestoreState(savedContext.day, (GameContext.Conclave)savedContext.conclave,
+            savedContext.completedActions, savedContext.actionsThisTurn, savedContext.isEventPhase,
+            savedContext.positionProgressVersion, savedContext.actionCountsByPosition,
+            savedContext.currentActionPosition, savedContext.completedActionsInPosition,
+            savedContext.unavailableActionCountsByPosition, savedContext.performedActionsInPosition,
+            savedContext.completedUnavailableActions);
+        return context.CurrentTimeOfDay;
     }
 
     public void StartNewGame()
@@ -444,6 +453,7 @@ public class SaveManager : MonoBehaviour
         TimeUI timeUI = FindAnyObjectByType<TimeUI>();
         if (timeUI != null)
         {
+            timeUI.ApplyCurrentTimeColorsImmediately();
             timeUI.ResetUI();
         }
 
@@ -664,7 +674,7 @@ public class SaveManager : MonoBehaviour
             string json = File.ReadAllText(SaveFilePath);
             saveModel = JsonUtility.FromJson<SaveModel>(json);
 
-            if (saveModel == null)
+            if (!SaveDateMigration.TryUpgrade(saveModel))
             {
                 Debug.LogWarning("[Save] 저장 파일을 읽었지만 복원 가능한 데이터가 없습니다.");
                 return false;
