@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 60e60000c4f24d1d9d83e9ad5d4e2e01, type: 3}
+  m_Name: E60000
+  m_EditorClassIdentifier: Assembly-CSharp::E60000
+  eventID: E60000
+  eventName: 거룩하도다
+  eventDescription: (랜덤 후보)가 당신의 열렬한 기도를 보고 감명받습니다.
+  itemImage: {fileID: 0}
+  maxAppear: 1
+  eventWeightBase: 1
+  eventWeightMultiplier: 0
+  preEvents: []
+  conflictEvents: []
+  option1: 감사를 표한다
+  option1Chance: 1
+  option1Requirement: ""
+  option1SuccessDescription: 당신이 감사를 표하자, 그는 당신에게 태양 팔찌를 쥐어 주며 지지를 약속하였다
+  option1SuccessResult: "정치력 +2\n아이템 '태양 팔찌' 획득"
+  option1FailDescription: ""
+  option1FailResult: ""
+  option2: ""
+  option2Chance: 0
+  option2SuccessDescription: ""
+  option2SuccessResult: ""
+  option2FailDescription: ""
+  option2FailResult: ""
+  sunBracelet: {fileID: 11400000, guid: d3f78ff31b4228c49b477ed963e4b78a, type: 2}

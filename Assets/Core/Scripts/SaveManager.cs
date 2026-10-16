@@ -434,12 +434,16 @@ public class SaveManager : MonoBehaviour
             case SaveResumeStep.OpenSushiSelection:
                 if (SushiUI.Instance != null)
                 {
+                    UIManager.Instance?.SetUIState(UIManager.UIState.SUSHI);
                     SushiUI.Instance.RestoreFromSave(saveModel.sushi);
                 }
                 break;
 
             case SaveResumeStep.StartNextConclave:
-                InGameManager.Instance.StartConclaveCycle();
+                if (saveModel.checkpointType == SaveCheckpointType.SushiRewardAcquired)
+                    InGameManager.Instance.StartConclaveAfterItemSelection();
+                else
+                    InGameManager.Instance.StartConclaveCycle();
                 break;
 
             case SaveResumeStep.ContinueAfterResolvedEvent:

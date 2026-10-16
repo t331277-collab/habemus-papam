@@ -167,12 +167,17 @@ public class SettingsManager : MonoBehaviour
         return false;
     }
 
-    private void ApplySettings()
+    public void ApplySettings()
     {
         float finalMasterVolume = isMasterMuted ? 0f : masterVolume / 100f;
         AudioListener.volume = finalMasterVolume;
 
-        // BGM / SFX 분리는 나중에 AudioMixer나 AudioSource 분리 후 적용
+        SoundManager soundManager = SoundManager.Instance;
+        if (soundManager == null) return;
+
+        soundManager.SetMasterVolume(finalMasterVolume);
+        soundManager.SetBGMVolume(isBgmMuted ? 0f : bgmVolume / 100f);
+        soundManager.SetSFXVolume(isSfxMuted ? 0f : sfxVolume / 100f);
     }
 
     private void ClearDuplicateHotKey(HotKeyAction currentAction, Key key)

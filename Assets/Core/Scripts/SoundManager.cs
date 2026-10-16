@@ -13,6 +13,11 @@ public class SoundManager : MonoBehaviour
     private VCA BGMVCA;
     private VCA SFXVCA;
     private string currentBGM = "";
+    private float masterVolume = 1f;
+    private float bgmVolume;
+    private float sfxVolume;
+    private bool volumeControlsReady;
+    private bool hasWarnedMissingVolumeControls;
 
     private static SoundManager instance = null;
     public static SoundManager Instance
@@ -36,6 +41,12 @@ public class SoundManager : MonoBehaviour
     {
         currentBGM="";
         InitVolume();
+    }
+
+    private void Update()
+    {
+        // Keep the latest settings while FMOD's banks are still loading.
+        if (!volumeControlsReady) ApplyVolumeSettings();
     }
     /// <summary>
     /// FMOD 프로젝트 내 BGM 뱅크에서 경로로 BGM을 찾아 플레이함.
@@ -114,37 +125,65 @@ public class SoundManager : MonoBehaviour
     }
     public void SetMasterVolume(float volume)
     {
-        masterBus.setVolume(volume);
+        masterVolume = Mathf.Clamp01(volume);
+        ApplyVolumeSettings();
     }
     public void SetBGMVolume(float volume)
     {
-        BGMVCA.setVolume(volume);
+        bgmVolume = Mathf.Clamp01(volume);
+        ApplyVolumeSettings();
     }
     public float GetBGMVolume()
     {
-        float volume = 0f;
-        BGMVCA.getVolume(out volume);
-        return volume;
+        return bgmVolume;
     }
     public void SetSFXVolume(float volume)
     {
-        SFXVCA.setVolume(volume);
+        sfxVolume = Mathf.Clamp01(volume);
+        ApplyVolumeSettings();
     }
     public float GetSFXVolume()
     {
-        float volume = 0f;
-        SFXVCA.getVolume(out volume);
-        return volume;
+        return sfxVolume;
     }
     public void InitVolume()
     {
-        masterBus = RuntimeManager.GetBus("bus:/");
-        BGMVCA = RuntimeManager.GetVCA("vca:/BGM");
-        SFXVCA = RuntimeManager.GetVCA("vca:/SFX");
+        if (SettingsManager.Instance != null)
+        {
+            SettingsManager.Instance.ApplySettings();
+        }
+        else
+        {
+            masterVolume = 1f;
+            bgmVolume = Mathf.Clamp01(initBGMVolume);
+            sfxVolume = Mathf.Clamp01(initSFXVolume);
+            ApplyVolumeSettings();
+        }
+    }
 
-        SetMasterVolume(1f);
-        SetBGMVolume(initBGMVolume);
-        SetSFXVolume(initSFXVolume);
+    private void ApplyVolumeSettings()
+    {
+        var system = RuntimeManager.StudioSystem;
+        if (!masterBus.isValid()) system.getBus("bus:/", out masterBus);
+        if (!BGMVCA.isValid()) system.getVCA("vca:/BGM", out BGMVCA);
+        if (!SFXVCA.isValid()) system.getVCA("vca:/SFX", out SFXVCA);
+
+        bool masterApplied = masterBus.isValid() && masterBus.setVolume(masterVolume) == FMOD.RESULT.OK;
+        bool bgmApplied = BGMVCA.isValid() && BGMVCA.setVolume(bgmVolume) == FMOD.RESULT.OK;
+        bool sfxApplied = SFXVCA.isValid() && SFXVCA.setVolume(sfxVolume) == FMOD.RESULT.OK;
+        volumeControlsReady = masterApplied && bgmApplied && sfxApplied;
+
+        if (!volumeControlsReady && !hasWarnedMissingVolumeControls &&
+            RuntimeManager.HaveMasterBanksLoaded && RuntimeManager.HaveAllBanksLoaded)
+        {
+            hasWarnedMissingVolumeControls = true;
+            Debug.LogWarning("FMOD volume controls unavailable. Check bus:/, vca:/BGM and vca:/SFX in the built banks.");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (instance == this) instance = null;
     }
     public void Mute()
     {

@@ -16,9 +16,18 @@ public class E21100 : Event
         option2Chance = 1f;
     }
 
+    private bool RequiresHighPiety => InGameManager.Instance == null ||
+        InGameManager.Instance.EventManager == null ||
+        !InGameManager.Instance.EventManager.HasChosenOption1("E21000");
+
+    public override string GetOption1Requirement()
+    {
+        return RequiresHighPiety ? "경건함 40 이상" : "";
+    }
+
     public override bool CanChoiceOption1(Cardinal performer)
     {
-        return true;
+        return performer != null && (!RequiresHighPiety || performer.Piety >= 40f);
     }
 
     public override bool CanChoiceOption2(Cardinal performer)

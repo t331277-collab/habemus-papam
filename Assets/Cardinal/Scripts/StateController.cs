@@ -67,6 +67,8 @@ public class StateController : MonoBehaviour
     [Tooltip("연설 상태를 유지할 시간 (초)")]
     [SerializeField] private float speechDuration = 3.0f;
 
+    private float ActionMotionSpeed => CompareTag("Player") ? 3f : 1f;
+
     [Header("Action 이동 방어 설정")]
     [Tooltip("기도/연설 이동이 이 시간 이상 완료되지 않으면 시퀀스를 중단합니다.")]
     [SerializeField] private float actionMoveTimeout = 8.0f;
@@ -141,6 +143,8 @@ public class StateController : MonoBehaviour
     public bool IsChatSfxInterrupted => chatSfxSession != null && chatSfxSession.IsInterrupted;
     public bool CanAcceptManualInteraction()
     {
+        if (CompareTag("Player") && InGameManager.Instance != null &&
+            InGameManager.Instance.IsAwaitingPlayerActionResult) return false;
         return currentState == CardinalState.Idle &&
                !IsPerformingPrayerAction &&
                !IsPerformingSpeechAction;
@@ -335,6 +339,7 @@ public class StateController : MonoBehaviour
                 }
                 break;
             case CardinalState.Praying:
+                animController?.SetActionAnimationSpeed(ActionMotionSpeed);
                 if (cardinal != null)
                 {
                     cardinal.SetAgentSize(0.5f, 1f);
@@ -362,6 +367,7 @@ public class StateController : MonoBehaviour
                 break;
 
             case CardinalState.InSpeech:
+                animController?.SetActionAnimationSpeed(ActionMotionSpeed);
                 if (cardinal != null) cardinal.SetAgentSize(0.5f, 1f); // 크기 조절
 
                 // 기존 시퀀스 코루틴 정리 -----> 레거시 함수.. 나중에 버그 발생시 활성화
@@ -458,6 +464,7 @@ public class StateController : MonoBehaviour
                 break;
 
             case CardinalState.Praying:
+                animController?.SetActionAnimationSpeed(1f);
                 if (cardinal != null)
                 {
                     cardinal.SetAgentSize(0.2f, 0.2f);
@@ -484,6 +491,7 @@ public class StateController : MonoBehaviour
                 break;
 
             case CardinalState.InSpeech:
+                animController?.SetActionAnimationSpeed(1f);
                 if (cardinal != null) cardinal.SetAgentSize(0.2f, 0.2f); // 원래 크기로
 
                 if (agent != null && agent.isOnNavMesh)
@@ -570,6 +578,16 @@ public class StateController : MonoBehaviour
     void HandlePlayerInput()
     {
         if (inputController == null || agent == null) return;
+
+        if (InGameManager.Instance != null && InGameManager.Instance.IsAwaitingPlayerActionResult)
+        {
+            if (agent.isOnNavMesh)
+            {
+                agent.ResetPath();
+                agent.velocity = Vector3.zero;
+            }
+            return;
+        }
 
         CardinalInputData input = inputController.GetInput();
 
@@ -1208,7 +1226,7 @@ public class StateController : MonoBehaviour
 
         Vector2 leftDir = Vector2.left;
         float rotateTimer = 0f;
-        while (rotateTimer < 0.5f)
+        while (rotateTimer < 0.5f / ActionMotionSpeed)
         {
             if (currentState != CardinalState.Praying) yield break;
             if (animController != null) animController.SetLookDirection(leftDir);
@@ -1220,7 +1238,7 @@ public class StateController : MonoBehaviour
         if (agent != null) agent.avoidancePriority = 0;
 
         float currentPrayTimer = 0f;
-        while (currentPrayTimer < prayDuration)
+        while (currentPrayTimer < prayDuration / ActionMotionSpeed)
         {
             if (currentState != CardinalState.Praying) yield break;
             if (animController != null) animController.SetLookDirection(leftDir);
@@ -1364,7 +1382,7 @@ public class StateController : MonoBehaviour
 
         // 자리 잡기 및 방향 고정
         float rotateTimer = 0f;
-        while (rotateTimer < 0.5f)
+        while (rotateTimer < 0.5f / ActionMotionSpeed)
         {
             if (currentState != CardinalState.InSpeech) yield break;
 
@@ -1379,7 +1397,7 @@ public class StateController : MonoBehaviour
 
         // 실제 연설 진행
         float currentSpeechTimer = 0f;
-        while (currentSpeechTimer < speechDuration)
+        while (currentSpeechTimer < speechDuration / ActionMotionSpeed)
         {
             if (currentState != CardinalState.InSpeech) yield break;
             if (animController != null) animController.SetLookDirection(speechDir);
@@ -1391,7 +1409,7 @@ public class StateController : MonoBehaviour
 
         if (cardinal != null) cardinal.Speech();
 
-        yield return new WaitForSeconds(2.0f);
+        yield return new WaitForSeconds(2.0f / ActionMotionSpeed);
 
         if (animController != null)
         {

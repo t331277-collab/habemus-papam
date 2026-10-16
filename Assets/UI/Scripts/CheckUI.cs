@@ -115,6 +115,7 @@ public class CheckUI : MonoBehaviour
     private void Skip() //스킵 버튼을 누르면 스킵.
     {
         if (isRevealingResult) return;
+        SoundManager.Instance?.StopBGM();
         if (animState == AnimState.ElectEnd)
         {
             RevealFinalResult();

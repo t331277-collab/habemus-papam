@@ -516,6 +516,16 @@ public class InGameManager : MonoBehaviour
     [SerializeField] private GameObject inventoryUIPanel;
     private GameObject hpZeroPopup;
 
+    [Header("플레이어 기도/연설 결과창")]
+    [Tooltip("반투명 배경 Image를 포함하는 오브젝트. Image의 알파값은 인스펙터에서 설정합니다.")]
+    [SerializeField] private GameObject playerActionResultBackground;
+    [SerializeField] private GameObject playerActionResultWindow;
+    [SerializeField] private Button playerActionResultConfirmButton;
+    [SerializeField] private TMPro.TMP_Text playerActionResultTitle;
+    [SerializeField] private TMPro.TMP_Text playerActionResultText;
+    private Cardinal pendingResultPerformer;
+    private NPCBehaviour pendingResultAction;
+
     [Header("아이템 스폰 설정")]
     [Tooltip("아이템이 스폰될 수 있는 위치들")]
     [SerializeField] private List<Transform> spawnPoints;
@@ -563,11 +573,13 @@ public class InGameManager : MonoBehaviour
     public GameContext Context => gameContext;
     public bool IsTimeRunning => isTimeRunning;
     public EventManager EventManager => eventManager;
+    public int SupportedCandidateNumber => eventManager != null ? eventManager.SupportedCandidateNumber : 0;
     public bool IsFirstStart => isFirstStart;
     public bool IsSushiOn => isSushiOn;
     public bool IsConclaveExitInProgress => isConclaveExitInProgress;
     public bool IsAwaitingTurnEvent => awaitingTurnEvent;
     public bool IsResolvingPlayerActionNotice => isResolvingPlayerActionNotice;
+    public bool IsAwaitingPlayerActionResult => pendingResultPerformer != null;
     public NPCBehaviour InitialTutorialRequiredAction
     {
         get
@@ -599,6 +611,10 @@ public class InGameManager : MonoBehaviour
 
         Instance = this;
 
+        HidePlayerActionResult();
+        if (playerActionResultConfirmButton != null)
+            playerActionResultConfirmButton.onClick.AddListener(ConfirmPlayerActionResult);
+
         GameContext.ValidateActionRules();
         ValidateInitialTutorialRules();
         ValidateHpZeroCandidateRules();
@@ -626,12 +642,34 @@ public class InGameManager : MonoBehaviour
 
     public void StartConclaveCycle()
     {
+        if (isTimeRunning || SushiUI.Instance != null && SushiUI.Instance.IsOpen)
+            return;
+
+        ConfigureStartButton(false, false);
+        isSushiOn = true;
+        if (SushiUI.Instance != null)
+        {
+            if (UIManager.Instance != null) UIManager.Instance.SetUIState(UIManager.UIState.SUSHI);
+            bool shown = SushiUI.Instance.Show(() =>
+            {
+                SaveManager.Instance?.SaveCheckpoint(
+                    SaveCheckpointType.JudgementResolved, SaveResumeStep.OpenSushiSelection);
+            });
+            if (shown) return;
+        }
+
+        StartConclaveAfterItemSelection();
+    }
+
+    public void StartConclaveAfterItemSelection()
+    {
         if (isTimeRunning)
         {
             return;
         }
 
         ConfigureStartButton(false, false);
+        if (UIManager.Instance != null) UIManager.Instance.SetUIState(UIManager.UIState.INGAME);
 
         if (isFirstStart)
         {
@@ -742,6 +780,7 @@ public class InGameManager : MonoBehaviour
         pendingEffects.Clear();
         playerActionEffects.Clear();
         isResolvingPlayerActionNotice = false;
+        HidePlayerActionResult();
 
         gameContext.InitGameContext();
         ConfigureStartButton(true, true);
@@ -1105,6 +1144,7 @@ public class InGameManager : MonoBehaviour
         RestorePendingEffects(saveData.pendingEffects);
         playerActionEffects.Restore(saveData.playerActionEffects);
         isResolvingPlayerActionNotice = false;
+        HidePlayerActionResult();
         if (!string.IsNullOrWhiteSpace(saveData.currentEventId) && eventManager != null)
         {
             Event restoredEvent = eventManager.GetEventById(saveData.currentEventId);
@@ -1181,6 +1221,8 @@ public class InGameManager : MonoBehaviour
 
         firstHpZeroCandidateSlot = KeepFirstHpZeroCandidateSlot(
             firstHpZeroCandidateSlot, candidateSlot);
+        if (candidate != null && candidate.IsDead && eventManager != null)
+            eventManager.RecordCandidateDeath(candidateSlot, GetCurrentDay());
     }
 
     public bool TryGetFirstHpZeroCandidateSlot(out int candidateSlot)
@@ -1451,7 +1493,7 @@ public class InGameManager : MonoBehaviour
             npcTurnActionsExecuted[candidateIndex, actionIndex] = true;
 
             Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-            if (candidate == null || !candidate.CanAct) continue;
+            if (candidate == null || candidate.IsDead) continue;
             ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, actionIndex], actionIndex);
         }
 
@@ -1465,7 +1507,7 @@ public class InGameManager : MonoBehaviour
                 npcTurnActionsExecuted[candidateIndex, 1] = true;
 
                 Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-                if (candidate == null || !candidate.CanAct) continue;
+                if (candidate == null || candidate.IsDead) continue;
                 ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, 1], 1);
             }
         }
@@ -1479,7 +1521,7 @@ public class InGameManager : MonoBehaviour
         {
             int candidateIndex = candidateNumber - 1;
             Cardinal candidate = GetRepresentativeCandidate(candidateNumber);
-            if (candidate == null || !candidate.CanAct) continue;
+            if (candidate == null || candidate.IsDead) continue;
 
             NPCBehaviour behaviour;
             if (baseActionIndex < 2 && !npcTurnActionsExecuted[candidateIndex, baseActionIndex])
@@ -1558,27 +1600,47 @@ public class InGameManager : MonoBehaviour
     private static NPCBehaviour RollNpcBehaviour(int candidateNumber, float hp)
     {
         float roll = UnityEngine.Random.value;
-        bool healthy = hp >= 4f;
+        bool healthy = hp >= 5f;
         switch (candidateNumber)
         {
             case 1:
-                if (healthy) return roll < 0.3f ? NPCBehaviour.Pray : roll < 0.7f ? NPCBehaviour.Speech : NPCBehaviour.None;
-                return roll < 0.7f ? NPCBehaviour.Pray : roll < 0.9f ? NPCBehaviour.Speech : NPCBehaviour.None;
+                if (healthy) return roll < 0.25f ? NPCBehaviour.Pray : roll < 0.5f ? NPCBehaviour.Speech : NPCBehaviour.None;
+                return roll < 0.65f ? NPCBehaviour.Pray : roll < 0.8f ? NPCBehaviour.Speech : NPCBehaviour.None;
             case 2:
-                if (healthy) return roll < 0.5f ? NPCBehaviour.Pray : roll < 0.8f ? NPCBehaviour.Speech : NPCBehaviour.None;
-                return roll < 0.6f ? NPCBehaviour.Pray : NPCBehaviour.None;
+                if (healthy) return roll < 0.45f ? NPCBehaviour.Pray : roll < 0.65f ? NPCBehaviour.Speech : NPCBehaviour.None;
+                return roll < 0.55f ? NPCBehaviour.Pray : roll < 0.6f ? NPCBehaviour.Speech : NPCBehaviour.None;
             default:
-                if (healthy) return roll < 0.3f ? NPCBehaviour.Pray : roll < 0.6f ? NPCBehaviour.Speech : NPCBehaviour.None;
-                return roll < 0.6f ? NPCBehaviour.Pray : NPCBehaviour.None;
+                if (healthy) return roll < 0.25f ? NPCBehaviour.Pray : roll < 0.45f ? NPCBehaviour.Speech : NPCBehaviour.None;
+                return roll < 0.55f ? NPCBehaviour.Pray : roll < 0.6f ? NPCBehaviour.Speech : NPCBehaviour.None;
         }
     }
 
     private static void ApplyNpcIdlePenalty(Cardinal candidate)
     {
-        if (UnityEngine.Random.value < 0.1f) candidate.ChangeInfluence(-1f);
-        if (UnityEngine.Random.value < 0.1f) candidate.ChangePiety(-1f);
-        if (UnityEngine.Random.value < 0.1f) candidate.ChangePiety(-2f);
-        if (UnityEngine.Random.value < 0.1f) candidate.ChangePiety(-3f);
+        float roll = UnityEngine.Random.value;
+        if (roll < 0.4f) return;
+
+        // 경건함을 소모할 수 없으면 복합 효과 전체를 정치력 -1로 대체한다.
+        if (roll < 0.6f || candidate.Piety < 3f)
+        {
+            candidate.ChangeInfluence(-1f);
+            return;
+        }
+
+        candidate.ChangePiety(-3f);
+        if (roll < 0.8f) candidate.ChangeInfluence(-2f);
+        else if (roll < 0.9f) candidate.ChangeHp(5f);
+        else candidate.ChangeInfluence(-3f);
+    }
+
+    private static void ApplyNpcBlockedActionEffect(Cardinal candidate)
+    {
+        float roll = UnityEngine.Random.value;
+        if (roll < 0.2f) candidate.ChangeInfluence(1f);
+        else if (roll < 0.4f) candidate.ChangeInfluence(2f);
+        else if (roll < 0.6f) candidate.ChangeInfluence(3f);
+        else if (roll < 0.8f) candidate.ChangeHp(-1f);
+        else candidate.ChangeHp(-2f);
     }
 
     private void ExecuteRemainingNpcBaseActions()
@@ -1591,7 +1653,7 @@ public class InGameManager : MonoBehaviour
 
                 npcTurnActionsExecuted[candidateIndex, actionIndex] = true;
                 Cardinal candidate = GetRepresentativeCandidate(candidateIndex + 1);
-                if (candidate == null || !candidate.CanAct) continue;
+                if (candidate == null || candidate.IsDead) continue;
                 ExecuteNpcBehaviour(candidate, npcTurnBehaviours[candidateIndex, actionIndex], actionIndex);
             }
         }
@@ -1599,6 +1661,11 @@ public class InGameManager : MonoBehaviour
 
     private NpcActionResult ExecuteNpcBehaviour(Cardinal candidate, NPCBehaviour behaviour, int actionIndex)
     {
+        if (candidate == null || candidate.IsDead) return default;
+        candidate.ResolveHpState();
+        if (candidate.IsDead) return default;
+        if (candidate.IsKnockedOut) behaviour = NPCBehaviour.ActionBlocked;
+
         int candidateNumber = GetNpcCandidateNumber(candidate);
         float hpBefore = candidate.Hp;
         float pietyBefore = candidate.Piety;
@@ -1615,8 +1682,10 @@ public class InGameManager : MonoBehaviour
                 succeeded = candidate.PerformNpcSpeech(GetSpeechSuccessChance(candidate));
                 break;
             case NPCBehaviour.None:
-            case NPCBehaviour.ActionBlocked:
                 ApplyNpcIdlePenalty(candidate);
+                break;
+            case NPCBehaviour.ActionBlocked:
+                ApplyNpcBlockedActionEffect(candidate);
                 break;
             case NPCBehaviour.PlayerExtraAction:
                 break;
@@ -1632,7 +1701,7 @@ public class InGameManager : MonoBehaviour
             NPCBehaviour.ActionBlocked => "행동 불가",
             _ => behaviour.ToString()
         };
-        string result = succeeded.HasValue ? (succeeded.Value ? "성공" : "실패") : "패널티 판정";
+        string result = succeeded.HasValue ? (succeeded.Value ? "성공" : "실패") : "능력치 변화 판정";
         Debug.Log(
             $"[NPC 행동][후보 {candidateNumber}: {candidate.name}][행동 {actionIndex + 1}] {behaviourName} ({result}) [실행 방식: 즉시 효과] | " +
             $"체력 {hpBefore:0.##} -> {candidate.Hp:0.##} ({candidate.Hp - hpBefore:+0.##;-0.##;0}), " +
@@ -1897,33 +1966,83 @@ public class InGameManager : MonoBehaviour
             npcNextTurnBlockedActionCounts[index] + count, 0, 2);
     }
 
-    public void CompletePlayerAction(Cardinal performer, NPCBehaviour completedAction = NPCBehaviour.None)
+    public void CompletePlayerAction(Cardinal performer, NPCBehaviour completedAction = NPCBehaviour.None,
+        bool? succeeded = null)
     {
         if (!CanCompletePlayerAction(performer)) return;
 
-        StateController stateController = completedAction == NPCBehaviour.Speech
+        StateController stateController = completedAction == NPCBehaviour.Speech || succeeded.HasValue
             ? performer.GetComponent<StateController>()
             : null;
-        if (stateController != null && stateController.CurrentState == CardinalState.InSpeech)
+        if (stateController != null &&
+            (stateController.CurrentState == CardinalState.InSpeech || stateController.CurrentState == CardinalState.Praying))
         {
             if (isCompletingSpeechAction) return;
             isCompletingSpeechAction = true;
-            StartCoroutine(CompleteSpeechActionAfterAnimation(performer, stateController));
+            StartCoroutine(CompletePlayerActionAfterAnimation(performer, stateController, completedAction, succeeded));
             return;
         }
 
-        CompletePlayerActionNow(performer, completedAction);
+        ShowPlayerActionResultOrComplete(performer, completedAction, succeeded);
     }
 
-    private IEnumerator CompleteSpeechActionAfterAnimation(Cardinal performer, StateController stateController)
+    private IEnumerator CompletePlayerActionAfterAnimation(Cardinal performer, StateController stateController,
+        NPCBehaviour completedAction, bool? succeeded)
     {
-        while (stateController != null && stateController.CurrentState == CardinalState.InSpeech)
+        while (stateController != null &&
+            (stateController.CurrentState == CardinalState.InSpeech || stateController.CurrentState == CardinalState.Praying))
         {
             yield return null;
         }
 
         isCompletingSpeechAction = false;
-        CompletePlayerActionNow(performer, NPCBehaviour.Speech);
+        ShowPlayerActionResultOrComplete(performer, completedAction, succeeded);
+    }
+
+    private void ShowPlayerActionResultOrComplete(Cardinal performer, NPCBehaviour completedAction, bool? succeeded)
+    {
+        if (!CanCompletePlayerAction(performer)) return;
+        if (!succeeded.HasValue || playerActionResultBackground == null || playerActionResultWindow == null ||
+            playerActionResultConfirmButton == null || playerActionResultTitle == null || playerActionResultText == null)
+        {
+            CompletePlayerActionNow(performer, completedAction);
+            return;
+        }
+
+        pendingResultPerformer = performer;
+        pendingResultAction = completedAction;
+        isResolvingPlayerActionNotice = true;
+        string actionName = completedAction == NPCBehaviour.Pray ? "기도" : "연설";
+        string resultName = succeeded.Value ? "성공" : "실패";
+        playerActionResultTitle.text = $"{actionName} {resultName}!";
+        playerActionResultText.text = $"{actionName}에 {resultName}했습니다.";
+        playerActionResultBackground.SetActive(true);
+        playerActionResultWindow.SetActive(true);
+    }
+
+    private void ConfirmPlayerActionResult()
+    {
+        if (pendingResultPerformer == null) return;
+        Cardinal performer = pendingResultPerformer;
+        NPCBehaviour completedAction = pendingResultAction;
+        HidePlayerActionResult();
+        isResolvingPlayerActionNotice = false;
+        CompletePlayerActionNow(performer, completedAction);
+    }
+
+    private void HidePlayerActionResult()
+    {
+        pendingResultPerformer = null;
+        pendingResultAction = NPCBehaviour.None;
+        if (playerActionResultWindow != null) playerActionResultWindow.SetActive(false);
+        if (playerActionResultBackground != null) playerActionResultBackground.SetActive(false);
+    }
+
+    private void OnDestroy()
+    {
+        if (playerActionResultConfirmButton != null)
+            playerActionResultConfirmButton.onClick.RemoveListener(ConfirmPlayerActionResult);
+        if (Instance == this) Instance = null;
     }
 
     private bool CanCompletePlayerAction(Cardinal performer)
@@ -1936,6 +2055,7 @@ public class InGameManager : MonoBehaviour
     {
         if (!CanCompletePlayerAction(performer)) return;
         if (!gameContext.CompleteCommittedAction()) return;
+        eventManager?.RecordPlayerAction(completedAction);
         if (blockRemainingCurrentTurn)
         {
             blockRemainingCurrentTurn = false;
@@ -2193,14 +2313,19 @@ public class InGameManager : MonoBehaviour
 
         if (candidate3 != null && candidate3.Hp > 0f && candidate3WasLeading)
         {
-            float hpBeforePassive = candidate3.Hp;
             float roll = UnityEngine.Random.value;
             bool triggered = roll < 0.3f;
-            if (triggered) candidate3.ChangeHp(-1f);
+            if (triggered)
+            {
+                foreach (Cardinal candidate in candidates)
+                {
+                    if (candidate == null || candidate == candidate3 || candidate.IsDead || candidate.Hp <= 0f) continue;
+                    candidate.ChangeHp(-1f);
+                }
+            }
             Debug.Log(
-                $"[NPC 선두 패시브][후보 3] 추가 체력 감소 30% 판정 | " +
-                $"주사위 {roll:0.000}, 결과 {(triggered ? "발동" : "미발동")}, " +
-                $"체력 {hpBeforePassive:0.##} -> {candidate3.Hp:0.##} ({candidate3.Hp - hpBeforePassive:+0.##;-0.##;0})");
+                $"[NPC 선두 패시브][후보 3] 자신을 제외한 모든 후보 추가 체력 -1, 30% 판정 | " +
+                $"주사위 {roll:0.000}, 결과 {(triggered ? "발동" : "미발동")}");
         }
 
         foreach (Cardinal candidate in candidates) candidate?.ResolveHpState();

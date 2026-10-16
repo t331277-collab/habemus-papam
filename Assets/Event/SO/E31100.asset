@@ -24,7 +24,7 @@ MonoBehaviour:
     \uC788\uB2E4!\n\uAD50\uB2E8\uC758 \uC6B4\uBA85\uC774 \uB2F9\uC2E0\uC758 \uC190\uC5D0
     \uB2EC\uB838\uB2E4! \uB2F9\uC2E0\uC774 \uC6D0\uD558\uB294 \uAC83\uC740 \uBB34\uC5C7\uC778\uAC00?"
   itemImage: {fileID: 0}
-  maxAppear: 4
+  maxAppear: 2
   eventWeightBase: 20
   eventWeightMultiplier: 0
   preEvents: []
@@ -64,3 +64,9 @@ MonoBehaviour:
     \uC885\uACB0!"
   option2FailDescription: 
   option2FailResult: 
+
+  basePietyRequirement: 6
+  firstOption2SuccessDescription: "\ub2f9\uc2e0\uc740 (\ud6c4\ubcf4 1)\uc744(\ub97c) \uc9c0\uc9c0\ud558\uae30\ub85c \ud588\ub2e4. \uc131\uc804 \uc120\ud3ec\uc5d0 \ub300\ud55c \uacb0\uc815\uc740 \ub2e4\uc74c \ud68c\uc758\ub85c \ubbf8\ub904\uc84c\ub2e4."
+  firstOption2SuccessResult: "\uc9c0\uc9c0\ud558\ub294 \ud6c4\ubcf4: (\ud6c4\ubcf4 1)"
+  firstOption2FailDescription: "\ub2f9\uc2e0\uc740 (\ud6c4\ubcf4 1)\uc744(\ub97c) \uc9c0\uc9c0\ud558\uae30\ub85c \ud588\ub2e4. \ud68c\uc758\ub294 \uacb0\ub860\uc744 \ub0b4\ub9ac\uc9c0 \ubabb\ud588\uace0, \ub17c\uc758\ub294 \ub2e4\uc74c \ud68c\uc758\ub85c \uc774\uc5b4\uc9c4\ub2e4."
+  firstOption2FailResult: "\uc9c0\uc9c0\ud558\ub294 \ud6c4\ubcf4: (\ud6c4\ubcf4 1)"

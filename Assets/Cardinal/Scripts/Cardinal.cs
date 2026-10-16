@@ -43,6 +43,7 @@ public class Cardinal : MonoBehaviour
     public bool IsKnockedOut => isKnockedOut;
     public bool HasBeenKnockedOut => hasBeenKnockedOut;
     public bool IsDead => isDead;
+    public int DeathDay => isDead ? knockedOutDay : -1;
     public bool CanReceiveHpEffects => !isDead && (CompareTag("Player") || !isKnockedOut);
     public bool CanAct => !isDead && !isKnockedOut && hp > 0f;
 
@@ -143,6 +144,22 @@ public class Cardinal : MonoBehaviour
         hp = 7f;
         isKnockedOut = false;
         knockedOutDay = -1;
+    }
+
+    // E31200 explicitly returns candidate 2 to the conclave, including after permanent elimination.
+    public void ReviveNpcForEvent(float hpValue, float influenceValue, float pietyValue)
+    {
+        if (CompareTag("Player")) return;
+        hp = Mathf.Clamp(hpValue, 1f, maxHp);
+        influence = Mathf.Clamp(influenceValue, 0f, 10f);
+        piety = Mathf.Clamp(pietyValue, 0f, 10f);
+        isDead = false;
+        isKnockedOut = false;
+        knockedOutDay = -1;
+        gameObject.SetActive(true);
+        StateController controller = GetComponent<StateController>();
+        if (controller != null) controller.ChangeState(controller.IsSchemer ? CardinalState.Scheme : CardinalState.Idle);
+        CardinalManager.Instance?.StatsUI?.RefreshVisualOrder();
     }
 
     void InitCardinal()
@@ -493,7 +510,7 @@ public class Cardinal : MonoBehaviour
         }
 
         pietyDelta = isSuccess ? balance.PraySuccessDeltaPiety : balance.PrayFailDeltaPiety;
-        hpDelta = isSuccess ? balance.PraySuccessDeltaHp : balance.PrayFailDeltaHp;
+        hpDelta = isSuccess ? balance.PraySuccessDeltaHp : CompareTag("Player") ? 0f : balance.PrayFailDeltaHp;
 
         foreach (Item item in items)
         {
@@ -502,7 +519,8 @@ public class Cardinal : MonoBehaviour
             hpDelta = item.PreviewPrayerHp(hpDelta, balance, isSuccess);
         }
 
-        if (hpDelta > 0f && items.Exists(item => item is I001))
+        if ((!isSuccess && CompareTag("Player")) ||
+            (hpDelta > 0f && items.Exists(item => item is I001)))
         {
             hpDelta = 0f;
         }
@@ -589,7 +607,7 @@ public class Cardinal : MonoBehaviour
         else
         {
             ChangePiety(balance.PrayFailDeltaPiety);
-            ChangeHp(balance.PrayFailDeltaHp);
+            if (!completePlayerAction) ChangeHp(balance.PrayFailDeltaHp);
         }
 
         if (completePlayerAction)
@@ -602,7 +620,7 @@ public class Cardinal : MonoBehaviour
             item?.OnPray(this);
         }
 
-        if (blocksPrayerHealing && Hp > hpBeforePrayer)
+        if ((blocksPrayerHealing || (completePlayerAction && !success)) && Hp > hpBeforePrayer)
         {
             ChangeHp(hpBeforePrayer - Hp);
         }
@@ -614,7 +632,7 @@ public class Cardinal : MonoBehaviour
         if (completePlayerAction)
         {
             GameSceneCameraZoom.ReleaseAllGameCameraZoomAndFollow(1f);
-            InGameManager.Instance.CompletePlayerAction(this, NPCBehaviour.Pray);
+            InGameManager.Instance.CompletePlayerAction(this, NPCBehaviour.Pray, success);
         }
 
         return success;
@@ -735,7 +753,7 @@ public class Cardinal : MonoBehaviour
         if (completePlayerAction)
         {
             GameSceneCameraZoom.ReleaseAllGameCameraZoomAndFollow(1f);
-            InGameManager.Instance.CompletePlayerAction(this, NPCBehaviour.Speech);
+            InGameManager.Instance.CompletePlayerAction(this, NPCBehaviour.Speech, success);
         }
 
         return success;

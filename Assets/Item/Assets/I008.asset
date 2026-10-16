@@ -16,9 +16,8 @@ MonoBehaviour:
   itemName: "\uD0DC\uC591 \uD314\uCC0C"
   itemDescription: "\uD0DC\uC591\uC758 \uD798\uC774 \uD655\uC2E4\uD788 \uB290\uAEF4\uC9C0\uB294
     \uACBD\uAC74\uD55C \uD314\uCC0C\uB2E4!"
-  itemEffectDescription: "기도 시 <color=#FFD84D>경건함</color> <color=#66CCFF>+1</color> 추가 획득."
+  itemEffectDescription: "매일 <color=#4488FF>정치력</color> 1, <color=#FFD84D>경건함</color> 1, <color=#5BD65B>체력</color> 1 획득. 버릴 수 없다."
   itemImage: {fileID: -194224930418327051, guid: 9d9ca0b1f3a562042818da62901b41e2, type: 3}
   itemGrade: 0
   itemExpirationType: 2
   usageType: 0
-  pietyBonus: 1

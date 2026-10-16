@@ -31,7 +31,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 11.733334
+    m_StopTime: 11.366667
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -58,119 +58,35 @@ AnimationClip:
     floatParameter: 0
     intParameter: 5
     messageOptions: 0
-  - time: 1
+  - time: 2.3
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 6
     messageOptions: 0
-  - time: 2
+  - time: 4.5833335
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 4
     messageOptions: 0
-  - time: 3
+  - time: 6.883333
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 7
     messageOptions: 0
-  - time: 4
+  - time: 9.216666
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 5
     messageOptions: 0
-  - time: 4.5
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 6
-    messageOptions: 0
-  - time: 5
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 4
-    messageOptions: 0
-  - time: 5.5
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 7
-    messageOptions: 0
-  - time: 6
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 5
-    messageOptions: 0
-  - time: 6.5
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 6
-    messageOptions: 0
-  - time: 7
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 4
-    messageOptions: 0
-  - time: 7.5
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 7
-    messageOptions: 0
-  - time: 8
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 5
-    messageOptions: 0
-  - time: 8.25
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 6
-    messageOptions: 0
-  - time: 8.516666
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 4
-    messageOptions: 0
-  - time: 8.75
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 7
-    messageOptions: 0
-  - time: 9
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 5
-    messageOptions: 0
-  - time: 9.266666
+  - time: 9.333333
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
@@ -184,66 +100,87 @@ AnimationClip:
     floatParameter: 0
     intParameter: 4
     messageOptions: 0
-  - time: 9.75
+  - time: 9.666667
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 7
+    messageOptions: 0
+  - time: 9.833333
+    functionName: SetSprite
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 5
     messageOptions: 0
   - time: 10
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 5
-    messageOptions: 0
-  - time: 10.25
-    functionName: SetSprite
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
     intParameter: 6
     messageOptions: 0
-  - time: 10.516666
+  - time: 10.166667
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 4
     messageOptions: 0
-  - time: 10.75
+  - time: 10.333333
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 7
     messageOptions: 0
-  - time: 11
+  - time: 10.5
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 5
     messageOptions: 0
-  - time: 11.266666
+  - time: 10.616667
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 6
     messageOptions: 0
-  - time: 11.5
+  - time: 10.733334
     functionName: SetSprite
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
     intParameter: 4
     messageOptions: 0
-  - time: 11.733334
+  - time: 10.85
+    functionName: SetSprite
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 7
+    messageOptions: 0
+  - time: 10.95
+    functionName: SetSprite
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 5
+    messageOptions: 0
+  - time: 11.166667
+    functionName: SetSprite
+    data: 
+    objectReferenceParameter: {fileID: 0}
+    floatParameter: 0
+    intParameter: 7
+    messageOptions: 0
+  - time: 11.366667
     functionName: OnElectAnimFinished
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
-    intParameter: 7
+    intParameter: 0
     messageOptions: 0

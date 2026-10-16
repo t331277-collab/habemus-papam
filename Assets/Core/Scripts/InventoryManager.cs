@@ -46,6 +46,7 @@ public class InventoryManager : MonoBehaviour
 
     void OnDestroy()
     {
+        ReleaseItemEffects();
         if (InGameManager.Instance != null && InGameManager.Instance.Context != null)
         {
             InGameManager.Instance.Context.OnGameContextEvent -= OnGameContextChanged;
@@ -205,6 +206,12 @@ public class InventoryManager : MonoBehaviour
         return true;
     }
 
+    private void ReleaseItemEffects()
+    {
+        foreach (Item item in inventoryItems) if (item != null) item.OnRemove();
+        foreach (Item item in activeBuffs) if (item != null) item.OnRemove();
+    }
+
     public void UseItem(Item item)
     {
         if (!inventoryItems.Contains(item))
@@ -307,6 +314,7 @@ public class InventoryManager : MonoBehaviour
 
     public void RestoreFromSave(InventorySaveData saveData, Dictionary<string, Item> itemCatalog)
     {
+        ReleaseItemEffects();
         inventoryItems.Clear();
         activeBuffs.Clear();
         remainingConclaveCounts.Clear();

@@ -5,6 +5,7 @@ public class Animation_Controller : MonoBehaviour
 {
     private Animator animator;
     private NavMeshAgent agent;
+    private float defaultAnimationSpeed = 1f;
 
     private Vector2 lastMoveDirection = Vector2.down;
     private bool isPlayer = false; // 플레이어 여부를 저장할 변수
@@ -17,6 +18,7 @@ public class Animation_Controller : MonoBehaviour
     {
         // 컴포넌트 할당
         animator = GetComponent<Animator>();
+        if (animator != null) defaultAnimationSpeed = animator.speed;
         agent = GetComponent<NavMeshAgent>();
 
         if (agent == null) agent = GetComponentInParent<NavMeshAgent>();
@@ -118,5 +120,10 @@ public class Animation_Controller : MonoBehaviour
         {
             animator.SetInteger("SpeechState", stateIndex);
         }
+    }
+
+    public void SetActionAnimationSpeed(float multiplier)
+    {
+        if (animator != null) animator.speed = defaultAnimationSpeed * multiplier;
     }
 }

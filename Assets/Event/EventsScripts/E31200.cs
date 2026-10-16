@@ -3,11 +3,20 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "E31200", menuName = "Events/이단과 소문")]
 public class E31200 : Event
 {
+    [Header("회차별 경건함 조건")]
+    [SerializeField] private int basePietyRequirement = 5;
+
+    private int PietyRequirement => InGameManager.Instance != null && InGameManager.Instance.EventManager != null
+        ? InGameManager.Instance.EventManager.GetBranchPietyRequirement(eventID, basePietyRequirement)
+        : basePietyRequirement;
+
+    public override string GetOption1Requirement() => $"경건함 {PietyRequirement} 이상";
+
     void Reset()
     {
         eventID = "E31200";
         eventName = "이단과 소문";
-        maxAppear = 1;
+        maxAppear = 2;
 
         eventWeightBase = 40f;
         eventWeightMultiplier = 0f;
@@ -18,7 +27,7 @@ public class E31200 : Event
 
     public override bool CanChoiceOption1(Cardinal performer)
     {
-        return true;
+        return performer != null && performer.Piety >= PietyRequirement;
     }
 
     public override bool CanChoiceOption2(Cardinal performer)
@@ -32,8 +41,7 @@ public class E31200 : Event
 
         if(Random.value <= option1Chance)
         {  // 성공했을 때 로직
-
-
+            GetCandidate(2)?.ReviveNpcForEvent(6f, 6f, 6f);
             return FinishChoice(1, true);
         }
         else
@@ -51,10 +59,6 @@ public class E31200 : Event
 
         if(Random.value <= option2Chance)
         {  // 성공했을 때 로직
-            SetCandidateStats(2, 6f, 6f, 6f);
-
-            // TODO(태양만세 엔딩): 후보 2가 최종 당선될 때 전용 엔딩으로 전환한다.
-            // EndingType과 엔딩 컷신이 아직 없으므로 여기서는 부활/분기 기록까지만 수행한다.
             return FinishChoice(2, true);
         }
         else

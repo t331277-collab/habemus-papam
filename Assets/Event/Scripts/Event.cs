@@ -38,6 +38,23 @@ public abstract class Event : ScriptableObject
         return eventWeightBase + eventWeightMultiplier * Mathf.Max(1, day);
     }
 
+    public virtual string GetOption1Requirement()
+    {
+        return option1Requirement;
+    }
+
+    public virtual string GetResultDescription(int optionIndex, bool succeeded)
+    {
+        return optionIndex == 1 ? (succeeded ? option1SuccessDescription : option1FailDescription) :
+            (succeeded ? option2SuccessDescription : option2FailDescription);
+    }
+
+    public virtual string GetResultText(int optionIndex, bool succeeded)
+    {
+        return optionIndex == 1 ? (succeeded ? option1SuccessResult : option1FailResult) :
+            (succeeded ? option2SuccessResult : option2FailResult);
+    }
+
     public virtual bool CanChoiceOption1(Cardinal performer)
     {
         return true;

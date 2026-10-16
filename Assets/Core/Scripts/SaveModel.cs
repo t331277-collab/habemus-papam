@@ -348,7 +348,6 @@ public class SushiSaveData
 {
     public List<string> offeredItemIds = new List<string>();
     public List<bool> selectableSlots = new List<bool>();
-    public float selectionDuration;
 }
 
 [Serializable]
@@ -397,11 +396,19 @@ public class ItemSaveData
 public class EventManagerSaveData
 {
     public int scheduleVersion;
+    public int supportedCandidateNumber;
+    public int consecutivePrayerCount;
+    public bool prayerRewardPending;
     public List<EventRecordSaveData> records = new List<EventRecordSaveData>();
     public List<EventChoiceSaveData> choices = new List<EventChoiceSaveData>();
+    public List<string> option1ChosenEventIds = new List<string>();
+    public List<CandidateDeathSaveData> candidateDeaths = new List<CandidateDeathSaveData>();
+    public List<EventBranchProgressSaveData> branchProgress = new List<EventBranchProgressSaveData>();
     public List<EventPlotDamageBonusSaveData> plotDamageBonuses = new List<EventPlotDamageBonusSaveData>();
     public List<PendingGuaranteedEventSaveData> pendingGuaranteedEvents = new List<PendingGuaranteedEventSaveData>();
     public bool subEventOccurredThisTurn;
+    public int lastEventSelectionDay = -1;
+    public int lastEventSelectionPosition = -1;
     public bool guaranteeNextPrayerOrSpeech;
     public bool freePlotPietyForCurrentConclave;
 }
@@ -432,6 +439,24 @@ public class EventChoiceSaveData
     public string eventId;
     public int optionIndex;
     public bool succeeded;
+    public int occurrence;
+}
+
+[Serializable]
+public class CandidateDeathSaveData
+{
+    public int candidateNumber;
+    public int day;
+    public int sequence;
+}
+
+[Serializable]
+public class EventBranchProgressSaveData
+{
+    public string eventId;
+    public int firstOptionIndex;
+    public bool firstSucceeded;
+    public bool supportDiscount;
 }
 
 [Serializable]

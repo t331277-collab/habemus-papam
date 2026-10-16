@@ -195,28 +195,13 @@ public class ElectionManager : MonoBehaviour
             checkUI.gameObject.SetActive(false);
         }
 
-        if (InGameManager.Instance.IsSushiOn && SushiUI.Instance != null)
+        if (SaveManager.Instance != null)
         {
-            SushiUI.Instance.Show(() =>
-            {
-                if (SaveManager.Instance != null)
-                {
-                    SaveManager.Instance.SaveCheckpoint(
-                        SaveCheckpointType.JudgementResolved,
-                        SaveResumeStep.OpenSushiSelection);
-                }
-            });
+            SaveManager.Instance.SaveCheckpoint(
+                SaveCheckpointType.JudgementResolved,
+                SaveResumeStep.StartNextConclave);
         }
-        else
-        {
-            if (SaveManager.Instance != null)
-            {
-                SaveManager.Instance.SaveCheckpoint(
-                    SaveCheckpointType.JudgementResolved,
-                    SaveResumeStep.StartNextConclave);
-            }
-            InGameManager.Instance.StartConclaveCycle();
-        }
+        InGameManager.Instance.StartConclaveCycle();
     }
 
     private float CalculateWinProbability(Cardinal candidate)

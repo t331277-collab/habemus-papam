@@ -27,8 +27,10 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
     [SerializeField] private GameObject gameStartConfirmPopup;
     [SerializeField] private Button gameStartConfirmButton;
     [SerializeField] private Button gameStartCancelButton;
+    [SerializeField] private NewsBookInitializationTrigger cutsceneTrigger;
 
     private bool isWaitingForGameSceneLoad;
+    private bool IsCutscenePending => cutsceneTrigger != null && !cutsceneTrigger.HasFinished;
 
     private void Awake()
     {
@@ -48,6 +50,11 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
 
         if (inputNameUIController != null)
             inputNameUIController.OnPlayerNameConfirmed += RefreshNavigationButtons;
+
+        if (cutsceneTrigger != null)
+            cutsceneTrigger.OnCutsceneFinished += RefreshNavigationButtons;
+
+        RefreshNavigationButtons();
     }
 
     private void Start()
@@ -65,10 +72,16 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
 
         if (inputNameUIController != null)
             inputNameUIController.OnPlayerNameConfirmed -= RefreshNavigationButtons;
+
+        if (cutsceneTrigger != null)
+            cutsceneTrigger.OnCutsceneFinished -= RefreshNavigationButtons;
     }
 
     private void ResolveReferences()
     {
+        if (cutsceneTrigger == null)
+            cutsceneTrigger = FindFirstObjectByType<NewsBookInitializationTrigger>();
+
         if (autoFlip == null)
             autoFlip = GetComponent<AutoFlip>() ?? FindFirstObjectByType<AutoFlip>();
 
@@ -102,7 +115,8 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
 
     public void OnClickNext()
     {
-        if (isWaitingForGameSceneLoad || autoFlip == null || book == null || autoFlip.IsFlipping)
+        if (IsCutscenePending || isWaitingForGameSceneLoad || autoFlip == null || book == null || autoFlip.IsFlipping ||
+            (gameStartConfirmPopup != null && gameStartConfirmPopup.activeSelf))
             return;
 
         if (book.currentPage == NameInputPage && (inputNameUIController == null || !inputNameUIController.HasPlayerName))
@@ -121,10 +135,11 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
 
     public void OnClickPrevious()
     {
-        if (isWaitingForGameSceneLoad || autoFlip == null || autoFlip.IsFlipping)
+        if (IsCutscenePending || isWaitingForGameSceneLoad || autoFlip == null || autoFlip.IsFlipping ||
+            (gameStartConfirmPopup != null && gameStartConfirmPopup.activeSelf))
             return;
 
-        SoundManager.Instance.PlaySFX(NewspaperSfxName);
+        SoundManager.Instance?.PlaySFX(NewspaperSfxName);
         autoFlip.FlipLeftPage();
     }
 
@@ -141,10 +156,10 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
 
     public void OnClickConfirmGameStart()
     {
-        if (isWaitingForGameSceneLoad || autoFlip == null)
+        if (IsCutscenePending || isWaitingForGameSceneLoad || autoFlip == null)
             return;
 
-        SoundManager.Instance.PlaySFX(GameStartConfirmSfxName);
+        SoundManager.Instance?.PlaySFX(GameStartConfirmSfxName);
         SetGameStartConfirmPopup(false);
         isWaitingForGameSceneLoad = true;
         RefreshNavigationButtons();
@@ -177,7 +192,11 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
         if (book == null)
             return;
 
-        if (isWaitingForGameSceneLoad)
+        bool isNavigationBlocked = IsCutscenePending || isWaitingForGameSceneLoad ||
+            (gameStartConfirmPopup != null && gameStartConfirmPopup.activeSelf);
+        // Keep the scene's original drag setting. Pages are turned by AutoFlip;
+        // enabling mouse dragging here lets it interfere with that animation.
+        if (isNavigationBlocked)
         {
             SetButtonActive(previousButton, false);
             SetButtonActive(nextButton, false);
@@ -204,6 +223,7 @@ public sealed class IntroNewspaperFlowController : MonoBehaviour
     {
         if (gameStartConfirmPopup != null)
             gameStartConfirmPopup.SetActive(isActive);
+        RefreshNavigationButtons();
     }
 
     private static void SetButtonActive(Button button, bool isActive)

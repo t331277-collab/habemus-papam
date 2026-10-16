@@ -24,13 +24,13 @@ class EventResult : MonoBehaviour
             succeeded = evt.OnChoiceOption1(UIManager.Instance.Ingame.Stats.LinkedCardinals[0]);
             if(succeeded)
             {
-                text.text = evt.ResolveDisplayText(evt.option1SuccessDescription);
-                this.result.text = evt.ResolveDisplayText(evt.option1SuccessResult);
+                text.text = evt.ResolveDisplayText(evt.GetResultDescription(1, true));
+                this.result.text = evt.ResolveDisplayText(evt.GetResultText(1, true));
             }
             else
             {
-                text.text = evt.ResolveDisplayText(evt.option1FailDescription);
-                this.result.text = evt.ResolveDisplayText(evt.option1FailResult);
+                text.text = evt.ResolveDisplayText(evt.GetResultDescription(1, false));
+                this.result.text = evt.ResolveDisplayText(evt.GetResultText(1, false));
             }
         }
         else if(result == 2)
@@ -38,13 +38,13 @@ class EventResult : MonoBehaviour
             succeeded = evt.OnChoiceOption2(UIManager.Instance.Ingame.Stats.LinkedCardinals[0]);
             if(succeeded)
             {
-                text.text = evt.ResolveDisplayText(evt.option2SuccessDescription);
-                this.result.text = evt.ResolveDisplayText(evt.option2SuccessResult);
+                text.text = evt.ResolveDisplayText(evt.GetResultDescription(2, true));
+                this.result.text = evt.ResolveDisplayText(evt.GetResultText(2, true));
             }
             else
             {
-                text.text = evt.ResolveDisplayText(evt.option2FailDescription);
-                this.result.text = evt.ResolveDisplayText(evt.option2FailResult);
+                text.text = evt.ResolveDisplayText(evt.GetResultDescription(2, false));
+                this.result.text = evt.ResolveDisplayText(evt.GetResultText(2, false));
             }
         }
         else

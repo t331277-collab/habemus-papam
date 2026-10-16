@@ -2,13 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 public class SushiUI : MonoBehaviour
 {
-    private const string ClockSfxName = "33 인게임- 시계소리";
-    private const float ClockSfxStartTime = 10f;
-
     public static SushiUI Instance { get; private set; }
 
     [Header("등급별 스프라이트 설정")]
@@ -18,26 +15,30 @@ public class SushiUI : MonoBehaviour
     [Header("UI 연결")]
     [SerializeField] private GameObject sushiPanel;
     [SerializeField] private SushiSlot[] slots = new SushiSlot[3];
-    [SerializeField] private Slider timerSlider; 
     [SerializeField] private CanvasGroup totalPanelGroup; 
+    [SerializeField] private TMP_Text subtitleText;
+    [SerializeField] private TMP_Text footerText;
+    private string defaultSubtitle;
+    private string defaultFooter;
 
     [Header("데이터")]
     [SerializeField] private List<Item> allItems;
     [SerializeField] private StatsUI statsUI;
-
-    private Coroutine timerCoroutine;
-    private bool isClockSfxPlaying;
-    private float currentSelectionDuration;
+    public bool IsOpen => sushiPanel != null && sushiPanel.activeInHierarchy;
 
     void Awake()
     {
         Instance = this;
+        defaultSubtitle = subtitleText != null ? subtitleText.text : string.Empty;
+        defaultFooter = footerText != null ? footerText.text : string.Empty;
         if (sushiPanel != null) sushiPanel.SetActive(false);
     }
 
-    public void Show(System.Action onReady = null)
+    public bool Show(System.Action onReady = null)
     {
-        if (allItems.Count < 3) return;
+        if (allItems == null || allItems.Count < 3) return false;
+
+        PreparePlayerReferences();
 
         sushiPanel.SetActive(true);
 
@@ -54,6 +55,7 @@ public class SushiUI : MonoBehaviour
         }
 
         StartCoroutine(SequenceRoutine(onReady));
+        return true;
     }
 
     private IEnumerator SequenceRoutine(System.Action onReady)
@@ -65,20 +67,14 @@ public class SushiUI : MonoBehaviour
         totalPanelGroup.alpha = 1.0f;
 
         ApplyRankPenalty(playerRank);
+        RefreshAvailabilityNotice();
 
-        currentSelectionDuration = (playerRank == 4) ? 5f : 30f;
         onReady?.Invoke();
-        if (timerCoroutine != null) StopCoroutine(timerCoroutine);
-        StopClockSfx();
-        timerCoroutine = StartCoroutine(TimerRoutine(currentSelectionDuration));
     }
 
     public SushiSaveData CaptureSaveData()
     {
-        SushiSaveData saveData = new SushiSaveData
-        {
-            selectionDuration = currentSelectionDuration
-        };
+        SushiSaveData saveData = new SushiSaveData();
 
         foreach (SushiSlot slot in slots)
         {
@@ -91,9 +87,10 @@ public class SushiUI : MonoBehaviour
 
     public void RestoreFromSave(SushiSaveData saveData)
     {
+        PreparePlayerReferences();
         if (saveData == null || saveData.offeredItemIds == null || saveData.offeredItemIds.Count < slots.Length)
         {
-            Show();
+            if (!Show()) InGameManager.Instance.StartConclaveAfterItemSelection();
             return;
         }
 
@@ -102,7 +99,7 @@ public class SushiUI : MonoBehaviour
             Item item = allItems.FirstOrDefault(candidate => candidate != null && candidate.itemID == saveData.offeredItemIds[i]);
             if (item == null)
             {
-                Show();
+                if (!Show()) InGameManager.Instance.StartConclaveAfterItemSelection();
                 return;
             }
 
@@ -115,18 +112,55 @@ public class SushiUI : MonoBehaviour
 
         sushiPanel.SetActive(true);
         totalPanelGroup.alpha = 1f;
-        currentSelectionDuration = saveData.selectionDuration > 0f ? saveData.selectionDuration : 30f;
-        StopClockSfx();
-        if (timerCoroutine != null) StopCoroutine(timerCoroutine);
-        timerCoroutine = StartCoroutine(TimerRoutine(currentSelectionDuration));
+        RefreshAvailabilityNotice();
+    }
+
+    private void RefreshAvailabilityNotice()
+    {
+        bool inventoryFull = IsInventoryFull();
+        if (inventoryFull)
+            foreach (SushiSlot slot in slots) slot.SetSelectable(false);
+
+        bool noSelection = !slots.Any(slot => slot != null && slot.IsSelectable);
+        if (subtitleText != null)
+            subtitleText.text = noSelection
+                ? inventoryFull ? "아이템창이 가득 차 선택할 수 없습니다!" : "낮은 순위의 후보들이 아이템을 모두 가져갔습니다!"
+                : defaultSubtitle;
+        if (footerText != null)
+            footerText.text = noSelection ? "순위를 낮게 유지해서 아이템 선택권을 늘리세요!" : defaultFooter;
+    }
+
+    private void PreparePlayerReferences()
+    {
+        if (statsUI == null && CardinalManager.Instance != null) statsUI = CardinalManager.Instance.StatsUI;
+        if (statsUI != null && CardinalManager.Instance != null)
+            statsUI.Initialize(CardinalManager.Instance.Cardinals);
+        Cardinal player = statsUI != null ? statsUI.LinkedCardinals[0] : null;
+        if (player != null && InventoryManager.Instance != null) InventoryManager.Instance.SetPlayer(player);
+    }
+
+    private static bool IsInventoryFull()
+    {
+        return InventoryManager.Instance != null &&
+            InventoryManager.Instance.InventoryItems.Count >= InventoryManager.Instance.MaxSlots;
+    }
+
+    public void OnClickClose()
+    {
+        if (!IsOpen) return;
+        Close();
+        SaveManager.Instance?.SaveCheckpoint(
+            SaveCheckpointType.SushiRewardAcquired, SaveResumeStep.StartNextConclave);
+        InGameManager.Instance.StartConclaveAfterItemSelection();
     }
 
     private int CalculatePlayerRank()
     {
-        Cardinal[] cardinals = statsUI.LinkedCardinals;
+        Cardinal[] cardinals = statsUI != null ? statsUI.LinkedCardinals : null;
+        if (cardinals == null || cardinals[0] == null) return 1;
         Cardinal player = cardinals[0]; 
 
-        var sorted = cardinals.OrderByDescending(c => c.Piety)
+        var sorted = cardinals.Where(c => c != null).OrderByDescending(c => c.Piety)
                               .ThenByDescending(c => c.Influence)
                               .ThenBy(c => c.Hp)
                               .ThenBy(c => Random.value)
@@ -158,53 +192,9 @@ public class SushiUI : MonoBehaviour
         }
     }
 
-    private IEnumerator TimerRoutine(float duration)
-    {
-        float elapsed = 0f;
-        timerSlider.maxValue = duration;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float remainingTime = duration - elapsed;
-            timerSlider.value = remainingTime;
-
-            if (!isClockSfxPlaying && remainingTime > 0f && remainingTime <= ClockSfxStartTime)
-            {
-                SoundManager.Instance.LoopSFX(ClockSfxName);
-                isClockSfxPlaying = true;
-            }
-
-            yield return null;
-        }
-
-        // 시간 종료 시 강제 다음 콘클라베
-        Close();
-        InGameManager.Instance.StartConclaveCycle();
-    }
-
     public void Close()
     {
-        if (timerCoroutine != null)
-        {
-            StopCoroutine(timerCoroutine);
-            timerCoroutine = null;
-        }
-
-        StopClockSfx();
+        StopAllCoroutines();
         sushiPanel.SetActive(false);
-    }
-
-    private void OnDisable()
-    {
-        StopClockSfx();
-    }
-
-    private void StopClockSfx()
-    {
-        if (!isClockSfxPlaying) return;
-
-        SoundManager.Instance.StopLoop(ClockSfxName);
-        isClockSfxPlaying = false;
     }
 }

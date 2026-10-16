@@ -13,6 +13,8 @@ public class SushiSlot : MonoBehaviour
     public Button useButton;
     public CanvasGroup canvasGroup;
     public Image sushiGradeImage;
+    [SerializeField] private TMP_Text useButtonText;
+    private string selectableButtonText;
 
     private Item currentItem;
     private bool isSelectable = true;
@@ -42,6 +44,12 @@ public class SushiSlot : MonoBehaviour
 
     public void SetSelectable(bool selectable)
     {
+        if (useButtonText == null) useButtonText = useButton.GetComponentInChildren<TMP_Text>(true);
+        if (useButtonText != null)
+        {
+            if (selectableButtonText == null) selectableButtonText = useButtonText.text;
+            useButtonText.text = selectable ? selectableButtonText : "선택 불가";
+        }
         isSelectable = selectable;
         useButton.interactable = selectable;
 
@@ -70,6 +78,6 @@ public class SushiSlot : MonoBehaviour
                 SaveCheckpointType.SushiRewardAcquired,
                 SaveResumeStep.StartNextConclave);
         }
-        InGameManager.Instance.StartConclaveCycle();
+        InGameManager.Instance.StartConclaveAfterItemSelection();
     }
 }
