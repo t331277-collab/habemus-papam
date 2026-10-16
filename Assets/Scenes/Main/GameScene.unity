@@ -7837,7 +7837,7 @@ MonoBehaviour:
     \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138
     \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138
     \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138
-    \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 "
+    \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 \uD0DC\uC591\uB9CC\uC138 xxxxxxxxxxxxxxxx"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 10b561fa58c82b24296b0948ae70d42f, type: 2}
   m_sharedMaterial: {fileID: 7861833276805257987, guid: 10b561fa58c82b24296b0948ae70d42f, type: 2}
@@ -7880,9 +7880,9 @@ MonoBehaviour:
   m_lineSpacingMax: 0
   m_paragraphSpacing: 0
   m_charWidthMaxAdj: 0
-  m_TextWrappingMode: 3
+  m_TextWrappingMode: 1
   m_wordWrappingRatios: 0.4
-  m_overflowMode: 5
+  m_overflowMode: 0
   m_linkedTextComponent: {fileID: 0}
   parentLinkedComponent: {fileID: 0}
   m_enableKerning: 0
